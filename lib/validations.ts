@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { differenceInCalendarDays } from "date-fns";
 
 // Schémas de validation Zod des entrées des routes API.
 
@@ -47,6 +48,24 @@ export const catCreateSchema = z.object({
 
 /// Mise à jour d'un chat : tous les champs deviennent facultatifs.
 export const catUpdateSchema = catCreateSchema.partial();
+
+// --- Réservations -----------------------------------------------------------
+
+export const bookingCreateSchema = z
+  .object({
+    startDate: z.coerce.date(),
+    endDate: z.coerce.date(),
+    catIds: z.array(z.string().min(1)).min(1, "Sélectionnez au moins un chat."),
+    clientNotes: z.string().trim().optional(),
+  })
+  .refine((d) => differenceInCalendarDays(d.endDate, d.startDate) >= 1, {
+    message: "Le séjour doit durer au moins une nuit.",
+    path: ["endDate"],
+  });
+
+export const bookingMessageSchema = z.object({
+  content: z.string().trim().min(1, "Le message ne peut pas être vide."),
+});
 
 // --- Utilitaire -------------------------------------------------------------
 
