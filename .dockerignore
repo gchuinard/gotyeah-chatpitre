@@ -1,0 +1,27 @@
+# Dépendances et artefacts de build — jamais copiés dans l'image.
+node_modules
+.next
+out
+build
+*.tsbuildinfo
+
+# VCS et métadonnées d'éditeur
+.git
+.gitignore
+.github
+.claude
+.vscode
+.idea
+.DS_Store
+
+# Secrets et environnement — fournis au runtime, jamais dans l'image
+.env*
+
+# Docker et documentation — inutiles dans l'image
+Dockerfile
+.dockerignore
+docker-compose.yml
+README.md
+
+# Logs
+*.log
