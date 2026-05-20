@@ -67,6 +67,15 @@ export const bookingMessageSchema = z.object({
   content: z.string().trim().min(1, "Le message ne peut pas être vide."),
 });
 
+// --- Admin ------------------------------------------------------------------
+
+export const adminBookingUpdateSchema = z.object({
+  status: z
+    .enum(["PENDING", "QUESTION_ASKED", "ACCEPTED", "REJECTED", "CANCELLED", "COMPLETED"])
+    .optional(),
+  adminNotes: z.string().trim().optional(),
+});
+
 // --- Utilitaire -------------------------------------------------------------
 
 /// Transforme une ZodError en un objet plat { champ: message } facile à
