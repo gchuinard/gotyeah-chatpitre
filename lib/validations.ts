@@ -1,7 +1,6 @@
 import { z } from "zod";
 
 // Schémas de validation Zod des entrées des routes API.
-// Les schémas des chats, réservations, etc. sont ajoutés au fil des étapes.
 
 // --- Authentification -------------------------------------------------------
 
@@ -20,6 +19,34 @@ export const loginSchema = z.object({
   email: z.email("Email invalide."),
   password: z.string().min(1, "Le mot de passe est requis."),
 });
+
+// --- Chats ------------------------------------------------------------------
+
+export const catCreateSchema = z.object({
+  name: z.string().trim().min(1, "Le nom du chat est requis."),
+  sex: z.enum(["MALE", "FEMALE"]),
+  birthDate: z.coerce.date().optional(),
+  breed: z.string().trim().optional(),
+  color: z.string().trim().optional(),
+  weight: z.number().positive("Le poids doit être positif.").optional(),
+  photoUrl: z.string().trim().optional(),
+  personality: z.string().trim().optional(),
+  isSterilized: z.boolean().optional(),
+  isIdentified: z.boolean().optional(),
+  vaccinesUpToDate: z.boolean().optional(),
+  isSociable: z.boolean().optional(),
+  vetName: z.string().trim().optional(),
+  vetClinic: z.string().trim().optional(),
+  vetPhone: z.string().trim().optional(),
+  vetAddress: z.string().trim().optional(),
+  allergies: z.string().trim().optional(),
+  currentTreatments: z.string().trim().optional(),
+  medicalNotes: z.string().trim().optional(),
+  specialDiet: z.string().trim().optional(),
+});
+
+/// Mise à jour d'un chat : tous les champs deviennent facultatifs.
+export const catUpdateSchema = catCreateSchema.partial();
 
 // --- Utilitaire -------------------------------------------------------------
 
