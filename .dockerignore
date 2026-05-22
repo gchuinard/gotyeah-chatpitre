@@ -20,7 +20,7 @@ build
 # Docker et documentation — inutiles dans l'image
 Dockerfile
 .dockerignore
-docker-compose.yml
+docker-compose*.yml
 README.md
 
 # Logs

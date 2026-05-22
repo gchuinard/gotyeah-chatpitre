@@ -1,0 +1,76 @@
+# Environnement de PRODUCTION (Raspberry Pi) : PostgreSQL + l'app Next en
+# image `runner` (build standalone Next, utilisateur non-root).
+#
+# L'app n'est PAS publiée sur l'hôte : elle n'est joignable que par Nginx
+# Proxy Manager, via le réseau Docker partagé `nginx-proxy-manager_default`.
+# NPM est l'unique point d'entrée et termine le TLS (Let's Encrypt) ;
+# Cloudflare est devant NPM. La base n'est exposée ni à l'hôte ni au LAN.
+#
+# Déploiement :  docker compose -f docker-compose.prod.yml up -d --build
+# Prérequis   :  un .env de production (AUTH_SECRET dédié, BASE_URL https…).
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: chatpitre_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: chatpitre
+      POSTGRES_PASSWORD: chatpitre
+      POSTGRES_DB: chatpitre
+    volumes:
+      - chatpitre_pgdata:/var/lib/postgresql/data
+    # Pas de `ports:` — la base reste interne au réseau `default`,
+    # seule l'app y accède.
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U chatpitre -d chatpitre"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runner
+    image: chatpitre-app:latest
+    container_name: chatpitre_app
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - .env
+    environment:
+      # Dans le réseau Docker, la base est joignable via le nom de service `db`
+      # — on surcharge le DATABASE_URL du .env (qui pointe sur localhost).
+      DATABASE_URL: postgresql://chatpitre:chatpitre@db:5432/chatpitre
+      NODE_ENV: production
+    # `expose` (et non `ports`) : 3000 n'est ouvert qu'aux conteneurs des
+    # réseaux rejoints, jamais à l'hôte. NPM atteint l'app par son nom.
+    expose:
+      - "3000"
+    networks:
+      - default
+      - npm
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 40s
+
+volumes:
+  # Réutilise le volume de données existant (préfixé par le nom de projet
+  # `gotyeah-chatpitre`) — aucune perte de données au passage dev → prod.
+  chatpitre_pgdata:
+
+networks:
+  # Réseau interne app ↔ db, créé automatiquement par Compose.
+  default:
+  # Réseau partagé avec Nginx Proxy Manager. Sur ce Pi il s'appelle
+  # `nginx-proxy-manager_default` (cf. `docker network ls | grep nginx`).
+  # C'est ce réseau qui permet à NPM de résoudre le nom `chatpitre_app`.
+  npm:
+    external: true
+    name: nginx-proxy-manager_default
