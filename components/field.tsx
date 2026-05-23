@@ -4,8 +4,9 @@ import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 
 /// Regroupement label + contrôle + indication / erreur. Le contrôle est
-/// fourni par le caller (Input, Select, Textarea…). Erreur en cramoisi,
-/// indication en sépia, astérisque cramoisi pour les champs requis.
+/// fourni par le caller (Input, Select, Textarea…). Erreur en sanguine
+/// avec marqueur dièse, indication en italique encre douce, astérisque
+/// sanguine pour les champs requis.
 export function Field({
   label,
   htmlFor,
@@ -28,16 +29,21 @@ export function Field({
       <Label htmlFor={htmlFor}>
         <span>{label}</span>
         {required && (
-          <span aria-hidden className="text-cp-crimson">
+          <span aria-hidden className="font-display text-cp-sanguine">
             *
           </span>
         )}
       </Label>
       {children}
       {error ? (
-        <p className="font-body text-xs font-medium text-cp-crimson">{error}</p>
+        <p className="flex items-baseline gap-2 font-body text-xs font-medium text-cp-sanguine">
+          <span aria-hidden className="font-mono font-bold">
+            ↳
+          </span>
+          {error}
+        </p>
       ) : hint ? (
-        <p className="font-body text-xs text-cp-ink-soft">{hint}</p>
+        <p className="font-display text-sm italic text-cp-ink-soft">{hint}</p>
       ) : null}
     </div>
   );

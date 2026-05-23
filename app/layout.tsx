@@ -1,32 +1,21 @@
 import type { Metadata } from "next";
-import {
-  Abril_Fatface,
-  Inter,
-  Playfair_Display,
-  Special_Elite,
-} from "next/font/google";
+import { Bodoni_Moda, Inter, Space_Mono } from "next/font/google";
 import "./globals.css";
 
-// Typographie « affiche de cabaret » :
-// - Abril Fatface, display dramatique pour les très gros titres
-// - Playfair Display, serif éditoriale (+ italique) pour les sous-titres
-// - Inter, corps de texte et formulaires
-// - Special Elite, mono « machine à écrire » pour les mentions ticket
+// Typographie « brutalist editorial » :
+// - Bodoni Moda (variable, opsz + ital) → display ET serif, didone à fort
+//   contraste, qui porte les très grands titres et les noms italiques.
+// - Inter (variable) → corps de texte, navigation, formulaires.
+// - Space Mono → mentions catalogue, numéros, métadonnées « fiche ».
 //
 // Les `variable` exposent les fontes en CSS custom property sur <html> ;
-// globals.css les récupère via `var(--font-cp-*)` dans `@theme`.
-const abril = Abril_Fatface({
-  weight: "400",
-  subsets: ["latin"],
-  display: "swap",
-  variable: "--font-cp-display",
-});
-
-const playfair = Playfair_Display({
+// globals.css les remappe sur `--font-display` / `--font-body` / `--font-mono`
+// via `@theme`.
+const bodoniModa = Bodoni_Moda({
   subsets: ["latin"],
   display: "swap",
   style: ["normal", "italic"],
-  variable: "--font-cp-serif",
+  variable: "--font-cp-display",
 });
 
 const inter = Inter({
@@ -35,17 +24,18 @@ const inter = Inter({
   variable: "--font-cp-body",
 });
 
-const specialElite = Special_Elite({
-  weight: "400",
+const spaceMono = Space_Mono({
   subsets: ["latin"],
   display: "swap",
+  weight: ["400", "700"],
+  style: ["normal", "italic"],
   variable: "--font-cp-mono",
 });
 
 export const metadata: Metadata = {
   title: "Le Chat-Pitre",
   description:
-    "Maison de villégiature pour chats de bonne compagnie — réservation en ligne.",
+    "Maison de villégiature pour félins de bonne compagnie — réservation en ligne.",
 };
 
 export default function RootLayout({
@@ -56,7 +46,7 @@ export default function RootLayout({
   return (
     <html
       lang="fr"
-      className={`${abril.variable} ${playfair.variable} ${inter.variable} ${specialElite.variable} h-full antialiased`}
+      className={`${bodoniModa.variable} ${inter.variable} ${spaceMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">{children}</body>
     </html>

@@ -5,105 +5,146 @@
 /*
  * Design system — « Le Chat-Pitre »
  * ----------------------------------
- * Affiche de spectacle vintage : palette saturée et contrastée, typos
- * théâtrales, filets dorés, grain de papier. Tailwind v4 — toute la config
- * (palette + fonts + rayons) vit ici, dans `@theme`. Pas de `tailwind.config.ts`.
+ * Brutalist editorial : noir d'encre sur bone, un flash sanguine, didone
+ * (Bodoni Moda) + neo-grotesque (Inter) + mono (Space Mono).
+ * Esthétique fiche catalogue / NYRB / ECAL. Tailwind v4 — config CSS-first
+ * dans `@theme`, pas de `tailwind.config.ts`.
  */
 
 @theme {
-  /* --- Palette « Chat-Pitre » (brut) -------------------------------- */
-  --color-cp-cream: #f4ecd8;
-  --color-cp-paper: #ede3cb;
-  --color-cp-crimson: #8b1a1a;
-  --color-cp-crimson-dark: #6b1414;
-  --color-cp-midnight: #0f1b3d;
-  --color-cp-brass: #b8893c;
-  --color-cp-brass-light: #d4af6b;
-  --color-cp-ink: #1a1410;
-  --color-cp-ink-soft: #3d2f26;
-  --color-cp-amber: #c45a1b;
-  --color-cp-emerald: #1f4733;
+  /* --- Palette « Chat-Pitre » -------------------------------------- */
+  --color-cp-paper: #efe9dd;          /* Fond unique — bone */
+  --color-cp-paper-deep: #e3dcc9;     /* Fond alternatif des sections */
+  --color-cp-ink: #0a0a0a;            /* Texte principal */
+  --color-cp-ink-soft: #2a2a2a;       /* Texte secondaire */
+  --color-cp-rule: #1a1a1a;           /* Filets et traits */
+  --color-cp-mute: #6a6a6a;           /* Texte estompé, états passés */
+  --color-cp-sanguine: #7a1818;       /* Accent unique — CTA, alerte */
+  --color-cp-sanguine-deep: #5a1010;  /* Hover sanguine */
 
-  /* --- Tokens sémantiques shadcn → DA ------------------------------- */
-  --color-background: #f4ecd8;
-  --color-foreground: #1a1410;
-  --color-card: #ede3cb;
-  --color-card-foreground: #1a1410;
-  --color-popover: #f4ecd8;
-  --color-popover-foreground: #1a1410;
-  --color-primary: #8b1a1a;
-  --color-primary-foreground: #f4ecd8;
-  --color-secondary: #0f1b3d;
-  --color-secondary-foreground: #f4ecd8;
-  --color-muted: #ede3cb;
-  --color-muted-foreground: #3d2f26;
-  --color-accent: #b8893c;
-  --color-accent-foreground: #1a1410;
-  --color-destructive: #8b1a1a;
-  --color-border: #cdb78a; /* filet brass atténué, lecture neutre */
-  --color-input: #cdb78a;
-  --color-ring: #b8893c;
+  /* --- Tokens sémantiques shadcn → DA ------------------------------ */
+  --color-background: #efe9dd;
+  --color-foreground: #0a0a0a;
+  --color-card: #efe9dd;
+  --color-card-foreground: #0a0a0a;
+  --color-popover: #efe9dd;
+  --color-popover-foreground: #0a0a0a;
+  --color-primary: #0a0a0a;
+  --color-primary-foreground: #efe9dd;
+  --color-secondary: #efe9dd;
+  --color-secondary-foreground: #0a0a0a;
+  --color-muted: #e3dcc9;
+  --color-muted-foreground: #2a2a2a;
+  --color-accent: #7a1818;
+  --color-accent-foreground: #efe9dd;
+  --color-destructive: #7a1818;
+  --color-border: #1a1a1a;
+  --color-input: #1a1a1a;
+  --color-ring: #7a1818;
 
-  /* --- Rayons — affiche imprimée : quasi nuls ----------------------- */
-  --radius: 2px;
-  --radius-sm: 1px;
-  --radius-md: 2px;
-  --radius-lg: 2px;
-  --radius-xl: 3px;
-  --radius-2xl: 4px;
+  /* --- Rayons — fiche imprimée : nuls ------------------------------ */
+  --radius: 0px;
+  --radius-sm: 0px;
+  --radius-md: 0px;
+  --radius-lg: 0px;
+  --radius-xl: 0px;
+  --radius-2xl: 0px;
 
-  /* --- Typographie — variables CSS injectées par next/font sur <html> */
+  /* --- Typographie ------------------------------------------------- */
+  /* Variables `--font-cp-*` injectées par next/font sur <html> dans
+     app/layout.tsx ; on les remappe ici sur les noms Tailwind canoniques. */
   --font-display: var(--font-cp-display), Georgia, "Times New Roman", serif;
-  --font-serif: var(--font-cp-serif), Georgia, "Times New Roman", serif;
+  --font-serif: var(--font-cp-display), Georgia, "Times New Roman", serif;
   --font-body: var(--font-cp-body), ui-sans-serif, system-ui, sans-serif;
-  --font-mono: var(--font-cp-mono), ui-monospace, "Courier New", monospace;
   --font-sans: var(--font-cp-body), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-cp-mono), ui-monospace, "Courier New", monospace;
 }
 
 @layer base {
   *,
   ::before,
   ::after {
-    @apply border-border;
+    @apply border-cp-rule;
   }
 
   body {
-    @apply bg-background text-foreground font-body antialiased;
-    /* Grain de papier — SVG tuilé, subtil mais perceptible sur les aplats. */
+    @apply bg-cp-paper text-cp-ink font-body antialiased;
+    /* Grain de papier — la trame reste, l'esthétique brutaliste éditoriale
+       garde la matière du support, à la manière des couvertures NYRB. */
     background-image: url("/grain.svg");
     background-repeat: repeat;
-    background-size: 180px 180px;
+    background-size: 220px 220px;
   }
 
   ::selection {
-    background-color: var(--color-cp-crimson);
-    color: var(--color-cp-cream);
+    background-color: var(--color-cp-ink);
+    color: var(--color-cp-paper);
   }
 }
 
 /* ------------------------------------------------------------------ */
-/* Utilitaires DA — clip de billet et surcouche grain optionnelle      */
+/* Utilitaires DA                                                      */
 /* ------------------------------------------------------------------ */
 
-/* Coins crantés type ticket de spectacle. Le focus visible des éléments
-   qui portent ce clip doit être en `ring-inset` (sinon coupé hors-cadre). */
-.cp-ticket-clip {
-  clip-path: polygon(
-    0 6px,
-    6px 0,
-    calc(100% - 6px) 0,
-    100% 6px,
-    100% calc(100% - 6px),
-    calc(100% - 6px) 100%,
-    6px 100%,
-    0 calc(100% - 6px)
-  );
-}
-
-/* Surcouche grain — pour les sections qui ont leur propre fond et qui
-   doivent quand même afficher la trame de papier. */
+/* Surcouche grain — sections qui ont leur propre fond et doivent garder
+   la trame de papier visible. */
 .cp-grain {
   background-image: url("/grain.svg");
   background-repeat: repeat;
-  background-size: 180px 180px;
+  background-size: 220px 220px;
+}
+
+/* Mention « catalogue » : caps mono à fort tracking, encre douce. */
+.cp-meta {
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.22em;
+  font-size: 0.7rem;
+  color: var(--color-cp-ink-soft);
+}
+
+/* Reveal staggered au load — discret, conforme au ton sec.
+   Usage : ajouter `cp-reveal` et `style={{ "--cp-delay": "120ms" }}`. */
+.cp-reveal {
+  animation: cp-reveal-in 600ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  animation-delay: var(--cp-delay, 0ms);
+}
+
+@keyframes cp-reveal-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Fade simple pour les très gros titres (pas de translate qui souffrirait
+   d'un crénelage sur les Bodoni serrés). */
+.cp-fade {
+  animation: cp-fade-in 800ms ease-out both;
+  animation-delay: var(--cp-delay, 0ms);
+}
+
+@keyframes cp-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Trait sanguine clignotant — curseur de titre éditorial, accent rare. */
+.cp-caret::after {
+  content: "";
+  display: inline-block;
+  width: 0.06em;
+  height: 0.85em;
+  background-color: var(--color-cp-sanguine);
+  margin-left: 0.18em;
+  vertical-align: -0.05em;
+  animation: cp-caret 1.1s steps(2) infinite;
+}
+
+@keyframes cp-caret {
+  to { opacity: 0; }
 }

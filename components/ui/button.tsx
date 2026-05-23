@@ -3,46 +3,38 @@ import { cva, type VariantProps } from "class-variance-authority"
 
 import { cn } from "@/lib/utils"
 
-// Boutons « Chat-Pitre » : capitales espacées, ombres dures (presse),
-// focus doré. Les variantes principales sont `default` (rouge cramoisi,
-// CTA fort), `secondary` (filet doré, alternatif) et `ticket` (coins
-// crantés, billet). Les autres restent disponibles pour les besoins
-// utilitaires (logout, liens éditoriaux, actions destructives).
+// Boutons brutalist editorial : rectangles plats, capitales serrées, zéro
+// radius, transition d'inversion encre/papier au survol. La variante par
+// défaut est noire pleine (CTA institutionnelle) ; la sanguine est réservée
+// aux actions destructives ou aux alertes (refus de séjour, suppression).
 const buttonVariants = cva(
-  "inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap font-body text-xs font-semibold uppercase tracking-[0.14em] transition-all outline-none select-none focus-visible:ring-2 focus-visible:ring-cp-brass focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-45 active:translate-y-px [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+  "inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap font-body font-medium uppercase tracking-[0.16em] outline-none transition-colors select-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cp-sanguine disabled:pointer-events-none disabled:opacity-40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
   {
     variants: {
       variant: {
-        // Cramoisi plein, ombre dure noire d'encre — la grande CTA.
+        // Encre pleine — CTA principale, sans ornement.
         default:
-          "border border-cp-crimson-dark bg-cp-crimson text-cp-cream shadow-[2px_2px_0_0_var(--color-cp-ink)] hover:bg-cp-crimson-dark hover:shadow-[1px_1px_0_0_var(--color-cp-ink)]",
-        // Filet doré sur fond crème — l'option alternative.
+          "border border-cp-ink bg-cp-ink text-cp-paper hover:bg-cp-sanguine hover:border-cp-sanguine",
+        // Cadre encre, fond bone — alternative neutre, inversion au survol.
         secondary:
-          "border-2 border-cp-brass bg-transparent text-cp-ink hover:bg-cp-brass/15",
-        // Billet : coins crantés, double bordure, focus en ring-inset
-        // (un ring externe serait coupé par le clip-path).
-        ticket:
-          "cp-ticket-clip border-2 border-cp-ink bg-cp-cream text-cp-ink shadow-[inset_0_0_0_1px_var(--color-cp-cream)] hover:bg-cp-paper focus-visible:ring-inset focus-visible:ring-offset-0",
-        // Nuit profonde — contre-poids du cramoisi (CTA secondaire forte).
-        midnight:
-          "border border-cp-ink bg-cp-midnight text-cp-cream shadow-[2px_2px_0_0_var(--color-cp-ink)] hover:bg-cp-ink",
-        // Filet d'encre neutre.
+          "border border-cp-ink bg-cp-paper text-cp-ink hover:bg-cp-ink hover:text-cp-paper",
+        // Cadre seul, plus fin — pour barres d'actions secondaires.
         outline:
-          "border-2 border-cp-ink/40 bg-transparent text-cp-ink hover:border-cp-ink hover:bg-cp-ink/5",
-        // Sans cadre.
+          "border border-cp-ink/55 bg-transparent text-cp-ink hover:border-cp-ink hover:bg-cp-ink hover:text-cp-paper",
+        // Sans cadre, juste du texte. Souligne au survol.
         ghost:
-          "text-cp-ink hover:bg-cp-ink/8",
-        // Lien éditorial.
+          "text-cp-ink underline-offset-[6px] decoration-[1.5px] hover:underline hover:decoration-cp-sanguine hover:text-cp-sanguine",
+        // Lien éditorial sanguine souligné.
         link:
-          "tracking-normal normal-case text-cp-crimson underline-offset-4 hover:underline",
-        // Action destructive.
+          "normal-case tracking-normal font-normal text-cp-sanguine underline underline-offset-[5px] decoration-[1.5px] hover:decoration-[2.5px]",
+        // Action destructive — sanguine.
         destructive:
-          "border border-cp-crimson-dark bg-transparent text-cp-crimson hover:bg-cp-crimson/10",
+          "border border-cp-sanguine bg-cp-sanguine text-cp-paper hover:bg-cp-sanguine-deep hover:border-cp-sanguine-deep",
       },
       size: {
-        sm: "h-9 px-4 text-[0.65rem]",
-        default: "h-11 px-6",
-        lg: "h-13 px-9 text-sm",
+        sm: "h-8 px-3 text-[0.65rem]",
+        default: "h-11 px-6 text-[0.72rem]",
+        lg: "h-13 px-9 text-[0.8rem]",
         icon: "size-11",
       },
     },

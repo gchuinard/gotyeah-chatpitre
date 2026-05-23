@@ -2,9 +2,9 @@ import * as React from "react"
 
 import { cn } from "@/lib/utils"
 
-// Card « affiche imprimée » : fond paper, filet brass à 2 px, coins très peu
-// arrondis (printed-poster), ombre nette discrète. Sous-composants identiques
-// à l'API shadcn pour ne pas casser les usages futurs.
+// Carte « fiche catalogue » : cadre encre 1.5px sur bone, zéro radius,
+// zéro ombre. Sous-composants conformes à l'API shadcn pour ne pas casser
+// les usages futurs.
 function Card({
   className,
   size = "default",
@@ -15,7 +15,7 @@ function Card({
       data-slot="card"
       data-size={size}
       className={cn(
-        "group/card flex flex-col gap-4 overflow-hidden border-2 border-cp-brass bg-cp-paper py-5 text-sm text-cp-ink shadow-[3px_3px_0_0_rgb(26_20_16/0.15)] has-data-[slot=card-footer]:pb-0 has-[>img:first-child]:pt-0 data-[size=sm]:gap-3 data-[size=sm]:py-4 data-[size=sm]:has-data-[slot=card-footer]:pb-0",
+        "group/card flex flex-col gap-4 overflow-hidden border border-cp-ink bg-cp-paper py-5 text-sm text-cp-ink has-data-[slot=card-footer]:pb-0 has-[>img:first-child]:pt-0 data-[size=sm]:gap-3 data-[size=sm]:py-4 data-[size=sm]:has-data-[slot=card-footer]:pb-0",
         className
       )}
       {...props}
@@ -41,7 +41,7 @@ function CardTitle({ className, ...props }: React.ComponentProps<"div">) {
     <div
       data-slot="card-title"
       className={cn(
-        "font-serif text-xl leading-snug text-cp-ink group-data-[size=sm]/card:text-base",
+        "font-display text-2xl leading-[1.05] tracking-tight text-cp-ink group-data-[size=sm]/card:text-lg",
         className
       )}
       {...props}
@@ -87,7 +87,7 @@ function CardFooter({ className, ...props }: React.ComponentProps<"div">) {
     <div
       data-slot="card-footer"
       className={cn(
-        "flex items-center border-t border-cp-brass/50 px-5 py-3 group-data-[size=sm]/card:px-4",
+        "flex items-center border-t border-cp-ink px-5 py-3 group-data-[size=sm]/card:px-4",
         className
       )}
       {...props}

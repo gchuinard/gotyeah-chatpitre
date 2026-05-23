@@ -1,16 +1,16 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 
-import { ActHeading } from "@/components/act-heading";
 import {
   BookingStatusBadge,
   type BookingStatus,
 } from "@/components/booking-status-badge";
 import { CatCard } from "@/components/cat-card";
 import { Field } from "@/components/field";
-import { FiletFrame } from "@/components/filet-frame";
-import { OrnamentDivider } from "@/components/ornament-divider";
-import { TicketStamp } from "@/components/ticket-stamp";
+import { LibraryStamp } from "@/components/library-stamp";
+import { RuleDivider } from "@/components/rule-divider";
+import { RuledBox } from "@/components/ruled-box";
+import { SectionHeading } from "@/components/section-heading";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Wordmark } from "@/components/wordmark";
@@ -24,79 +24,42 @@ export const metadata: Metadata = {
 
 const PALETTE: {
   name: string;
-  cssVar: string;
   hex: string;
   usage: string;
-  isLight?: boolean;
+  ink?: "light" | "dark";
 }[] = [
+  { name: "cp-paper", hex: "#EFE9DD", usage: "Fond unique — bone", ink: "dark" },
   {
-    name: "cp-cream",
-    cssVar: "--color-cp-cream",
-    hex: "#F4ECD8",
-    usage: "Fond principal — ivoire vieilli",
-    isLight: true,
-  },
-  {
-    name: "cp-paper",
-    cssVar: "--color-cp-paper",
-    hex: "#EDE3CB",
+    name: "cp-paper-deep",
+    hex: "#E3DCC9",
     usage: "Fond alternatif des sections",
-    isLight: true,
+    ink: "dark",
   },
-  {
-    name: "cp-crimson",
-    cssVar: "--color-cp-crimson",
-    hex: "#8B1A1A",
-    usage: "Primaire — rouge cramoisi",
-  },
-  {
-    name: "cp-crimson-dark",
-    cssVar: "--color-cp-crimson-dark",
-    hex: "#6B1414",
-    usage: "Hover et états appuyés",
-  },
-  {
-    name: "cp-midnight",
-    cssVar: "--color-cp-midnight",
-    hex: "#0F1B3D",
-    usage: "Secondaire — bleu nuit profond",
-  },
-  {
-    name: "cp-brass",
-    cssVar: "--color-cp-brass",
-    hex: "#B8893C",
-    usage: "Accent — doré laiton (décoratif)",
-  },
-  {
-    name: "cp-brass-light",
-    cssVar: "--color-cp-brass-light",
-    hex: "#D4AF6B",
-    usage: "Doré clair, filets décoratifs",
-    isLight: true,
-  },
-  {
-    name: "cp-ink",
-    cssVar: "--color-cp-ink",
-    hex: "#1A1410",
-    usage: "Noir d’encre pour le texte",
-  },
+  { name: "cp-ink", hex: "#0A0A0A", usage: "Texte principal", ink: "light" },
   {
     name: "cp-ink-soft",
-    cssVar: "--color-cp-ink-soft",
-    hex: "#3D2F26",
-    usage: "Texte secondaire, sépia foncé",
+    hex: "#2A2A2A",
+    usage: "Texte secondaire",
+    ink: "light",
+  },
+  { name: "cp-rule", hex: "#1A1A1A", usage: "Filets, traits", ink: "light" },
+  {
+    name: "cp-mute",
+    hex: "#6A6A6A",
+    usage: "Texte estompé, états passés",
+    ink: "light",
   },
   {
-    name: "cp-amber",
-    cssVar: "--color-cp-amber",
-    hex: "#C45A1B",
-    usage: "Orange brûlé — statut « question »",
+    name: "cp-sanguine",
+    hex: "#7A1818",
+    usage: "Accent unique — CTA, alerte",
+    ink: "light",
   },
   {
-    name: "cp-emerald",
-    cssVar: "--color-cp-emerald",
-    hex: "#1F4733",
-    usage: "Vert théâtral — statut « acceptée »",
+    name: "cp-sanguine-deep",
+    hex: "#5A1010",
+    usage: "Hover sanguine",
+    ink: "light",
   },
 ];
 
@@ -111,76 +74,76 @@ const STATUSES: BookingStatus[] = [
 
 export default function StyleguidePage() {
   return (
-    <main className="mx-auto w-full max-w-5xl px-6 py-16 sm:px-10">
-      {/* En-tête de la page */}
-      <header className="space-y-6">
-        <TicketStamp boxed>
-          N° 001 — Design System — Représentation Permanente
-        </TicketStamp>
-        <Wordmark as="h1" className="text-5xl sm:text-7xl" />
-        <p className="font-serif text-xl italic text-cp-ink-soft">
-          Langage visuel — affiche de cabaret Belle Époque, modernisée pour le
-          web.
+    <main className="mx-auto w-full max-w-6xl px-6 py-16 sm:px-10 sm:py-24">
+      {/* En-tête fiche bibliothèque */}
+      <header className="space-y-10">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <LibraryStamp boxed>
+            N° 001 — Design System — Édition 2026
+          </LibraryStamp>
+          <LibraryStamp>Représentation permanente</LibraryStamp>
+        </div>
+
+        <Wordmark
+          as="h1"
+          className="cp-fade text-[clamp(3.5rem,12vw,9rem)]"
+        />
+
+        <p
+          className="cp-reveal max-w-2xl font-display text-2xl italic leading-snug text-cp-ink-soft sm:text-3xl"
+          style={{ "--cp-delay": "120ms" } as React.CSSProperties}
+        >
+          Langage visuel — brutalist editorial, fiche bibliothèque, encre noire
+          sur bone. Pas d&apos;ornement. Que de la typographie.
         </p>
       </header>
 
-      <OrnamentDivider className="my-14" />
+      <RuleDivider className="my-20" weight="heavy" />
 
-      {/* ----- Palette ----- */}
-      <section aria-labelledby="sg-palette" className="space-y-6">
-        <ActHeading
-          act="I"
+      {/* 01 — Palette */}
+      <section aria-labelledby="sg-palette" className="space-y-10">
+        <SectionHeading
+          number="01"
           title="Palette"
-          kicker="Onze couleurs, saturées, contrastées."
+          kicker="Huit couleurs. Pas une de plus."
         />
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
           {PALETTE.map((c) => (
             <Swatch key={c.name} {...c} />
           ))}
         </div>
-        <p className="font-body text-sm text-cp-ink-soft">
-          <span className="font-semibold">Accessibilité :</span> le doré (
-          <code className="font-mono">cp-brass</code>) ne sert qu’à la
-          décoration (filets, ornements). Le texte courant utilise{" "}
-          <code className="font-mono">cp-ink</code> ou{" "}
-          <code className="font-mono">cp-ink-soft</code> sur fond crème.
+        <p className="max-w-2xl font-body text-sm leading-relaxed text-cp-ink-soft">
+          <span className="font-mono font-bold uppercase tracking-[0.16em] text-cp-sanguine">
+            Sanguine
+          </span>{" "}
+          est l&apos;accent unique : CTA, alerte, refus, focus. Tout le reste
+          se joue sur le contraste encre/papier. Aucun statut ne dépend
+          uniquement de la couleur (label mono + symbole assurent l&apos;AA).
         </p>
       </section>
 
-      <OrnamentDivider className="my-14" label="Typographies" />
+      <RuleDivider className="my-20" label="Typographies" />
 
-      {/* ----- Typographies ----- */}
-      <section aria-labelledby="sg-typo" className="space-y-10">
-        <ActHeading
-          act="II"
+      {/* 02 — Typographies */}
+      <section aria-labelledby="sg-typo" className="space-y-12">
+        <SectionHeading
+          number="02"
           title="Typographies"
-          kicker="Quatre voix pour quatre rôles."
+          kicker="Trois voix pour trois rôles."
         />
 
         <FontSample
-          label="Display — Abril Fatface"
+          label="Display — Bodoni Moda"
           variable="font-display"
-          weight="400"
-          usage="Hero, titres de section « Acte X »."
+          weight="400 / 700 + italique"
+          usage="Très grands titres, noms de pensionnaires en italique."
           sample={
-            <p className="font-display text-5xl leading-[1.05] text-cp-ink sm:text-6xl">
-              Mesdames, messieurs, et chats de qualité.
-            </p>
-          }
-        />
-
-        <FontSample
-          label="Serif — Playfair Display"
-          variable="font-serif"
-          weight="400 / italique"
-          usage="Sous-titres, citations, noms de pensionnaires."
-          sample={
-            <div className="space-y-2 text-cp-ink">
-              <p className="font-serif text-3xl">
-                Maison de villégiature pour félins de bonne compagnie.
+            <div className="space-y-6 text-cp-ink">
+              <p className="font-display text-5xl font-bold uppercase leading-[0.95] tracking-[0.02em] sm:text-7xl">
+                Maison de villégiature
               </p>
-              <p className="font-serif text-2xl italic text-cp-ink-soft">
-                Représentations permanentes, salle close à la nuit tombée.
+              <p className="font-display text-3xl italic leading-snug text-cp-ink-soft sm:text-4xl">
+                Madame Cliquot · européenne · 6 ans
               </p>
             </div>
           }
@@ -192,116 +155,89 @@ export default function StyleguidePage() {
           weight="variable"
           usage="Corps de texte, navigation, formulaires."
           sample={
-            <p className="font-body text-base leading-relaxed text-cp-ink-soft">
+            <p className="max-w-2xl font-body text-base leading-relaxed text-cp-ink">
               Le corps de texte courant : lisible, sobre, sans afféterie. Il
-              porte les informations pratiques pendant que les grands titres
-              font le spectacle. Sur fond crème, l’encre profonde garantit le
-              contraste exigé par la maison.
+              porte les informations pratiques quand le titre fait l&apos;affiche.
+              Sur fond bone, l&apos;encre profonde garantit le contraste exigé
+              par la maison.
             </p>
           }
         />
 
         <FontSample
-          label="Mono — Special Elite"
+          label="Mono — Space Mono"
           variable="font-mono"
-          weight="400"
-          usage="Mentions ticket, numéros, métadonnées."
+          weight="400 / 700"
+          usage="Mentions catalogue, numéros, métadonnées."
           sample={
-            <p className="font-mono text-base uppercase tracking-[0.18em] text-cp-ink-soft">
-              N° 001 — Admission — Représentation Quotidienne — Salle Comble
+            <p className="font-mono text-sm font-bold uppercase tracking-[0.22em] text-cp-ink-soft">
+              N° 047 — Rue de la Chartreuse — Bordeaux — Est. 2024
             </p>
           }
         />
       </section>
 
-      <OrnamentDivider className="my-14" label="Boutons" />
+      <RuleDivider className="my-20" label="Boutons" />
 
-      {/* ----- Boutons ----- */}
-      <section aria-labelledby="sg-buttons" className="space-y-8">
-        <ActHeading
-          act="III"
+      {/* 03 — Boutons */}
+      <section aria-labelledby="sg-buttons" className="space-y-10">
+        <SectionHeading
+          number="03"
           title="Boutons"
-          kicker="Trois voix, trois usages."
+          kicker="Encre pleine, alternative outline, action sanguine."
         />
 
-        <div className="flex flex-wrap items-center gap-4">
-          <Button>Réserver une loge</Button>
-          <Button variant="secondary">Accéder à sa loge</Button>
-          <Button variant="ticket">Entrer en scène</Button>
-        </div>
-
-        <div className="flex flex-wrap items-center gap-3">
-          <Button size="sm">Petit</Button>
-          <Button size="default">Standard</Button>
-          <Button size="lg">Plus grand</Button>
-          <Button disabled>Désactivé</Button>
-        </div>
-
-        <details className="border border-cp-brass/55 bg-cp-paper/40">
-          <summary className="cursor-pointer list-none px-4 py-2 font-mono text-xs uppercase tracking-[0.18em] text-cp-ink-soft marker:hidden">
-            Autres variantes — disponibles mais d’usage utilitaire
-          </summary>
-          <div className="flex flex-wrap items-center gap-3 border-t border-cp-brass/40 p-4">
-            <Button variant="midnight">Nuit profonde</Button>
-            <Button variant="outline">Filet d’encre</Button>
-            <Button variant="ghost">Fantôme</Button>
-            <Button variant="destructive">Destructive</Button>
-            <Button variant="link">Lien éditorial</Button>
+        <div className="space-y-6">
+          <div className="flex flex-wrap items-center gap-4">
+            <Button>Réserver un séjour</Button>
+            <Button variant="secondary">Se connecter</Button>
+            <Button variant="outline">Voir les détails</Button>
+            <Button variant="ghost">Annuler</Button>
+            <Button variant="destructive">Refuser le séjour</Button>
+            <Button variant="link">en savoir plus</Button>
           </div>
-        </details>
+
+          <div className="flex flex-wrap items-center gap-4">
+            <Button size="sm">Petit</Button>
+            <Button size="default">Standard</Button>
+            <Button size="lg">Plus grand</Button>
+            <Button disabled>Désactivé</Button>
+          </div>
+        </div>
       </section>
 
-      <OrnamentDivider className="my-14" label="Section & filet doré" />
+      <RuleDivider className="my-20" label="Statuts" />
 
-      {/* ----- Section démo (titre + corps + ornement + filet doré) ----- */}
-      <section aria-labelledby="sg-section" className="space-y-10">
-        <ActHeading
-          act="IV"
-          title="Section démonstrative"
-          kicker="Hiérarchie complète d’une section type."
+      {/* 04 — Statuts */}
+      <section aria-labelledby="sg-statuses" className="space-y-8">
+        <SectionHeading
+          number="04"
+          title="Statuts de séjour"
+          kicker="Les six états d'une réservation."
         />
-
-        <article className="space-y-8">
-          <ActHeading
-            act="I"
-            title="Démonstration"
-            kicker="Une mise en scène simple — titre, corps, séparation, encadrement."
-          />
-
-          <p className="font-body text-base leading-relaxed text-cp-ink-soft">
-            Voici comment se compose une section type sur ce site : un titre
-            dramatique en Abril, une mention d’acte en mono cramoisi, un
-            sous-titre italique en Playfair, puis un paragraphe de corps en
-            Inter. Le tout posé sur le grain du papier, séparé par des
-            ornements typographiques.
-          </p>
-
-          <OrnamentDivider />
-
-          <FiletFrame>
-            <p className="font-serif text-xl leading-snug text-cp-ink italic">
-              « Pour être admis sur la scène de notre établissement, le félin
-              se doit d’être stérilisé, identifié, vacciné, et sociable avec
-              ses congénères. »
-            </p>
-            <p className="mt-4 font-mono text-[0.7rem] uppercase tracking-[0.22em] text-cp-crimson">
-              — Article II du règlement de la maison
-            </p>
-          </FiletFrame>
-        </article>
+        <div className="flex flex-wrap items-center gap-3">
+          {STATUSES.map((s) => (
+            <BookingStatusBadge key={s} status={s} />
+          ))}
+        </div>
+        <p className="max-w-2xl font-body text-sm leading-relaxed text-cp-ink-soft">
+          Numéro d&apos;ordre + libellé mono caps. Sanguine signale l&apos;action
+          requise (question, refus). Encre pleine valide l&apos;engagement
+          (acceptation). Mute neutralise (annulé, terminé).
+        </p>
       </section>
 
-      <OrnamentDivider className="my-14" label="Formulaire" />
+      <RuleDivider className="my-20" label="Formulaire" />
 
-      {/* ----- Champ de formulaire ----- */}
-      <section aria-labelledby="sg-form" className="space-y-8">
-        <ActHeading
-          act="V"
+      {/* 05 — Champs de formulaire */}
+      <section aria-labelledby="sg-form" className="space-y-10">
+        <SectionHeading
+          number="05"
           title="Champs de formulaire"
-          kicker="Sobriété au service de la clarté."
+          kicker="Trait fin, focus sanguine, indication italique."
         />
 
-        <div className="grid gap-6 sm:grid-cols-2">
+        <div className="grid gap-8 sm:grid-cols-2">
           <Field
             label="Email"
             htmlFor="sg-email"
@@ -332,38 +268,58 @@ export default function StyleguidePage() {
         </div>
       </section>
 
-      <OrnamentDivider className="my-14" label="Statuts" />
+      <RuleDivider className="my-20" label="Cartouches & sections" />
 
-      {/* ----- Badges de statut ----- */}
-      <section aria-labelledby="sg-statuses" className="space-y-6">
-        <ActHeading
-          act="VI"
-          title="Statuts de réservation"
-          kicker="Les six états d’une représentation."
+      {/* 06 — Section + ruled box */}
+      <section aria-labelledby="sg-section" className="space-y-12">
+        <SectionHeading
+          number="06"
+          title="Composition d'une section"
+          kicker="Numéro, filet, titre, kicker italique, corps."
         />
-        <div className="flex flex-wrap items-center gap-3">
-          {STATUSES.map((s) => (
-            <BookingStatusBadge key={s} status={s} />
-          ))}
+
+        <div className="grid gap-8 lg:grid-cols-[2fr_1fr]">
+          <article className="space-y-6">
+            <SectionHeading
+              number="A"
+              title="Exemple"
+              kicker="Une mise en page typique du site."
+              as="h3"
+            />
+
+            <p className="font-body text-base leading-relaxed text-cp-ink">
+              La section commence par un numéro d&apos;entrée mono sanguine.
+              Le titre est en Bodoni Moda. Le kicker en italique. Le corps
+              en Inter. Toute la composition se lit comme une fiche de
+              catalogue : on entre par le numéro, on confirme par le titre.
+            </p>
+          </article>
+
+          <RuledBox variant="deep" as="blockquote" className="font-display italic">
+            <p className="text-xl leading-snug text-cp-ink sm:text-2xl">
+              « Pour être admis sur la scène de notre établissement, le
+              félin se doit d&apos;être stérilisé, identifié, vacciné, et
+              sociable avec ses congénères. »
+            </p>
+            <p className="mt-4 font-mono text-[0.65rem] font-bold not-italic uppercase tracking-[0.22em] text-cp-sanguine">
+              § 02 — Règlement de la maison
+            </p>
+          </RuledBox>
         </div>
-        <p className="font-body text-sm text-cp-ink-soft">
-          Outline 2 px + tint léger + texte ink — la couleur du statut est
-          portée par la bordure et le fond pour garantir un contraste AA, y
-          compris sur le doré (qui ne peut pas être un texte sur cream).
-        </p>
       </section>
 
-      <OrnamentDivider className="my-14" label="Fiche pensionnaire" />
+      <RuleDivider className="my-20" label="Fiches" />
 
-      {/* ----- CatCard ----- */}
-      <section aria-labelledby="sg-cat" className="space-y-6">
-        <ActHeading
-          act="VII"
-          title="Fiche de pensionnaire"
-          kicker="Le placeholder en attendant les vraies photos."
+      {/* 07 — Cat cards */}
+      <section aria-labelledby="sg-cat" className="space-y-8">
+        <SectionHeading
+          number="07"
+          title="Fiches de pensionnaires"
+          kicker="Numéro de catalogue, nom italique, critères d'admission."
         />
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           <CatCard
+            reference="003"
             name="Madame Cliquot"
             sex="FEMALE"
             breed="Européenne tricolore"
@@ -376,6 +332,7 @@ export default function StyleguidePage() {
             }}
           />
           <CatCard
+            reference="012"
             name="Maestro"
             sex="MALE"
             breed="Chartreux"
@@ -388,6 +345,7 @@ export default function StyleguidePage() {
             }}
           />
           <CatCard
+            reference="024"
             name="Salami"
             sex="MALE"
             breed="Roux des toits"
@@ -402,11 +360,11 @@ export default function StyleguidePage() {
         </div>
       </section>
 
-      <OrnamentDivider className="my-14" />
+      <RuleDivider className="mt-24 mb-12" weight="heavy" />
 
-      <footer className="space-y-3 pb-10 text-center">
-        <TicketStamp>Fin de la représentation — Rideau</TicketStamp>
-        <p className="font-body text-xs text-cp-ink-soft">
+      <footer className="flex flex-col gap-3 pb-8 text-center sm:flex-row sm:items-center sm:justify-between sm:text-left">
+        <LibraryStamp>Fin du document — § 07</LibraryStamp>
+        <p className="font-body text-xs italic text-cp-ink-soft">
           Page de référence — supprimable une fois la DA validée.
         </p>
       </footer>
@@ -422,31 +380,28 @@ function Swatch({
   name,
   hex,
   usage,
-  isLight,
 }: {
   name: string;
-  cssVar: string;
   hex: string;
   usage: string;
-  isLight?: boolean;
+  ink?: "light" | "dark";
 }) {
   return (
-    <div className="border-2 border-cp-ink/15 bg-cp-cream">
+    <div className="border border-cp-ink bg-cp-paper">
       <div
-        className={
-          "h-20 w-full " +
-          (isLight
-            ? "border-b border-cp-ink/10"
-            : "border-b border-transparent")
-        }
+        className="h-24 w-full border-b border-cp-ink"
         style={{ backgroundColor: hex }}
       />
-      <div className="space-y-1 px-3 py-2.5">
-        <p className="font-serif text-base leading-tight text-cp-ink">{name}</p>
-        <p className="font-mono text-[0.7rem] uppercase tracking-[0.14em] text-cp-ink-soft">
+      <div className="space-y-1 px-3 py-3">
+        <p className="font-mono text-xs font-bold uppercase tracking-[0.14em] text-cp-ink">
+          {name}
+        </p>
+        <p className="font-mono text-[0.65rem] uppercase tracking-[0.14em] text-cp-ink-soft">
           {hex}
         </p>
-        <p className="font-body text-xs text-cp-ink-soft/85">{usage}</p>
+        <p className="font-body text-xs leading-snug text-cp-ink-soft">
+          {usage}
+        </p>
       </div>
     </div>
   );
@@ -466,9 +421,9 @@ function FontSample({
   sample: ReactNode;
 }) {
   return (
-    <div className="space-y-3 border-t border-cp-brass/40 pt-6 first:border-t-0 first:pt-0">
-      <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
-        <p className="font-mono text-[0.7rem] uppercase tracking-[0.22em] text-cp-crimson">
+    <div className="space-y-4 border-t border-cp-ink/30 pt-8 first:border-t-0 first:pt-0">
+      <div className="flex flex-wrap items-baseline gap-x-5 gap-y-1">
+        <p className="font-mono text-xs font-bold uppercase tracking-[0.22em] text-cp-sanguine">
           {label}
         </p>
         <p className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-cp-ink-soft">
@@ -476,7 +431,7 @@ function FontSample({
         </p>
       </div>
       <p className="font-body text-sm italic text-cp-ink-soft">{usage}</p>
-      <div className="pt-1">{sample}</div>
+      <div className="pt-2">{sample}</div>
     </div>
   );
 }

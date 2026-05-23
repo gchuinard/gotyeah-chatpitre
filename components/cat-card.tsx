@@ -1,11 +1,10 @@
 import { cn } from "@/lib/utils";
-import { TicketStamp } from "@/components/ticket-stamp";
+import { LibraryStamp } from "@/components/library-stamp";
 
-/// Carte « fiche de pensionnaire ». Maquette uniquement (PHASE 2) — aucune
-/// donnée Prisma : toutes les valeurs sont passées en props. La photo est un
-/// placeholder structuré filet doré + silhouette gravure tant qu'aucune URL
-/// réelle n'est fournie. Les icônes Check/Cross sont des SVG inline (pas de
-/// dépendance lucide ici) pour rester cohérent avec le style « trait noir ».
+/// Carte « fiche de pensionnaire » version brutalist editorial : numéro
+/// d'entrée du catalogue, photo placeholder en silhouette trait noir,
+/// critères d'admission en ✓/— mono caps. Maquette uniquement (aucune
+/// donnée Prisma : toutes les valeurs sont passées en props).
 
 export type CatCardCriteria = {
   sterilized: boolean;
@@ -15,11 +14,13 @@ export type CatCardCriteria = {
 };
 
 export type CatCardProps = {
+  /** Numéro de catalogue (« 003 »). Affiché en mono dans l'en-tête. */
+  reference?: string;
   name: string;
   photoUrl?: string | null;
   sex?: "MALE" | "FEMALE";
   breed?: string | null;
-  ageLabel?: string; // ex. « 4 ans », « 6 mois »
+  ageLabel?: string;
   criteria: CatCardCriteria;
   className?: string;
 };
@@ -32,6 +33,7 @@ const CRITERIA: { key: keyof CatCardCriteria; label: string }[] = [
 ];
 
 export function CatCard({
+  reference,
   name,
   photoUrl,
   sex,
@@ -46,38 +48,55 @@ export function CatCard({
   return (
     <article
       className={cn(
-        "flex flex-col border-2 border-cp-brass bg-cp-paper text-cp-ink shadow-[3px_3px_0_0_rgb(26_20_16/0.15)]",
+        "flex flex-col border border-cp-ink bg-cp-paper text-cp-ink",
         className,
       )}
     >
+      {/* En-tête type fiche : numéro de catalogue + sexe */}
+      <header className="flex items-center justify-between border-b border-cp-ink px-4 py-2.5">
+        <LibraryStamp>
+          {reference ? `N° ${reference}` : "Pensionnaire"}
+        </LibraryStamp>
+        {sexLabel && (
+          <span
+            aria-hidden
+            className="font-display text-xl leading-none text-cp-ink"
+          >
+            {sexLabel}
+          </span>
+        )}
+      </header>
+
       <PhotoPlaceholder name={name} photoUrl={photoUrl} />
 
-      <div className="flex flex-col gap-3 px-5 py-4">
-        <div className="flex items-baseline justify-between gap-3">
-          <h3 className="font-serif text-2xl leading-tight">{name}</h3>
-          {sexLabel && (
-            <span aria-hidden className="font-display text-xl text-cp-crimson">
-              {sexLabel}
-            </span>
-          )}
-        </div>
+      <div className="flex flex-col gap-3 px-5 py-5">
+        <h3 className="font-display text-3xl italic leading-tight text-cp-ink">
+          {name}
+        </h3>
 
-        {subtitle && <TicketStamp>{subtitle}</TicketStamp>}
+        {subtitle && (
+          <p className="font-body text-sm text-cp-ink-soft">{subtitle}</p>
+        )}
 
-        <ul className="mt-1 grid grid-cols-2 gap-x-3 gap-y-1.5">
+        <ul className="mt-1 grid grid-cols-2 gap-x-3 gap-y-1.5 border-t border-cp-ink/30 pt-3">
           {CRITERIA.map(({ key, label }) => {
             const ok = criteria[key];
             return (
               <li
                 key={key}
                 className={cn(
-                  "flex items-center gap-1.5 font-body text-xs",
-                  ok ? "text-cp-emerald" : "text-cp-crimson/85",
+                  "flex items-center gap-2 font-mono text-[0.65rem] font-bold uppercase tracking-[0.14em]",
+                  ok ? "text-cp-ink" : "text-cp-sanguine",
                 )}
               >
-                {ok ? <IconCheck /> : <IconCross />}
+                <span aria-hidden className="inline-block w-3 text-center">
+                  {ok ? "✓" : "—"}
+                </span>
                 <span
-                  className={ok ? "" : "line-through decoration-cp-crimson/70"}
+                  className={cn(
+                    "leading-none",
+                    !ok && "line-through decoration-[1.5px]",
+                  )}
                 >
                   {label}
                 </span>
@@ -98,22 +117,20 @@ function PhotoPlaceholder({
   photoUrl?: string | null;
 }) {
   if (photoUrl) {
-    // Pour PHASE 2 on reste sur <img> brut ; la bascule next/image se fera
-    // quand les vraies photos arriveront (prompt « intégration »).
     return (
       // eslint-disable-next-line @next/next/no-img-element
       <img
         src={photoUrl}
         alt={`Portrait de ${name}`}
-        className="aspect-square w-full object-cover"
+        className="aspect-square w-full border-b border-cp-ink object-cover"
       />
     );
   }
   return (
-    <div className="relative aspect-square w-full overflow-hidden border-b-2 border-cp-brass bg-cp-cream">
-      <div className="absolute inset-3 flex flex-col items-center justify-center gap-3 border border-cp-brass/55">
-        <CatSilhouette className="size-20 text-cp-ink/40" />
-        <span className="font-mono text-[0.6rem] uppercase tracking-[0.22em] text-cp-ink-soft/80">
+    <div className="relative aspect-square w-full overflow-hidden border-b border-cp-ink bg-cp-paper-deep">
+      <div className="absolute inset-3 flex flex-col items-center justify-center gap-3 border border-cp-ink/45">
+        <CatSilhouette className="size-20 text-cp-ink/55" />
+        <span className="font-mono text-[0.6rem] font-bold uppercase tracking-[0.22em] text-cp-ink-soft/90">
           Portrait à venir
         </span>
       </div>
@@ -121,15 +138,15 @@ function PhotoPlaceholder({
   );
 }
 
-/// Silhouette de chat trait noir simplifiée — placeholder en attendant les
-/// illustrations gravure finales.
+/// Silhouette de chat trait noir simplifiée — placeholder en attendant
+/// les illustrations gravure finales.
 function CatSilhouette({ className }: { className?: string }) {
   return (
     <svg
       viewBox="0 0 64 64"
       fill="none"
       stroke="currentColor"
-      strokeWidth="1.5"
+      strokeWidth="1.4"
       strokeLinecap="round"
       strokeLinejoin="round"
       className={className}
@@ -148,40 +165,6 @@ function CatSilhouette({ className }: { className?: string }) {
       <path d="M22 41 L14 42" />
       <path d="M42 39 L50 38" />
       <path d="M42 41 L50 42" />
-    </svg>
-  );
-}
-
-function IconCheck() {
-  return (
-    <svg
-      viewBox="0 0 16 16"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2.2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className="size-3.5 shrink-0"
-      aria-hidden
-    >
-      <path d="M3 8.5 L6.5 12 L13 4" />
-    </svg>
-  );
-}
-
-function IconCross() {
-  return (
-    <svg
-      viewBox="0 0 16 16"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2.2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className="size-3.5 shrink-0"
-      aria-hidden
-    >
-      <path d="M4 4 L12 12 M12 4 L4 12" />
     </svg>
   );
 }

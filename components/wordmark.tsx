@@ -1,8 +1,9 @@
 import { cn } from "@/lib/utils";
 
-/// Logotype « Le Chat-Pitre ». Réutilisé dans le hero, les en-têtes, le pied.
-/// Polymorphe via `as` pour rester sémantique selon le contexte (h1 sur la
-/// home, span dans une nav).
+/// Logotype « Le Chat-Pitre ». Bodoni Moda bold, capitales avec tracking
+/// aéré : marque institutionnelle, lisible aussi bien à 10px (nav) qu'à
+/// 160px (hero). Polymorphe via `as` pour rester sémantique selon le
+/// contexte (h1 sur la home, span dans une nav, div dans un footer).
 export function Wordmark({
   className,
   as: Tag = "span",
@@ -13,7 +14,7 @@ export function Wordmark({
   return (
     <Tag
       className={cn(
-        "font-display leading-none tracking-tight text-cp-ink",
+        "font-display font-bold uppercase leading-[0.92] tracking-[0.04em] text-cp-ink",
         className,
       )}
     >
