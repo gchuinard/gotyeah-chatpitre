@@ -150,6 +150,26 @@ export default async function AdminBookingDetailPage({
         </RuledBox>
       )}
 
+      {/* Facture PDF — toujours dispo côté admin pour relecture */}
+      <aside className="mt-10 flex flex-wrap items-center justify-between gap-4 rounded-md border border-cp-cobalt bg-cp-paper-deep p-5 sm:p-6">
+        <div>
+          <p className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.18em] text-cp-cobalt">
+            Facture du séjour
+          </p>
+          <p className="mt-1 font-display text-xl italic text-cp-ink">
+            Aperçu de la facture PDF envoyée au client.
+          </p>
+        </div>
+        <a
+          href={`/api/invoices/${booking.reference}/pdf`}
+          target="_blank"
+          rel="noopener"
+          className="inline-flex items-center gap-2 rounded-md border border-cp-cobalt bg-cp-cobalt px-5 py-2.5 font-body text-sm font-semibold text-cp-paper transition-colors hover:bg-cp-cobalt-deep"
+        >
+          Ouvrir la facture PDF ↓
+        </a>
+      </aside>
+
       {/* Actions de statut */}
       {["PENDING", "QUESTION_ASKED"].includes(booking.status) && (
         <section className="mt-14 border border-cp-ink bg-cp-paper-deep/60 p-6 sm:p-8">
