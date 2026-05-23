@@ -44,9 +44,9 @@ export function SiteFooter() {
           <div className="grid gap-10 sm:grid-cols-2">
             <FooterColumn title="La maison" tone="cobalt">
               <FooterLink href="/le-lieu">Le lieu</FooterLink>
+              <FooterLink href="/a-propos">À propos · l&apos;humain</FooterLink>
               <FooterLink href="/#admission">Conditions d&apos;admission</FooterLink>
               <FooterLink href="/#tarif">Tarif des séjours</FooterLink>
-              <FooterLink href="/#deroulement">Déroulement</FooterLink>
               <FooterLink href="/#questions">Questions</FooterLink>
             </FooterColumn>
 
