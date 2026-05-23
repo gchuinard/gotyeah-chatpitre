@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { BookingStatusBadge } from "@/components/booking-status-badge";
+import { CurrentResidentsWall } from "@/components/current-residents-wall";
 import { LibraryStamp } from "@/components/library-stamp";
 import { OccupancyCalendar, type Occupancy } from "@/components/occupancy-calendar";
 import { RuleDivider } from "@/components/rule-divider";
@@ -88,6 +89,11 @@ export default async function AdminDashboardPage() {
           gloss="Toutes fiches confondues"
         />
       </section>
+
+      <RuleDivider className="my-14" />
+
+      {/* Pensionnaires actuellement en séjour */}
+      <CurrentResidentsWall variant="compact" />
 
       <RuleDivider className="my-14" />
 
