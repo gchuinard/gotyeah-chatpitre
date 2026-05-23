@@ -3,14 +3,13 @@ import { notFound } from "next/navigation";
 
 import { BookingStatusBadge } from "@/components/booking-status-badge";
 import { LibraryStamp } from "@/components/library-stamp";
-import { MaquetteActionButton, MaquetteForm } from "@/components/maquette-form";
-import { MessageThread } from "@/components/message-thread";
+import { ConversationView } from "@/components/conversation-view";
+import { MaquetteActionButton } from "@/components/maquette-form";
 import { StayJournal } from "@/components/stay-journal";
 import { RuleDivider } from "@/components/rule-divider";
 import { RuledBox } from "@/components/ruled-box";
 import { SectionHeading } from "@/components/section-heading";
-import { Button, buttonVariants } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
+import { buttonVariants } from "@/components/ui/button";
 import { getBooking, getCat, getClient } from "@/lib/fixtures";
 
 /// Détail admin d'un séjour : récap + infos client + fil + actions de
@@ -228,37 +227,10 @@ export default async function AdminBookingDetailPage({
           tone="paprika"
         />
 
-        <MessageThread messages={booking.messages} />
-
-        {/* Formulaire admin */}
-        <MaquetteForm
-          className="space-y-4 rounded-md border border-cp-ink bg-cp-ink p-6 text-cp-paper sm:p-8"
-          successMessage="Réponse envoyée au client — maquette."
-        >
-          <label
-            htmlFor="admin-reply"
-            className="block font-mono text-[0.65rem] font-bold uppercase tracking-[0.22em] text-cp-paper/70"
-          >
-            Réponse de la maison
-          </label>
-          <Textarea
-            id="admin-reply"
-            name="body"
-            rows={4}
-            placeholder="Écrivez votre réponse au client…"
-            className="border-cp-paper/40 bg-cp-ink text-cp-paper placeholder:text-cp-paper/50 focus-visible:outline-cp-paper"
-          />
-          <div className="flex justify-end">
-            <Button
-              type="submit"
-              size="default"
-              variant="secondary"
-              className="border-cp-paper text-cp-paper bg-transparent hover:bg-cp-paper hover:text-cp-ink"
-            >
-              Envoyer →
-            </Button>
-          </div>
-        </MaquetteForm>
+        <ConversationView
+          initialMessages={booking.messages}
+          voice="admin"
+        />
       </section>
 
       <RuleDivider className="my-16" />

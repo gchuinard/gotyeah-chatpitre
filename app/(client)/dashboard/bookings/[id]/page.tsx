@@ -3,14 +3,13 @@ import { notFound } from "next/navigation";
 
 import { BookingStatusBadge } from "@/components/booking-status-badge";
 import { LibraryStamp } from "@/components/library-stamp";
-import { MaquetteActionButton, MaquetteForm } from "@/components/maquette-form";
-import { MessageThread } from "@/components/message-thread";
+import { ConversationView } from "@/components/conversation-view";
+import { MaquetteActionButton } from "@/components/maquette-form";
 import { StayJournal } from "@/components/stay-journal";
 import { RuleDivider } from "@/components/rule-divider";
 import { RuledBox } from "@/components/ruled-box";
 import { SectionHeading } from "@/components/section-heading";
-import { Button, buttonVariants } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
+import { buttonVariants } from "@/components/ui/button";
 import { getBooking, getCat } from "@/lib/fixtures";
 
 /// Détail d'un séjour : récapitulatif tarif/dates/pensionnaires, fil de
@@ -142,31 +141,10 @@ export default async function BookingDetailPage({
           tone="paprika"
         />
 
-        <MessageThread messages={booking.messages} />
-
-        {/* Formulaire nouveau message — maquette */}
-        <MaquetteForm
-          className="space-y-4 rounded-md border border-cp-ink bg-cp-paper p-6 sm:p-8"
-          successMessage="Message envoyé — maquette, le câblage data viendra."
-        >
-          <label
-            htmlFor="reply-body"
-            className="block font-mono text-[0.65rem] font-bold uppercase tracking-[0.22em] text-cp-paprika"
-          >
-            Nouveau message
-          </label>
-          <Textarea
-            id="reply-body"
-            name="body"
-            rows={4}
-            placeholder="Écrivez votre réponse à la maison…"
-          />
-          <div className="flex justify-end">
-            <Button type="submit" size="default">
-              Envoyer →
-            </Button>
-          </div>
-        </MaquetteForm>
+        <ConversationView
+          initialMessages={booking.messages}
+          voice="client"
+        />
       </section>
 
       <RuleDivider className="my-16" />
