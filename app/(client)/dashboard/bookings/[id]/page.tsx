@@ -96,6 +96,26 @@ export default async function BookingDetailPage({
         </RuledBox>
       )}
 
+      {/* Facture PDF — toujours téléchargeable côté client */}
+      <aside className="mt-10 flex flex-wrap items-center justify-between gap-4 rounded-md border border-cp-cobalt bg-cp-cobalt p-5 text-cp-paper sm:p-6">
+        <div>
+          <p className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.18em] text-cp-canari">
+            Facture du séjour
+          </p>
+          <p className="mt-1 font-display text-xl italic text-cp-paper">
+            Téléchargez votre justificatif au format PDF.
+          </p>
+        </div>
+        <a
+          href={`/api/invoices/${booking.reference}/pdf`}
+          target="_blank"
+          rel="noopener"
+          className="inline-flex items-center gap-2 rounded-md border border-cp-canari bg-cp-canari px-5 py-2.5 font-body text-sm font-semibold text-cp-ink transition-colors hover:bg-cp-canari-deep"
+        >
+          Télécharger la facture PDF ↓
+        </a>
+      </aside>
+
       <RuleDivider className="my-16" label="Carnet de séjour" tone="cobalt" />
 
       {/* Carnet de séjour — photos + notes quotidiennes */}
