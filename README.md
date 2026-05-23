@@ -4,10 +4,11 @@ Site web de la pension féline **Le Chat-Pitre** : comptes des propriétaires,
 fiches des chats, demandes de réservation de séjour, fil de discussion par
 réservation, notifications in-app et facturation.
 
-> **État du projet.** Cette base couvre le **backend et la structure** : schéma
-> de données, authentification, routes API, Docker. Les pages publiques (vitrine)
-> et le design seront réalisés dans un second temps — l'UI actuelle est
-> volontairement minimale.
+> **État du projet.** Le backend (schéma, auth, API, Docker) **et** la refonte
+> UI sont en place. Direction artistique « brutalist editorial » — encre noire
+> sur bone, didone Bodoni Moda. Les écrans client/admin tournent sur des
+> **fixtures statiques** (`lib/fixtures.ts`) ; le câblage Prisma/API arrivera
+> dans un prompt dédié.
 
 ## Stack technique
 
@@ -105,6 +106,67 @@ lib/
 prisma/          schema.prisma, migrations/, seed.ts
 proxy.ts         protège /dashboard (session) et /admin (admin)
 ```
+
+## Design system
+
+Direction artistique : **affiche éditoriale brutalist** — encre noire sur bone,
+un flash sanguine, didone Bodoni Moda + Inter + Space Mono. Aucun ornement,
+zéro radius, grain de papier sur fond unique.
+
+### Palette (`@theme` dans `app/globals.css`)
+
+| Token | Hex | Usage |
+|---|---|---|
+| `--color-cp-paper` | `#EFE9DD` | Fond unique — bone |
+| `--color-cp-paper-deep` | `#E3DCC9` | Fond alternatif des sections |
+| `--color-cp-ink` | `#0A0A0A` | Texte principal |
+| `--color-cp-ink-soft` | `#2A2A2A` | Texte secondaire |
+| `--color-cp-rule` | `#1A1A1A` | Filets, traits |
+| `--color-cp-mute` | `#6A6A6A` | Texte estompé, états passés |
+| `--color-cp-sanguine` | `#7A1818` | Accent unique — CTA, alerte |
+| `--color-cp-sanguine-deep` | `#5A1010` | Hover sanguine |
+
+### Typographies (`next/font/google`, variables `--font-cp-*`)
+
+- **Bodoni Moda** (`--font-cp-display`) — display ET serif, variable opsz + italique
+- **Inter** (`--font-cp-body`) — corps, navigation, formulaires
+- **Space Mono** (`--font-cp-mono`) — mentions catalogue, numéros, métadonnées
+
+### Composants DS (`components/`)
+
+| Composant | Rôle |
+|---|---|
+| `Wordmark` | Logotype « LE CHAT-PITRE » polymorphe (caps Bodoni bold) |
+| `RuleDivider` | Filet horizontal noir, simple ou avec libellé mono caps |
+| `SectionHeading` | Numéro mono sanguine + filet + titre Bodoni + kicker italique |
+| `RuledBox` | Encadré 1.5 px (regular / deep / inverse) |
+| `LibraryStamp` | Tampon mono caps style fiche bibliothèque |
+| `Field` | Label + contrôle + hint/error (sanguine pour erreurs) |
+| `BookingStatusBadge` | Pastille numérotée des 6 statuts |
+| `CatCard` | Fiche pensionnaire (numéro + nom italique + critères ✓/—) |
+| `BookingCard` | Fiche séjour (réf + dates + cats + total + statut) |
+| `MessageThread` + `MessageBubble` | Fil de discussion typographique (paper / ink selon voix) |
+| `OccupancyCalendar` | Grille calendaire d'occupation, 4 niveaux de densité |
+| `SiteHeader` + `SiteFooter` | Chrome public |
+| `ClientHeader` | Chrome client/admin (variant) avec `NotificationBell` + `UserMenu` |
+| `AdmissionCriteria` + `PriceCard` + `FaqAccordion` | Sections de la home |
+| `CatForm` | Formulaire de pensionnaire en 4 sections numérotées |
+
+### Page de référence
+
+http://localhost:3000/styleguide expose la palette, les fontes, les boutons,
+les statuts, les cartes et les champs en contexte. À supprimer ou à conserver
+une fois la DA validée par le client.
+
+### Stack UI
+
+- **Tailwind CSS v4** — configuration CSS-first via `@theme` dans
+  `app/globals.css` (**pas** de `tailwind.config.ts`)
+- **shadcn/ui** style `base-nova` sur **Base UI** (`@base-ui/react`), pas Radix
+- **Pas de dark mode** — aucune classe `dark:`
+- **Pas de Framer Motion** — animations CSS pures (`tw-animate-css` +
+  `cp-reveal` / `cp-fade` avec `--cp-delay`)
+- **Mobile-first** — breakpoints Tailwind par défaut
 
 ## Routes API
 

@@ -3,11 +3,16 @@
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+
+import { Field } from "@/components/field";
+import { LibraryStamp } from "@/components/library-stamp";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 
-/// Formulaire de connexion : poste vers /api/auth/login puis redirige.
+/// Formulaire de connexion brutalist editorial : poste vers /api/auth/login
+/// puis redirige. L'authentification réelle reste intacte (juste un
+/// restylage). Erreur API affichée en sanguine avec marqueur § §.
+
 export function LoginForm({ next }: { next: string }) {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
@@ -33,40 +38,82 @@ export function LoginForm({ next }: { next: string }) {
       router.refresh();
     } else {
       const data: { error?: string } = await res.json().catch(() => ({}));
-      setError(data.error ?? "Échec de la connexion.");
+      setError(data.error ?? "Identifiants incorrects.");
       setLoading(false);
     }
   }
 
   return (
-    <div className="mx-auto flex min-h-screen max-w-sm flex-col justify-center gap-6 p-6">
-      <h1 className="text-2xl font-semibold">Connexion</h1>
-      <form onSubmit={onSubmit} className="flex flex-col gap-4">
-        <div className="flex flex-col gap-2">
-          <Label htmlFor="email">Email</Label>
-          <Input id="email" name="email" type="email" required autoComplete="email" />
-        </div>
-        <div className="flex flex-col gap-2">
-          <Label htmlFor="password">Mot de passe</Label>
+    <div className="space-y-10">
+      <header className="space-y-4">
+        <LibraryStamp>§ 01 — Accès à la fiche personnelle</LibraryStamp>
+        <h1 className="font-display text-5xl font-medium leading-[0.95] tracking-[-0.01em] text-cp-ink sm:text-6xl">
+          Se connecter
+        </h1>
+        <p className="max-w-sm font-display text-xl italic leading-snug text-cp-ink-soft">
+          Reprenez la main sur vos séjours en cours, vos fiches félines et
+          vos échanges avec la maison.
+        </p>
+      </header>
+
+      <form onSubmit={onSubmit} className="space-y-6">
+        <Field
+          label="Adresse email"
+          htmlFor="login-email"
+          required
+        >
           <Input
-            id="password"
+            id="login-email"
+            name="email"
+            type="email"
+            required
+            autoComplete="email"
+            placeholder="adresse@maison.fr"
+          />
+        </Field>
+
+        <Field
+          label="Mot de passe"
+          htmlFor="login-password"
+          required
+        >
+          <Input
+            id="login-password"
             name="password"
             type="password"
             required
             autoComplete="current-password"
           />
-        </div>
-        {error && <p className="text-sm text-destructive">{error}</p>}
-        <Button type="submit" disabled={loading}>
-          {loading ? "Connexion…" : "Se connecter"}
+        </Field>
+
+        {error && (
+          <p
+            role="alert"
+            className="flex items-baseline gap-2 border border-cp-sanguine bg-cp-sanguine/8 px-4 py-3 font-body text-sm text-cp-sanguine"
+          >
+            <span aria-hidden className="font-mono font-bold">
+              §§
+            </span>
+            {error}
+          </p>
+        )}
+
+        <Button type="submit" disabled={loading} className="w-full" size="lg">
+          {loading ? "Connexion…" : "Se connecter →"}
         </Button>
       </form>
-      <p className="text-sm text-muted-foreground">
-        Pas encore de compte ?{" "}
-        <Link href="/signup" className="underline">
-          Créer un compte
-        </Link>
-      </p>
+
+      <footer className="border-t border-cp-ink/30 pt-6">
+        <p className="font-body text-sm text-cp-ink-soft">
+          Pas encore inscrit ?{" "}
+          <Link
+            href="/signup"
+            className="font-medium text-cp-ink underline underline-offset-4 decoration-[1.5px] decoration-cp-ink/40 hover:decoration-cp-sanguine hover:text-cp-sanguine"
+          >
+            Créer un compte →
+          </Link>
+        </p>
+      </footer>
     </div>
   );
 }
