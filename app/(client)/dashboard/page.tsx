@@ -34,8 +34,8 @@ export default async function DashboardPage() {
     <div className="mx-auto w-full max-w-7xl px-6 py-12 sm:px-10 sm:py-16">
       {/* En-tête éditoriale */}
       <header className="space-y-5">
-        <LibraryStamp boxed>
-          § fiche personnelle — {firstName}
+        <LibraryStamp tone="cobalt" boxed>
+          Mon espace · {firstName}
         </LibraryStamp>
         <h1 className="font-display text-5xl font-medium leading-[0.95] tracking-[-0.01em] text-cp-ink sm:text-6xl lg:text-7xl">
           Bonjour, {firstName}.
@@ -49,10 +49,10 @@ export default async function DashboardPage() {
         </p>
       </header>
 
-      <RuleDivider weight="heavy" className="my-14" />
+      <RuleDivider className="my-14" tone="cobalt" />
 
       {/* Stats compactes */}
-      <section className="grid gap-px overflow-hidden border border-cp-ink bg-cp-ink sm:grid-cols-3">
+      <section className="grid gap-4 sm:grid-cols-3">
         <StatTile
           label="Pensionnaires"
           value={cats.length.toString().padStart(2, "0")}
@@ -261,11 +261,11 @@ function StatTile({
   gloss: string;
 }) {
   return (
-    <div className="flex flex-col gap-1 bg-cp-paper p-6 sm:p-8">
-      <p className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.22em] text-cp-paprika">
+    <div className="flex flex-col gap-1 rounded-md border border-cp-ink bg-cp-paper p-6 sm:p-8">
+      <p className="font-mono text-[0.7rem] font-bold uppercase tracking-[0.16em] text-cp-paprika">
         {label}
       </p>
-      <p className="font-display text-6xl font-bold leading-none tracking-tight text-cp-ink sm:text-7xl">
+      <p className="font-display text-6xl font-semibold leading-none tracking-tight text-cp-ink sm:text-7xl">
         {value}
       </p>
       <p className="font-body text-sm text-cp-ink-soft">{gloss}</p>
