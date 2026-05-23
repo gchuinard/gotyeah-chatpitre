@@ -62,7 +62,7 @@ export default function SignupPage() {
   return (
     <div className="space-y-10">
       <header className="space-y-4">
-        <LibraryStamp>§ 02 — Ouverture d&apos;une fiche</LibraryStamp>
+        <LibraryStamp tone="paprika">Ouverture d&apos;une fiche</LibraryStamp>
         <h1 className="font-display text-5xl font-medium leading-[0.95] tracking-[-0.01em] text-cp-ink sm:text-6xl">
           Créer un compte
         </h1>

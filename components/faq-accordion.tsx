@@ -4,9 +4,9 @@ import { Accordion } from "@base-ui/react/accordion";
 
 import { cn } from "@/lib/utils";
 
-/// FAQ accordéon — Base UI Accordion, restylé brutalist editorial.
-/// Chaque entrée a un numéro mono, un trigger Bodoni Moda gros, et
-/// révèle un panel avec corps en Inter. Animations CSS pures.
+/// FAQ accordéon — Base UI Accordion, restylé Charley Harper. Chaque
+/// entrée a un numéro mono paprika, un trigger Newsreader gros, et
+/// révèle un panel avec corps Manrope.
 
 export type FaqItem = {
   question: string;
@@ -33,15 +33,15 @@ export function FaqAccordion({
           >
             <Accordion.Header>
               <Accordion.Trigger className="group flex w-full items-baseline gap-6 py-7 text-left transition-colors hover:bg-cp-paper-deep/60 focus-visible:bg-cp-paper-deep/60 focus-visible:outline-none sm:py-8">
-                <span className="shrink-0 font-mono text-xs font-bold uppercase tracking-[0.22em] text-cp-paprika">
+                <span className="shrink-0 font-mono text-sm font-bold uppercase tracking-[0.18em] text-cp-paprika">
                   {index}
                 </span>
-                <span className="flex-1 font-display text-2xl font-medium leading-snug tracking-tight text-cp-ink sm:text-3xl">
+                <span className="flex-1 font-display text-2xl font-medium leading-snug text-cp-ink sm:text-3xl">
                   {item.question}
                 </span>
                 <span
                   aria-hidden
-                  className="ml-auto shrink-0 self-center font-display text-3xl leading-none text-cp-ink transition-transform duration-300 group-data-[panel-open]:rotate-45 sm:text-4xl"
+                  className="ml-auto shrink-0 self-center font-display text-3xl leading-none text-cp-paprika transition-transform duration-300 group-data-[panel-open]:rotate-45 sm:text-4xl"
                 >
                   +
                 </span>
@@ -52,7 +52,7 @@ export function FaqAccordion({
               className="overflow-hidden transition-[height] duration-300 ease-out data-[ending-style]:h-0 data-[starting-style]:h-0 [&[hidden]]:hidden"
               style={{ height: "var(--accordion-panel-height)" }}
             >
-              <div className="pb-8 pl-[3.5rem] pr-6">
+              <div className="pb-8 pl-[4rem] pr-6">
                 <p className="max-w-2xl font-body text-base leading-relaxed text-cp-ink">
                   {item.answer}
                 </p>

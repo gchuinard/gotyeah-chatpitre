@@ -46,7 +46,7 @@ export function LoginForm({ next }: { next: string }) {
   return (
     <div className="space-y-10">
       <header className="space-y-4">
-        <LibraryStamp>§ 01 — Accès à la fiche personnelle</LibraryStamp>
+        <LibraryStamp tone="cobalt">Accès à votre espace</LibraryStamp>
         <h1 className="font-display text-5xl font-medium leading-[0.95] tracking-[-0.01em] text-cp-ink sm:text-6xl">
           Se connecter
         </h1>
