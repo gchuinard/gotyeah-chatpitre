@@ -64,8 +64,8 @@ export function CatForm({
       <header className="space-y-5">
         <LibraryStamp boxed>
           {isEdit
-            ? `§ Fiche existante — N° ${reference}`
-            : "§ Nouvelle fiche de pensionnaire"}
+            ? `Fiche existante — N° ${reference}`
+            : "Nouvelle fiche de pensionnaire"}
         </LibraryStamp>
         <h1 className="font-display text-5xl font-medium leading-[0.95] tracking-[-0.01em] text-cp-ink sm:text-6xl">
           {isEdit ? `Éditer ${v.name ?? "la fiche"}` : "Déclarer un pensionnaire"}
@@ -77,7 +77,7 @@ export function CatForm({
         </p>
       </header>
 
-      <RuleDivider weight="heavy" className="my-12" />
+      <RuleDivider className="my-12" />
 
       <form action="/dashboard/cats" method="get" className="space-y-14">
         {/* Section 01 — Identité */}
@@ -210,7 +210,7 @@ export function CatForm({
           </Field>
         </FormSection>
 
-        <RuleDivider weight="heavy" />
+        <RuleDivider />
 
         {/* Actions */}
         <footer className="flex flex-wrap items-center justify-end gap-3">

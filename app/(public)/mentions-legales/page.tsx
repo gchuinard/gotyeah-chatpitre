@@ -30,7 +30,7 @@ export default function MentionsLegalesPage() {
         </p>
       </header>
 
-      <RuleDivider weight="heavy" className="my-16" />
+      <RuleDivider className="my-16" />
 
       <div className="space-y-14">
         <Article number="01" title="Éditeur du site">
@@ -107,10 +107,10 @@ export default function MentionsLegalesPage() {
         </Article>
       </div>
 
-      <RuleDivider weight="heavy" className="mt-16" />
+      <RuleDivider className="mt-16" />
 
       <p className="mt-10 font-mono text-[0.65rem] font-bold uppercase tracking-[0.22em] text-cp-ink-soft">
-        § fin du document — version provisoire à compléter
+        fin du document — version provisoire à compléter
       </p>
     </article>
   );
@@ -129,7 +129,7 @@ function Article({
     <section className="space-y-5">
       <header className="flex items-baseline gap-4">
         <span className="font-mono text-sm font-bold uppercase tracking-[0.16em] text-cp-paprika">
-          § {number}
+          {number}
         </span>
         <h2 className="font-display text-2xl font-medium leading-tight tracking-tight text-cp-ink sm:text-3xl">
           {title}

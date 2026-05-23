@@ -56,7 +56,7 @@ export default function AdminBookingsListPage() {
 
       <header className="space-y-4">
         <LibraryStamp boxed>
-          § Tous les séjours — {BOOKINGS.length} entrée{BOOKINGS.length > 1 ? "s" : ""}
+          Tous les séjours — {BOOKINGS.length} entrée{BOOKINGS.length > 1 ? "s" : ""}
         </LibraryStamp>
         <h1 className="font-display text-5xl font-medium leading-[0.95] tracking-[-0.01em] text-cp-ink sm:text-6xl">
           Séjours
@@ -66,7 +66,7 @@ export default function AdminBookingsListPage() {
         </p>
       </header>
 
-      <RuleDivider weight="heavy" className="my-12" />
+      <RuleDivider className="my-12" />
 
       {/* Chips de comptage par statut */}
       <section

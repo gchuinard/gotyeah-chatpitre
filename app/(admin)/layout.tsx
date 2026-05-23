@@ -66,7 +66,7 @@ export default async function AdminLayout({
 function Forbidden() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center gap-6 px-6 text-center">
-      <LibraryStamp boxed>§ 403 — Accès refusé</LibraryStamp>
+      <LibraryStamp boxed>403 — Accès refusé</LibraryStamp>
       <h1 className="font-display text-6xl font-medium leading-none tracking-tight text-cp-ink">
         403
       </h1>

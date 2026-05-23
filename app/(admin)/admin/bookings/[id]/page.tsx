@@ -50,7 +50,7 @@ export default async function AdminBookingDetailPage({
       <header className="space-y-6">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <LibraryStamp boxed>
-            § Séjour N° {booking.reference} — {booking.nights} nuit{booking.nights > 1 ? "s" : ""}
+            Séjour N° {booking.reference} — {booking.nights} nuit{booking.nights > 1 ? "s" : ""}
           </LibraryStamp>
           <BookingStatusBadge status={booking.status} />
         </div>
@@ -67,7 +67,7 @@ export default async function AdminBookingDetailPage({
         </p>
       </header>
 
-      <RuleDivider weight="heavy" className="my-12" />
+      <RuleDivider className="my-12" />
 
       {/* Récap client + tarif */}
       <section className="grid gap-px overflow-hidden border border-cp-ink bg-cp-ink lg:grid-cols-3">
@@ -141,7 +141,7 @@ export default async function AdminBookingDetailPage({
       {booking.notes && (
         <RuledBox variant="deep" className="mt-10">
           <p className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.22em] text-cp-paprika">
-            § Note du client
+            Note du client
           </p>
           <p className="mt-3 font-body text-base leading-relaxed text-cp-ink">
             {booking.notes}
@@ -153,7 +153,7 @@ export default async function AdminBookingDetailPage({
       {["PENDING", "QUESTION_ASKED"].includes(booking.status) && (
         <section className="mt-14 border border-cp-ink bg-cp-paper-deep/60 p-6 sm:p-8">
           <p className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.22em] text-cp-paprika">
-            § Décision à prendre
+            Décision à prendre
           </p>
           <p className="mt-3 font-display text-2xl italic leading-snug text-cp-ink sm:text-3xl">
             Quelle suite donnez-vous ?
@@ -178,7 +178,7 @@ export default async function AdminBookingDetailPage({
         </section>
       )}
 
-      <RuleDivider className="my-16" label="Fil de discussion" weight="heavy" />
+      <RuleDivider className="my-16" label="Fil de discussion" />
 
       {/* Fil */}
       <section aria-labelledby="thread-title" className="space-y-8">
@@ -200,7 +200,7 @@ export default async function AdminBookingDetailPage({
             htmlFor="admin-reply"
             className="block font-mono text-[0.65rem] font-bold uppercase tracking-[0.22em] text-cp-paper/70"
           >
-            § Réponse de la maison
+            Réponse de la maison
           </label>
           <Textarea
             id="admin-reply"
@@ -222,7 +222,7 @@ export default async function AdminBookingDetailPage({
         </form>
       </section>
 
-      <RuleDivider weight="heavy" className="my-16" />
+      <RuleDivider className="my-16" />
 
       <footer>
         <Link

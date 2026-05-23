@@ -49,7 +49,7 @@ export default async function BookingDetailPage({
       <header className="space-y-6">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <LibraryStamp boxed>
-            § Séjour N° {booking.reference} — {booking.nights} nuit{booking.nights > 1 ? "s" : ""}
+            Séjour N° {booking.reference} — {booking.nights} nuit{booking.nights > 1 ? "s" : ""}
           </LibraryStamp>
           <BookingStatusBadge status={booking.status} />
         </div>
@@ -67,7 +67,7 @@ export default async function BookingDetailPage({
         </p>
       </header>
 
-      <RuleDivider weight="heavy" className="my-12" />
+      <RuleDivider className="my-12" />
 
       {/* Récap chiffres + cats + note */}
       <section className="grid gap-px overflow-hidden border border-cp-ink bg-cp-ink lg:grid-cols-3">
@@ -87,7 +87,7 @@ export default async function BookingDetailPage({
       {booking.notes && (
         <RuledBox variant="deep" className="mt-10">
           <p className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.22em] text-cp-paprika">
-            § note de séjour
+            note de séjour
           </p>
           <p className="mt-3 font-body text-base leading-relaxed text-cp-ink">
             {booking.notes}
@@ -95,7 +95,7 @@ export default async function BookingDetailPage({
         </RuledBox>
       )}
 
-      <RuleDivider className="my-16" label="Fil de discussion" weight="heavy" />
+      <RuleDivider className="my-16" label="Fil de discussion" />
 
       {/* Fil de discussion */}
       <section aria-labelledby="thread-title" className="space-y-8">
@@ -117,7 +117,7 @@ export default async function BookingDetailPage({
             htmlFor="reply-body"
             className="block font-mono text-[0.65rem] font-bold uppercase tracking-[0.22em] text-cp-paprika"
           >
-            § Nouveau message
+            Nouveau message
           </label>
           <Textarea
             id="reply-body"
@@ -133,7 +133,7 @@ export default async function BookingDetailPage({
         </form>
       </section>
 
-      <RuleDivider weight="heavy" className="my-16" />
+      <RuleDivider className="my-16" />
 
       {/* Actions */}
       <footer className="flex flex-wrap items-center justify-between gap-3">

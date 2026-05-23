@@ -39,7 +39,7 @@ export default function BookingsListPage() {
       <header className="flex flex-wrap items-end justify-between gap-8">
         <div className="space-y-4">
           <LibraryStamp boxed>
-            § Mes représentations — {all.length} entrée{all.length > 1 ? "s" : ""}
+            Mes représentations — {all.length} entrée{all.length > 1 ? "s" : ""}
           </LibraryStamp>
           <h1 className="font-display text-5xl font-medium leading-[0.95] tracking-[-0.01em] text-cp-ink sm:text-6xl">
             Mes séjours
@@ -58,14 +58,14 @@ export default function BookingsListPage() {
         </Link>
       </header>
 
-      <RuleDivider weight="heavy" className="my-14" />
+      <RuleDivider className="my-14" />
 
       <section aria-labelledby="active-title" className="space-y-6">
         <h2
           id="active-title"
           className="font-mono text-xs font-bold uppercase tracking-[0.22em] text-cp-paprika"
         >
-          § Actifs — {active.length}
+          Actifs — {active.length}
         </h2>
 
         {active.length === 0 ? (
@@ -103,7 +103,7 @@ export default function BookingsListPage() {
           id="closed-title"
           className="font-mono text-xs font-bold uppercase tracking-[0.22em] text-cp-ink-soft"
         >
-          § Clôturés — {closed.length}
+          Clôturés — {closed.length}
         </h2>
 
         {closed.length === 0 ? (

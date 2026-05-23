@@ -50,7 +50,7 @@ export function MessageBubble({ message }: { message: FixtureMessage }) {
             fromAdmin ? "text-cp-paper" : "text-cp-paprika",
           )}
         >
-          § {message.authorLabel}
+          {message.authorLabel}
         </span>
         <span
           className={cn(

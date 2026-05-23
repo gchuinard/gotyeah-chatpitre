@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 
 /// Formulaire de connexion brutalist editorial : poste vers /api/auth/login
 /// puis redirige. L'authentification réelle reste intacte (juste un
-/// restylage). Erreur API affichée en sanguine avec marqueur § §.
+/// restylage). Erreur API affichée en sanguine avec marqueur §.
 
 export function LoginForm({ next }: { next: string }) {
   const router = useRouter();

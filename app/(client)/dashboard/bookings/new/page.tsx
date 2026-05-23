@@ -35,7 +35,7 @@ export default function NewBookingPage() {
       </nav>
 
       <header className="space-y-5">
-        <LibraryStamp boxed>§ Nouvelle demande de séjour</LibraryStamp>
+        <LibraryStamp boxed>Nouvelle demande de séjour</LibraryStamp>
         <h1 className="font-display text-5xl font-medium leading-[0.95] tracking-[-0.01em] text-cp-ink sm:text-6xl">
           Réserver un séjour
         </h1>
@@ -45,7 +45,7 @@ export default function NewBookingPage() {
         </p>
       </header>
 
-      <RuleDivider weight="heavy" className="my-12" />
+      <RuleDivider className="my-12" />
 
       <form action="/dashboard/bookings" method="get" className="space-y-14">
         {/* 01 — Dates */}
@@ -122,7 +122,7 @@ export default function NewBookingPage() {
           </Field>
         </FormSection>
 
-        <RuleDivider weight="heavy" />
+        <RuleDivider />
 
         <footer className="flex flex-wrap items-center justify-between gap-4">
           <p className="font-body text-sm text-cp-ink-soft">

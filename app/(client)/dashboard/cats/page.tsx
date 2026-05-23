@@ -29,7 +29,7 @@ export default function CatsListPage() {
       <header className="flex flex-wrap items-end justify-between gap-8">
         <div className="space-y-4">
           <LibraryStamp boxed>
-            § La troupe — {cats.length} pensionnaire{cats.length > 1 ? "s" : ""}
+            La troupe — {cats.length} pensionnaire{cats.length > 1 ? "s" : ""}
           </LibraryStamp>
           <h1 className="font-display text-5xl font-medium leading-[0.95] tracking-[-0.01em] text-cp-ink sm:text-6xl">
             Mes pensionnaires
@@ -49,7 +49,7 @@ export default function CatsListPage() {
         </Link>
       </header>
 
-      <RuleDivider weight="heavy" className="my-14" />
+      <RuleDivider className="my-14" />
 
       {cats.length === 0 ? (
         <EmptyTroop />
@@ -82,7 +82,7 @@ export default function CatsListPage() {
 function EmptyTroop() {
   return (
     <div className="flex flex-col items-start gap-6 border border-cp-ink/40 bg-cp-paper-deep/60 p-10 sm:p-14">
-      <LibraryStamp>§ aucune fiche déclarée</LibraryStamp>
+      <LibraryStamp>aucune fiche déclarée</LibraryStamp>
       <p className="font-display text-3xl italic leading-tight text-cp-ink">
         La troupe est encore vide.
       </p>

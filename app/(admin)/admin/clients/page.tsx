@@ -30,7 +30,7 @@ export default function AdminClientsListPage() {
 
       <header className="space-y-4">
         <LibraryStamp boxed>
-          § Comptes inscrits — {clients.length} fiche{clients.length > 1 ? "s" : ""}
+          Comptes inscrits — {clients.length} fiche{clients.length > 1 ? "s" : ""}
         </LibraryStamp>
         <h1 className="font-display text-5xl font-medium leading-[0.95] tracking-[-0.01em] text-cp-ink sm:text-6xl">
           Clients
@@ -41,7 +41,7 @@ export default function AdminClientsListPage() {
         </p>
       </header>
 
-      <RuleDivider weight="heavy" className="my-12" />
+      <RuleDivider className="my-12" />
 
       {/* Stats compactes */}
       <section

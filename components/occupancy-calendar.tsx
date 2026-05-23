@@ -46,7 +46,7 @@ export function OccupancyCalendar({
     <div className={cn("border border-cp-ink bg-cp-paper", className)}>
       <header className="flex items-baseline justify-between border-b border-cp-ink px-5 py-3">
         <p className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.22em] text-cp-paprika">
-          § Calendrier d&apos;occupation
+          Calendrier d&apos;occupation
         </p>
         <p className="font-display text-2xl italic leading-none tracking-tight text-cp-ink sm:text-3xl">
           {monthLabel} {year}

@@ -5,10 +5,13 @@ fiches des chats, demandes de réservation de séjour, fil de discussion par
 réservation, notifications in-app et facturation.
 
 > **État du projet.** Le backend (schéma, auth, API, Docker) **et** la refonte
-> UI sont en place. Direction artistique « brutalist editorial » — encre noire
-> sur bone, didone Bodoni Moda. Les écrans client/admin tournent sur des
-> **fixtures statiques** (`lib/fixtures.ts`) ; le câblage Prisma/API arrivera
-> dans un prompt dédié.
+> UI sont en place. Direction artistique « mid-century illustré » à la
+> Charley Harper — crème chaud, jewel-tones saturés (cobalt, paprika,
+> canari, feuille), chats géométriques flat color en SVG inline. Typo
+> Newsreader (serif chaleureux) + Manrope (body) + JetBrains Mono. Les
+> écrans client/admin tournent sur des **fixtures statiques**
+> (`lib/fixtures.ts`) ; le câblage Prisma/API arrivera dans un prompt
+> dédié.
 
 ## Stack technique
 
@@ -109,46 +112,58 @@ proxy.ts         protège /dashboard (session) et /admin (admin)
 
 ## Design system
 
-Direction artistique : **affiche éditoriale brutalist** — encre noire sur bone,
-un flash sanguine, didone Bodoni Moda + Inter + Space Mono. Aucun ornement,
-zéro radius, grain de papier sur fond unique.
+Direction artistique : **mid-century illustré** à la Charley Harper — crème
+chaud, jewel-tones saturés, chats géométriques flat color. Typographies
+chaleureuses (Newsreader serif + Manrope grotesque), légère rondeur (3 px),
+zéro ombre molle.
 
 ### Palette (`@theme` dans `app/globals.css`)
 
+**Structurelles** (partout) :
+
 | Token | Hex | Usage |
 |---|---|---|
-| `--color-cp-paper` | `#EFE9DD` | Fond unique — bone |
-| `--color-cp-paper-deep` | `#E3DCC9` | Fond alternatif des sections |
+| `--color-cp-paper` | `#FFF4D9` | Fond unique — crème chaud |
+| `--color-cp-paper-deep` | `#F7E7BA` | Crème profond, sections alternées |
 | `--color-cp-ink` | `#0A0A0A` | Texte principal |
-| `--color-cp-ink-soft` | `#2A2A2A` | Texte secondaire |
-| `--color-cp-rule` | `#1A1A1A` | Filets, traits |
-| `--color-cp-mute` | `#6A6A6A` | Texte estompé, états passés |
-| `--color-cp-sanguine` | `#7A1818` | Accent unique — CTA, alerte |
-| `--color-cp-sanguine-deep` | `#5A1010` | Hover sanguine |
+| `--color-cp-ink-soft` | `#2F2A26` | Texte secondaire chaud |
+| `--color-cp-mute` | `#6F6A64` | Texte estompé, états passés |
+
+**Accents jewel-tone** (les couleurs qui font la joie) :
+
+| Token | Hex | Usage |
+|---|---|---|
+| `--color-cp-cobalt` | `#1A4B8E` | Primaire institutionnel — comptes, liens calmes |
+| `--color-cp-paprika` | `#C9532E` | Accent festif — CTA, alerte, focus |
+| `--color-cp-canari` | `#F4C20D` | Soleil — highlights |
+| `--color-cp-feuille` | `#2E7D3D` | Vert vif — statuts positifs |
+
+Chacune a sa variante `-deep` (hover) et `-light` (tints / fonds doux).
 
 ### Typographies (`next/font/google`, variables `--font-cp-*`)
 
-- **Bodoni Moda** (`--font-cp-display`) — display ET serif, variable opsz + italique
-- **Inter** (`--font-cp-body`) — corps, navigation, formulaires
-- **Space Mono** (`--font-cp-mono`) — mentions catalogue, numéros, métadonnées
+- **Newsreader** (`--font-cp-display`) — serif chaleureux variable opsz + italique expressive
+- **Manrope** (`--font-cp-body`) — grotesque humaniste, corps de texte
+- **JetBrains Mono** (`--font-cp-mono`) — mentions catalogue, numéros
 
 ### Composants DS (`components/`)
 
 | Composant | Rôle |
 |---|---|
-| `Wordmark` | Logotype « LE CHAT-PITRE » polymorphe (caps Bodoni bold) |
-| `RuleDivider` | Filet horizontal noir, simple ou avec libellé mono caps |
-| `SectionHeading` | Numéro mono sanguine + filet + titre Bodoni + kicker italique |
-| `RuledBox` | Encadré 1.5 px (regular / deep / inverse) |
-| `LibraryStamp` | Tampon mono caps style fiche bibliothèque |
-| `Field` | Label + contrôle + hint/error (sanguine pour erreurs) |
-| `BookingStatusBadge` | Pastille numérotée des 6 statuts |
-| `CatCard` | Fiche pensionnaire (numéro + nom italique + critères ✓/—) |
-| `BookingCard` | Fiche séjour (réf + dates + cats + total + statut) |
-| `MessageThread` + `MessageBubble` | Fil de discussion typographique (paper / ink selon voix) |
+| `Wordmark` | Logotype « Le Chat-Pitre » en Newsreader italique |
+| `CatIllustration` | Chat géométrique flat color (4 palettes × 4 poses) — placeholder photo et accents joyeux |
+| `RuleDivider` | Filet horizontal, 5 tons (ink / cobalt / paprika / canari / feuille) |
+| `SectionHeading` | Chip de numéro coloré (5 tons) + filet + titre Newsreader + kicker italique |
+| `RuledBox` | Encadré 6 variantes (regular / deep / cobalt / paprika / feuille / ink) |
+| `LibraryStamp` | Étiquette mono caps tonale (paprika / cobalt / feuille / ink), boxed optionnel |
+| `Field` | Label Manrope semibold + contrôle + hint/error (erreur paprika) |
+| `BookingStatusBadge` | Pastille numérotée des 6 statuts (cobalt outline pour calme, paprika fill pour action, feuille fill pour confirmation, ink fill pour refus) |
+| `CatCard` | Fiche pensionnaire avec illustration Charley Harper dérivée du nom |
+| `BookingCard` | Fiche séjour |
+| `MessageThread` + `MessageBubble` | Fil de discussion (client paper, maison ink) |
 | `OccupancyCalendar` | Grille calendaire d'occupation, 4 niveaux de densité |
 | `SiteHeader` + `SiteFooter` | Chrome public |
-| `ClientHeader` | Chrome client/admin (variant) avec `NotificationBell` + `UserMenu` |
+| `ClientHeader` | Chrome client/admin avec `NotificationBell` + `UserMenu` |
 | `AdmissionCriteria` + `PriceCard` + `FaqAccordion` | Sections de la home |
 | `CatForm` | Formulaire de pensionnaire en 4 sections numérotées |
 

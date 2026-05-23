@@ -93,7 +93,7 @@ export default function StyleguidePage() {
         </p>
       </header>
 
-      <RuleDivider className="my-20" weight="heavy" />
+      <RuleDivider className="my-20" />
 
       {/* 01 — Palette */}
       <section aria-labelledby="sg-palette" className="space-y-10">
@@ -448,7 +448,7 @@ export default function StyleguidePage() {
         </div>
       </section>
 
-      <RuleDivider className="mt-24 mb-12" weight="heavy" />
+      <RuleDivider className="mt-24 mb-12" />
 
       <footer className="flex flex-col gap-3 pb-8 text-center sm:flex-row sm:items-center sm:justify-between sm:text-left">
         <LibraryStamp>Fin du document</LibraryStamp>

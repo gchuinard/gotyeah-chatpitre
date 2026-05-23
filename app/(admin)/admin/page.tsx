@@ -46,8 +46,8 @@ export default async function AdminDashboardPage() {
     <div className="mx-auto w-full max-w-7xl px-6 py-12 sm:px-10 sm:py-16">
       {/* En-tête */}
       <header className="space-y-5">
-        <LibraryStamp boxed>
-          § Administration — N° d&apos;établissement 047
+        <LibraryStamp tone="paprika" boxed>
+          Administration · N° d&apos;établissement 047
         </LibraryStamp>
         <h1 className="font-display text-5xl font-medium leading-[0.95] tracking-[-0.01em] text-cp-ink sm:text-6xl lg:text-7xl">
           Bonjour, {user?.firstName ?? "patronne"}.
@@ -59,12 +59,12 @@ export default async function AdminDashboardPage() {
         </p>
       </header>
 
-      <RuleDivider weight="heavy" className="my-12" />
+      <RuleDivider className="my-12" tone="paprika" />
 
       {/* Stats */}
       <section
         aria-label="Indicateurs clés"
-        className="grid gap-px overflow-hidden border border-cp-ink bg-cp-ink sm:grid-cols-2 lg:grid-cols-4"
+        className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4"
       >
         <StatTile
           label="À traiter"
@@ -194,20 +194,20 @@ function StatTile({
   accent?: boolean;
 }) {
   return (
-    <div className={`flex flex-col gap-1 ${accent ? "bg-cp-ink text-cp-paper" : "bg-cp-paper text-cp-ink"} p-6 sm:p-8`}>
+    <div className={`flex flex-col gap-1 rounded-md border border-cp-ink ${accent ? "bg-cp-paprika text-cp-paper" : "bg-cp-paper text-cp-ink"} p-6 sm:p-8`}>
       <p
-        className={`font-mono text-[0.65rem] font-bold uppercase tracking-[0.22em] ${
-          accent ? "text-cp-paper/70" : "text-cp-paprika"
+        className={`font-mono text-[0.7rem] font-bold uppercase tracking-[0.16em] ${
+          accent ? "text-cp-paper/85" : "text-cp-paprika"
         }`}
       >
         {label}
       </p>
-      <p className="font-display text-6xl font-bold leading-none tracking-tight sm:text-7xl">
+      <p className="font-display text-6xl font-semibold leading-none tracking-tight sm:text-7xl">
         {value}
       </p>
       <p
         className={`font-body text-sm ${
-          accent ? "text-cp-paper/70" : "text-cp-ink-soft"
+          accent ? "text-cp-paper/85" : "text-cp-ink-soft"
         }`}
       >
         {gloss}
