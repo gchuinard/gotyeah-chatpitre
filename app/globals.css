@@ -13,8 +13,8 @@
 
 @theme {
   /* --- Palette « Chat-Pitre » -------------------------------------- */
-  --color-cp-paper: #efe9dd;          /* Fond unique — bone */
-  --color-cp-paper-deep: #e3dcc9;     /* Fond alternatif des sections */
+  --color-cp-paper: #fff1d9;          /* Fond unique — crème chaud */
+  --color-cp-paper-deep: #f5e3bd;     /* Crème profond, sections neutres */
   --color-cp-ink: #0a0a0a;            /* Texte principal */
   --color-cp-ink-soft: #2a2a2a;       /* Texte secondaire */
   --color-cp-rule: #1a1a1a;           /* Filets et traits */
@@ -22,21 +22,31 @@
   --color-cp-sanguine: #7a1818;       /* Accent unique — CTA, alerte */
   --color-cp-sanguine-deep: #5a1010;  /* Hover sanguine */
 
+  /* --- Couleurs « festives » par acte (uniquement sur la home) ----- */
+  --color-cp-saffron: #fae08c;        /* Acte 01 — Admission */
+  --color-cp-saffron-deep: #f5d053;
+  --color-cp-coral: #ffc2b0;          /* Acte 02 — Tarif */
+  --color-cp-coral-deep: #ff9c80;
+  --color-cp-mint: #c5e1d2;           /* Acte 03 — Déroulement */
+  --color-cp-mint-deep: #a3cdb5;
+  --color-cp-lavande: #d7c8e8;        /* Acte 04 — Questions */
+  --color-cp-lavande-deep: #b9a4d2;
+
   /* --- Tokens sémantiques shadcn → DA ------------------------------ */
-  --color-background: #efe9dd;
+  --color-background: #fff1d9;
   --color-foreground: #0a0a0a;
-  --color-card: #efe9dd;
+  --color-card: #fff1d9;
   --color-card-foreground: #0a0a0a;
-  --color-popover: #efe9dd;
+  --color-popover: #fff1d9;
   --color-popover-foreground: #0a0a0a;
   --color-primary: #0a0a0a;
-  --color-primary-foreground: #efe9dd;
-  --color-secondary: #efe9dd;
+  --color-primary-foreground: #fff1d9;
+  --color-secondary: #fff1d9;
   --color-secondary-foreground: #0a0a0a;
-  --color-muted: #e3dcc9;
+  --color-muted: #f5e3bd;
   --color-muted-foreground: #2a2a2a;
   --color-accent: #7a1818;
-  --color-accent-foreground: #efe9dd;
+  --color-accent-foreground: #fff1d9;
   --color-destructive: #7a1818;
   --color-border: #1a1a1a;
   --color-input: #1a1a1a;

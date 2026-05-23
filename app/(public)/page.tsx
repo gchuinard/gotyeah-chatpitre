@@ -5,7 +5,6 @@ import { AdmissionCriteria } from "@/components/admission-criteria";
 import { FaqAccordion, type FaqItem } from "@/components/faq-accordion";
 import { LibraryStamp } from "@/components/library-stamp";
 import { PriceCard } from "@/components/price-card";
-import { RuleDivider } from "@/components/rule-divider";
 import { RuledBox } from "@/components/ruled-box";
 import { SectionHeading } from "@/components/section-heading";
 import { buttonVariants } from "@/components/ui/button";
@@ -144,16 +143,13 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Bande horizontale d'encre — séparation forte avant le contenu */}
-      <RuleDivider weight="heavy" className="mx-auto w-full max-w-6xl px-6 sm:px-10" />
-
       {/* ============================================================
-          01 — CONDITIONS D'ADMISSION
+          01 — CONDITIONS D'ADMISSION (saffron)
           ============================================================ */}
       <section
         id="admission"
         aria-labelledby="admission-title"
-        className="scroll-mt-24"
+        className="scroll-mt-24 border-t border-cp-ink bg-cp-saffron"
       >
         <div className="mx-auto w-full max-w-6xl px-6 py-24 sm:px-10 sm:py-32">
           <SectionHeading
@@ -173,15 +169,13 @@ export default function HomePage() {
         </div>
       </section>
 
-      <RuleDivider weight="heavy" className="mx-auto w-full max-w-6xl px-6 sm:px-10" />
-
       {/* ============================================================
-          02 — TARIF DES SÉJOURS
+          02 — TARIF DES SÉJOURS (coral)
           ============================================================ */}
       <section
         id="tarif"
         aria-labelledby="tarif-title"
-        className="scroll-mt-24 bg-cp-paper-deep cp-grain"
+        className="scroll-mt-24 border-t border-cp-ink bg-cp-coral"
       >
         <div className="mx-auto w-full max-w-6xl px-6 py-24 sm:px-10 sm:py-32">
           <SectionHeading
@@ -227,15 +221,13 @@ export default function HomePage() {
         </div>
       </section>
 
-      <RuleDivider weight="heavy" className="mx-auto w-full max-w-6xl px-6 sm:px-10" />
-
       {/* ============================================================
-          03 — DÉROULEMENT
+          03 — DÉROULEMENT (mint)
           ============================================================ */}
       <section
         id="deroulement"
         aria-labelledby="deroulement-title"
-        className="scroll-mt-24"
+        className="scroll-mt-24 border-t border-cp-ink bg-cp-mint"
       >
         <div className="mx-auto w-full max-w-6xl px-6 py-24 sm:px-10 sm:py-32">
           <SectionHeading
@@ -265,15 +257,13 @@ export default function HomePage() {
         </div>
       </section>
 
-      <RuleDivider weight="heavy" className="mx-auto w-full max-w-6xl px-6 sm:px-10" />
-
       {/* ============================================================
-          04 — QUESTIONS D'HONNEUR
+          04 — QUESTIONS D'HONNEUR (lavande)
           ============================================================ */}
       <section
         id="questions"
         aria-labelledby="questions-title"
-        className="scroll-mt-24"
+        className="scroll-mt-24 border-t border-cp-ink bg-cp-lavande"
       >
         <div className="mx-auto w-full max-w-6xl px-6 py-24 sm:px-10 sm:py-32">
           <SectionHeading
@@ -287,12 +277,10 @@ export default function HomePage() {
         </div>
       </section>
 
-      <RuleDivider weight="heavy" className="mx-auto w-full max-w-6xl px-6 sm:px-10" />
-
       {/* ============================================================
           CTA finale
           ============================================================ */}
-      <section className="bg-cp-ink text-cp-paper">
+      <section className="border-t border-cp-ink bg-cp-ink text-cp-paper">
         <div className="mx-auto w-full max-w-6xl px-6 py-24 sm:px-10 sm:py-32">
           <p className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.22em] text-cp-paper/70">
             § rendez-vous

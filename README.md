@@ -115,16 +115,27 @@ zéro radius, grain de papier sur fond unique.
 
 ### Palette (`@theme` dans `app/globals.css`)
 
+**Couleurs structurelles** (partout) :
+
 | Token | Hex | Usage |
 |---|---|---|
-| `--color-cp-paper` | `#EFE9DD` | Fond unique — bone |
-| `--color-cp-paper-deep` | `#E3DCC9` | Fond alternatif des sections |
+| `--color-cp-paper` | `#FFF1D9` | Fond unique — crème chaud |
+| `--color-cp-paper-deep` | `#F5E3BD` | Crème profond, sections neutres |
 | `--color-cp-ink` | `#0A0A0A` | Texte principal |
 | `--color-cp-ink-soft` | `#2A2A2A` | Texte secondaire |
 | `--color-cp-rule` | `#1A1A1A` | Filets, traits |
 | `--color-cp-mute` | `#6A6A6A` | Texte estompé, états passés |
 | `--color-cp-sanguine` | `#7A1818` | Accent unique — CTA, alerte |
 | `--color-cp-sanguine-deep` | `#5A1010` | Hover sanguine |
+
+**Couleurs festives par acte** (uniquement sur la home `/`, edge-to-edge) :
+
+| Token | Hex | Usage |
+|---|---|---|
+| `--color-cp-saffron` | `#FAE08C` | Acte 01 — Conditions d'admission |
+| `--color-cp-coral` | `#FFC2B0` | Acte 02 — Tarif des séjours |
+| `--color-cp-mint` | `#C5E1D2` | Acte 03 — Déroulement |
+| `--color-cp-lavande` | `#D7C8E8` | Acte 04 — Questions d'honneur |
 
 ### Typographies (`next/font/google`, variables `--font-cp-*`)
 

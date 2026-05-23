@@ -28,11 +28,11 @@ const PALETTE: {
   usage: string;
   ink?: "light" | "dark";
 }[] = [
-  { name: "cp-paper", hex: "#EFE9DD", usage: "Fond unique — bone", ink: "dark" },
+  { name: "cp-paper", hex: "#FFF1D9", usage: "Fond unique — crème chaud", ink: "dark" },
   {
     name: "cp-paper-deep",
-    hex: "#E3DCC9",
-    usage: "Fond alternatif des sections",
+    hex: "#F5E3BD",
+    usage: "Crème profond, sections neutres",
     ink: "dark",
   },
   { name: "cp-ink", hex: "#0A0A0A", usage: "Texte principal", ink: "light" },
@@ -61,6 +61,17 @@ const PALETTE: {
     usage: "Hover sanguine",
     ink: "light",
   },
+];
+
+const FESTIVE: {
+  name: string;
+  hex: string;
+  usage: string;
+}[] = [
+  { name: "cp-saffron", hex: "#FAE08C", usage: "Acte 01 — Admission (home)" },
+  { name: "cp-coral", hex: "#FFC2B0", usage: "Acte 02 — Tarif (home)" },
+  { name: "cp-mint", hex: "#C5E1D2", usage: "Acte 03 — Déroulement (home)" },
+  { name: "cp-lavande", hex: "#D7C8E8", usage: "Acte 04 — Questions (home)" },
 ];
 
 const STATUSES: BookingStatus[] = [
@@ -94,7 +105,8 @@ export default function StyleguidePage() {
           style={{ "--cp-delay": "120ms" } as React.CSSProperties}
         >
           Langage visuel — brutalist editorial, fiche bibliothèque, encre noire
-          sur bone. Pas d&apos;ornement. Que de la typographie.
+          sur crème chaud. Polychromie festive par acte sur la home. Pas
+          d&apos;ornement. Que de la typographie.
         </p>
       </header>
 
@@ -105,20 +117,39 @@ export default function StyleguidePage() {
         <SectionHeading
           number="01"
           title="Palette"
-          kicker="Huit couleurs. Pas une de plus."
+          kicker="Huit couleurs structurelles + quatre festives par acte."
         />
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-          {PALETTE.map((c) => (
-            <Swatch key={c.name} {...c} />
-          ))}
+
+        <div className="space-y-5">
+          <p className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.22em] text-cp-sanguine">
+            § structurelles — partout
+          </p>
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+            {PALETTE.map((c) => (
+              <Swatch key={c.name} {...c} />
+            ))}
+          </div>
         </div>
+
+        <div className="space-y-5">
+          <p className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.22em] text-cp-sanguine">
+            § festives — fond par acte de la home
+          </p>
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+            {FESTIVE.map((c) => (
+              <Swatch key={c.name} {...c} ink="dark" />
+            ))}
+          </div>
+        </div>
+
         <p className="max-w-2xl font-body text-sm leading-relaxed text-cp-ink-soft">
           <span className="font-mono font-bold uppercase tracking-[0.16em] text-cp-sanguine">
             Sanguine
           </span>{" "}
-          est l&apos;accent unique : CTA, alerte, refus, focus. Tout le reste
-          se joue sur le contraste encre/papier. Aucun statut ne dépend
-          uniquement de la couleur (label mono + symbole assurent l&apos;AA).
+          reste l&apos;accent unique : CTA, alerte, refus, focus. Les quatre
+          couleurs festives n&apos;apparaissent <strong>que sur la home</strong>{" "}
+          (un fond par acte) ; les pages internes restent en crème chaud
+          pour ne pas distraire pendant le travail.
         </p>
       </section>
 
