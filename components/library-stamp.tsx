@@ -15,13 +15,14 @@ export function LibraryStamp({
 }: {
   children: ReactNode;
   boxed?: boolean;
-  tone?: "paprika" | "cobalt" | "feuille" | "ink";
+  tone?: "paprika" | "cobalt" | "feuille" | "canari" | "ink";
   className?: string;
 }) {
   const toneClass = {
     paprika: "text-cp-paprika",
     cobalt: "text-cp-cobalt",
     feuille: "text-cp-feuille",
+    canari: "text-cp-canari-deep",
     ink: "text-cp-ink",
   }[tone];
 

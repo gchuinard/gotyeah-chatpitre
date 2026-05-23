@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 
+import { CurrentResidentsWall } from "@/components/current-residents-wall";
 import { LibraryStamp } from "@/components/library-stamp";
 import { RuleDivider } from "@/components/rule-divider";
 import { RuledBox } from "@/components/ruled-box";
@@ -205,6 +206,11 @@ export default function LeLieuPage() {
           </PracticalTile>
         </div>
       </section>
+
+      <RuleDivider className="my-20" />
+
+      {/* Mur des pensionnaires actuellement en séjour */}
+      <CurrentResidentsWall />
 
       <RuleDivider className="my-20" />
 

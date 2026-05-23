@@ -1,11 +1,11 @@
 import Link from "next/link";
 
+import { DateRangePicker } from "@/components/date-range-picker";
 import { Field } from "@/components/field";
 import { LibraryStamp } from "@/components/library-stamp";
 import { RuleDivider } from "@/components/rule-divider";
 import { SectionHeading } from "@/components/section-heading";
 import { Button, buttonVariants } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { CURRENT_OWNER_ID, getCatsByOwner } from "@/lib/fixtures";
@@ -52,16 +52,9 @@ export default function NewBookingPage() {
         <FormSection
           number="01"
           title="Dates du séjour"
-          description="Arrivée entre 10h et 12h, départ avant 19h."
+          description="Arrivée entre 10h et 12h, départ avant 19h. Les jours grisés sont passés ou complets."
         >
-          <div className="grid gap-6 sm:grid-cols-2">
-            <Field label="Arrivée" htmlFor="booking-start" required>
-              <Input id="booking-start" name="startDate" type="date" required />
-            </Field>
-            <Field label="Départ" htmlFor="booking-end" required>
-              <Input id="booking-end" name="endDate" type="date" required />
-            </Field>
-          </div>
+          <DateRangePicker />
         </FormSection>
 
         <RuleDivider />

@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { BookingStatusBadge } from "@/components/booking-status-badge";
 import { LibraryStamp } from "@/components/library-stamp";
 import { MessageThread } from "@/components/message-thread";
+import { StayJournal } from "@/components/stay-journal";
 import { RuleDivider } from "@/components/rule-divider";
 import { RuledBox } from "@/components/ruled-box";
 import { SectionHeading } from "@/components/section-heading";
@@ -178,14 +179,29 @@ export default async function AdminBookingDetailPage({
         </section>
       )}
 
-      <RuleDivider className="my-16" label="Fil de discussion" />
+      <RuleDivider className="my-16" label="Carnet de séjour" tone="cobalt" />
+
+      {/* Carnet de séjour — admin peut poster des entrées */}
+      <section aria-labelledby="journal-title" className="space-y-8">
+        <SectionHeading
+          number="02"
+          title="Carnet de séjour"
+          kicker="Une note photo quotidienne — c'est ce que voit le client."
+          tone="cobalt"
+        />
+
+        <StayJournal bookingId={booking.id} canAdd />
+      </section>
+
+      <RuleDivider className="my-16" label="Fil de discussion" tone="paprika" />
 
       {/* Fil */}
       <section aria-labelledby="thread-title" className="space-y-8">
         <SectionHeading
-          number="02"
+          number="03"
           title="Échanges avec le client"
           kicker={`${booking.messages.length} message${booking.messages.length > 1 ? "s" : ""} échangé${booking.messages.length > 1 ? "s" : ""} jusqu'ici.`}
+          tone="paprika"
         />
 
         <MessageThread messages={booking.messages} />

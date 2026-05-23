@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { BookingStatusBadge } from "@/components/booking-status-badge";
 import { LibraryStamp } from "@/components/library-stamp";
 import { MessageThread } from "@/components/message-thread";
+import { StayJournal } from "@/components/stay-journal";
 import { RuleDivider } from "@/components/rule-divider";
 import { RuledBox } from "@/components/ruled-box";
 import { SectionHeading } from "@/components/section-heading";
@@ -95,14 +96,29 @@ export default async function BookingDetailPage({
         </RuledBox>
       )}
 
-      <RuleDivider className="my-16" label="Fil de discussion" />
+      <RuleDivider className="my-16" label="Carnet de séjour" tone="cobalt" />
+
+      {/* Carnet de séjour — photos + notes quotidiennes */}
+      <section aria-labelledby="journal-title" className="space-y-8">
+        <SectionHeading
+          number="01"
+          title="Carnet de séjour"
+          kicker="Une note photo quotidienne pendant que votre chat est avec nous."
+          tone="cobalt"
+        />
+
+        <StayJournal bookingId={booking.id} />
+      </section>
+
+      <RuleDivider className="my-16" label="Fil de discussion" tone="paprika" />
 
       {/* Fil de discussion */}
       <section aria-labelledby="thread-title" className="space-y-8">
         <SectionHeading
-          number="01"
+          number="02"
           title="Échanges avec la maison"
           kicker={`${booking.messages.length} message${booking.messages.length > 1 ? "s" : ""} jusqu'ici.`}
+          tone="paprika"
         />
 
         <MessageThread messages={booking.messages} />

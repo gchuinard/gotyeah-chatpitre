@@ -35,8 +35,10 @@ export type FixtureBooking = {
   reference: string; // « 124 »
   ownerId: string;
   catIds: string[];
-  startDate: string; // « 14 mars 2026 »
+  startDate: string; // « 14 mars 2026 » — pour l'affichage
   endDate: string;
+  startISO: string;  // « 2026-03-14 » — pour les filtres et le calendrier
+  endISO: string;
   nights: number;
   pricePerNight: number;
   total: number;
@@ -54,6 +56,23 @@ export type FixtureClient = {
   createdAt: string; // « 10 fév 2025 »
   catCount: number;
   bookingCount: number;
+};
+
+/// Une entrée du « carnet de séjour » : la maison poste régulièrement
+/// une note + une photo pour chaque pensionnaire en cours de séjour. Le
+/// client la voit sur la page détail de sa réservation.
+///
+/// `imageVariant` / `imagePose` désignent l'illustration Charley Harper
+/// utilisée à la place de la vraie photo, en attendant l'upload réel.
+export type FixtureStayUpdate = {
+  id: string;
+  bookingId: string;
+  catId: string;
+  imageVariant: "cobalt" | "paprika" | "canari" | "feuille";
+  imagePose: "sitting" | "sleeping" | "standing" | "watching";
+  caption: string;
+  postedAt: string; // « 22 mai · 14h05 »
+  postedAtISO: string; // « 2026-05-22T14:05 » pour le tri
 };
 
 // --- Comptes -------------------------------------------------------------
@@ -213,7 +232,7 @@ export const CATS: FixtureCat[] = [
 // Un exemple par statut, dans l'ordre catalogue (01 → 06).
 
 export const BOOKINGS: FixtureBooking[] = [
-  // ACCEPTED — prochain séjour de Henriette
+  // ACCEPTED — séjour passé de Henriette
   {
     id: "b-121",
     reference: "121",
@@ -221,6 +240,8 @@ export const BOOKINGS: FixtureBooking[] = [
     catIds: ["c-1", "c-2"],
     startDate: "14 mars 2026",
     endDate: "21 mars 2026",
+    startISO: "2026-03-14",
+    endISO: "2026-03-21",
     nights: 7,
     pricePerNight: 40,
     total: 280,
@@ -259,6 +280,8 @@ export const BOOKINGS: FixtureBooking[] = [
     catIds: ["c-3"],
     startDate: "08 avr 2026",
     endDate: "15 avr 2026",
+    startISO: "2026-04-08",
+    endISO: "2026-04-15",
     nights: 7,
     pricePerNight: 22,
     total: 154,
@@ -289,6 +312,8 @@ export const BOOKINGS: FixtureBooking[] = [
     catIds: ["c-7"],
     startDate: "12 mai 2026",
     endDate: "18 mai 2026",
+    startISO: "2026-05-12",
+    endISO: "2026-05-18",
     nights: 6,
     pricePerNight: 22,
     total: 132,
@@ -311,6 +336,8 @@ export const BOOKINGS: FixtureBooking[] = [
     catIds: ["c-9"],
     startDate: "20 fév 2026",
     endDate: "25 fév 2026",
+    startISO: "2026-02-20",
+    endISO: "2026-02-25",
     nights: 5,
     pricePerNight: 22,
     total: 110,
@@ -340,6 +367,8 @@ export const BOOKINGS: FixtureBooking[] = [
     catIds: ["c-4"],
     startDate: "10 jan 2026",
     endDate: "14 jan 2026",
+    startISO: "2026-01-10",
+    endISO: "2026-01-14",
     nights: 4,
     pricePerNight: 22,
     total: 88,
@@ -355,6 +384,8 @@ export const BOOKINGS: FixtureBooking[] = [
     catIds: ["c-1"],
     startDate: "23 déc 2025",
     endDate: "02 jan 2026",
+    startISO: "2025-12-23",
+    endISO: "2026-01-02",
     nights: 10,
     pricePerNight: 22,
     total: 220,
@@ -369,11 +400,92 @@ export const BOOKINGS: FixtureBooking[] = [
     catIds: ["c-5", "c-6"],
     startDate: "12 déc 2025",
     endDate: "19 déc 2025",
+    startISO: "2025-12-12",
+    endISO: "2025-12-19",
     nights: 7,
     pricePerNight: 40,
     total: 280,
     status: "COMPLETED",
     messages: [],
+  },
+  // === Séjours actuellement EN COURS (chevauchent 2026-05-23) ===
+  // ACCEPTED — Sidonie a confié Pompon et Comtesse pour son déplacement
+  {
+    id: "b-130",
+    reference: "130",
+    ownerId: "u-3",
+    catIds: ["c-5", "c-6"],
+    startDate: "20 mai 2026",
+    endDate: "28 mai 2026",
+    startISO: "2026-05-20",
+    endISO: "2026-05-28",
+    nights: 8,
+    pricePerNight: 40,
+    total: 320,
+    status: "ACCEPTED",
+    notes:
+      "Sidonie en déplacement, Pompon et Comtesse partagent la chambre n° 02 comme la dernière fois.",
+    messages: [],
+  },
+  // ACCEPTED — Albert pour le pont du jeudi de l'Ascension
+  {
+    id: "b-131",
+    reference: "131",
+    ownerId: "u-4",
+    catIds: ["c-7"],
+    startDate: "19 mai 2026",
+    endDate: "27 mai 2026",
+    startISO: "2026-05-19",
+    endISO: "2026-05-27",
+    nights: 8,
+    pricePerNight: 22,
+    total: 176,
+    status: "ACCEPTED",
+    notes: "Hugolin, chambre n° 05 — peu de visites, il adore le jardin.",
+    messages: [],
+  },
+  // ACCEPTED — Jean-Loup pour un mariage à la campagne
+  {
+    id: "b-132",
+    reference: "132",
+    ownerId: "u-2",
+    catIds: ["c-4"],
+    startDate: "22 mai 2026",
+    endDate: "26 mai 2026",
+    startISO: "2026-05-22",
+    endISO: "2026-05-26",
+    nights: 4,
+    pricePerNight: 22,
+    total: 88,
+    status: "ACCEPTED",
+    notes: "Madame Cliquot, chambre n° 01 — adore le mûrier en fin d'après-midi.",
+    messages: [],
+  },
+  // === Séjour FUTUR de Henriette — sa réservation été 2026 ===
+  // PENDING — en lecture par la maison
+  {
+    id: "b-140",
+    reference: "140",
+    ownerId: "u-1",
+    catIds: ["c-1", "c-2"],
+    startDate: "25 juin 2026",
+    endDate: "02 juil 2026",
+    startISO: "2026-06-25",
+    endISO: "2026-07-02",
+    nights: 7,
+    pricePerNight: 40,
+    total: 280,
+    status: "PENDING",
+    notes: "Voyage de noces — Salami et Maestro pour la semaine.",
+    messages: [
+      {
+        id: "m-9",
+        fromAdmin: false,
+        authorLabel: "Vous",
+        body: "Bonjour, on se marie fin juin — Salami et Maestro du 25 juin au 2 juillet ?",
+        sentAt: "22 mai · 09h12",
+      },
+    ],
   },
 ];
 
@@ -397,4 +509,203 @@ export function getBooking(id: string): FixtureBooking | undefined {
 
 export function getClient(id: string): FixtureClient | undefined {
   return CLIENTS.find((c) => c.id === id);
+}
+
+// --- Carnet de séjour ----------------------------------------------------
+
+export const STAY_UPDATES: FixtureStayUpdate[] = [
+  // === b-121 (passé) — Henriette, Salami + Maestro, mars 2026 ===
+  {
+    id: "u-121-1",
+    bookingId: "b-121",
+    catId: "c-1",
+    imageVariant: "paprika",
+    imagePose: "sitting",
+    caption:
+      "Salami est arrivé sans broncher. Il a tout reniflé en silence puis s'est installé sur la couverture qu'il connaît.",
+    postedAt: "14 mars · 12h40",
+    postedAtISO: "2026-03-14T12:40",
+  },
+  {
+    id: "u-121-2",
+    bookingId: "b-121",
+    catId: "c-2",
+    imageVariant: "cobalt",
+    imagePose: "watching",
+    caption:
+      "Maestro plus méfiant — il observe depuis le perchoir. Pâtée à peine entamée ce matin mais il a bu.",
+    postedAt: "15 mars · 09h15",
+    postedAtISO: "2026-03-15T09:15",
+  },
+  {
+    id: "u-121-3",
+    bookingId: "b-121",
+    catId: "c-1",
+    imageVariant: "feuille",
+    imagePose: "sleeping",
+    caption:
+      "Sieste de l'après-midi dans le jardin pour les deux. Salami a chassé une mouche. Maestro a regardé.",
+    postedAt: "17 mars · 16h20",
+    postedAtISO: "2026-03-17T16:20",
+  },
+  {
+    id: "u-121-4",
+    bookingId: "b-121",
+    catId: "c-2",
+    imageVariant: "canari",
+    imagePose: "standing",
+    caption:
+      "Maestro a fini par accepter une caresse. Reprise complète du rythme alimentaire. On approche du départ — tout est prêt.",
+    postedAt: "20 mars · 18h00",
+    postedAtISO: "2026-03-20T18:00",
+  },
+
+  // === b-130 (en cours) — Sidonie, Pompon + Comtesse, mai 2026 ===
+  {
+    id: "u-130-1",
+    bookingId: "b-130",
+    catId: "c-5",
+    imageVariant: "cobalt",
+    imagePose: "sitting",
+    caption:
+      "Pompon a pris ses marques dès la première heure — il dort déjà sur la couverture en laine. Le persan, ça connaît le confort.",
+    postedAt: "20 mai · 14h05",
+    postedAtISO: "2026-05-20T14:05",
+  },
+  {
+    id: "u-130-2",
+    bookingId: "b-130",
+    catId: "c-6",
+    imageVariant: "paprika",
+    imagePose: "watching",
+    caption:
+      "Comtesse plus prudente — elle a fait le tour de toute la chambre avant de daigner s'allonger. Repas du soir nickel.",
+    postedAt: "20 mai · 19h45",
+    postedAtISO: "2026-05-20T19:45",
+  },
+  {
+    id: "u-130-3",
+    bookingId: "b-130",
+    catId: "c-5",
+    imageVariant: "feuille",
+    imagePose: "sleeping",
+    caption:
+      "Première sortie dans le jardin pour les deux ensemble. Pompon a observé une mésange charbonnière sans bouger d'un poil.",
+    postedAt: "22 mai · 11h30",
+    postedAtISO: "2026-05-22T11:30",
+  },
+
+  // === b-131 (en cours) — Albert, Hugolin, mai 2026 ===
+  {
+    id: "u-131-1",
+    bookingId: "b-131",
+    catId: "c-7",
+    imageVariant: "canari",
+    imagePose: "watching",
+    caption:
+      "Hugolin connaît les lieux, séjour facile. Il a réclamé le perchoir de la fenêtre est dès l'arrivée — comme la dernière fois.",
+    postedAt: "19 mai · 11h00",
+    postedAtISO: "2026-05-19T11:00",
+  },
+  {
+    id: "u-131-2",
+    bookingId: "b-131",
+    catId: "c-7",
+    imageVariant: "paprika",
+    imagePose: "standing",
+    caption:
+      "Petite course dans le couloir ce matin avec une balle en papier froissé. Énergie au beau fixe.",
+    postedAt: "20 mai · 10h15",
+    postedAtISO: "2026-05-20T10:15",
+  },
+  {
+    id: "u-131-3",
+    bookingId: "b-131",
+    catId: "c-7",
+    imageVariant: "cobalt",
+    imagePose: "sleeping",
+    caption:
+      "Trois heures de sieste après le repas. C'est un chat qui sait profiter de ses vacances.",
+    postedAt: "21 mai · 15h30",
+    postedAtISO: "2026-05-21T15:30",
+  },
+  {
+    id: "u-131-4",
+    bookingId: "b-131",
+    catId: "c-7",
+    imageVariant: "feuille",
+    imagePose: "sitting",
+    caption:
+      "Visite vétérinaire de routine validée — tout est bon. Encore une semaine de vacances pour lui.",
+    postedAt: "23 mai · 09h20",
+    postedAtISO: "2026-05-23T09:20",
+  },
+
+  // === b-132 (en cours) — Jean-Loup, Madame Cliquot, mai 2026 ===
+  {
+    id: "u-132-1",
+    bookingId: "b-132",
+    catId: "c-4",
+    imageVariant: "paprika",
+    imagePose: "sitting",
+    caption:
+      "Madame Cliquot a marqué son territoire en 15 minutes. Tout va bien — elle a son coin lecture (pas de livres, juste le radiateur).",
+    postedAt: "22 mai · 11h20",
+    postedAtISO: "2026-05-22T11:20",
+  },
+  {
+    id: "u-132-2",
+    bookingId: "b-132",
+    catId: "c-4",
+    imageVariant: "canari",
+    imagePose: "watching",
+    caption:
+      "Le mûrier a tout son intérêt. Elle a passé la matinée à étudier la trajectoire d'une feuille morte.",
+    postedAt: "23 mai · 10h40",
+    postedAtISO: "2026-05-23T10:40",
+  },
+];
+
+/// Renvoie les entrées du carnet pour un séjour donné, triées de la plus
+/// récente à la plus ancienne.
+export function getStayUpdates(bookingId: string): FixtureStayUpdate[] {
+  return STAY_UPDATES.filter((u) => u.bookingId === bookingId).sort((a, b) =>
+    a.postedAtISO < b.postedAtISO ? 1 : -1,
+  );
+}
+
+/// Renvoie les entrées du carnet sur tous les séjours actuellement en
+/// cours — utile pour un fil d'activité côté admin.
+export function getRecentStayUpdates(limit = 5): FixtureStayUpdate[] {
+  return [...STAY_UPDATES]
+    .sort((a, b) => (a.postedAtISO < b.postedAtISO ? 1 : -1))
+    .slice(0, limit);
+}
+
+/// Renvoie les chats actuellement en séjour : ACCEPTED + dont la plage
+/// chevauche la date donnée (par défaut, aujourd'hui). Le résultat est
+/// dédupliqué par chat (un chat ne peut être qu'à un endroit à la fois).
+export function getCurrentResidents(referenceDate: Date = new Date()): Array<{
+  cat: FixtureCat;
+  booking: FixtureBooking;
+  owner?: FixtureClient;
+}> {
+  const ref = referenceDate.toISOString().slice(0, 10); // YYYY-MM-DD
+  const out: Array<{
+    cat: FixtureCat;
+    booking: FixtureBooking;
+    owner?: FixtureClient;
+  }> = [];
+
+  for (const b of BOOKINGS) {
+    if (b.status !== "ACCEPTED") continue;
+    if (b.startISO > ref || b.endISO < ref) continue;
+    for (const catId of b.catIds) {
+      const cat = getCat(catId);
+      if (!cat) continue;
+      if (out.some((r) => r.cat.id === cat.id)) continue;
+      out.push({ cat, booking: b, owner: getClient(b.ownerId) });
+    }
+  }
+  return out;
 }
