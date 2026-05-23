@@ -57,14 +57,17 @@ export function ClientHeader({
         <Link
           href={isAdmin ? "/admin" : "/dashboard"}
           aria-label="Le Chat-Pitre — accueil"
-          className="shrink-0 transition-colors hover:text-cp-sanguine"
+          className="shrink-0 transition-colors hover:text-cp-paprika"
         >
           <Wordmark className="text-base sm:text-lg" />
         </Link>
 
         <span aria-hidden className="hidden h-6 w-px bg-cp-ink/40 sm:block" />
 
-        <LibraryStamp className="hidden md:inline-flex">
+        <LibraryStamp
+          tone={isAdmin ? "paprika" : "cobalt"}
+          className="hidden md:inline-flex"
+        >
           {isAdmin ? "Administration" : "Espace client"}
         </LibraryStamp>
 
@@ -76,7 +79,7 @@ export function ClientHeader({
             <Link
               key={l.href}
               href={l.href}
-              className="border border-transparent px-3 py-2 font-mono text-[0.65rem] font-bold uppercase tracking-[0.18em] text-cp-ink-soft transition-colors hover:text-cp-ink"
+              className="rounded-sm px-3 py-2 font-body text-sm font-semibold text-cp-ink-soft transition-colors hover:bg-cp-paper-deep hover:text-cp-ink"
             >
               {l.label}
             </Link>

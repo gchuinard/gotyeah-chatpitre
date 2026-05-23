@@ -79,7 +79,7 @@ export function BookingCard({
 
       <footer className="flex items-end justify-between gap-3 border-t border-cp-ink px-5 py-3">
         <div className="flex flex-col gap-0.5">
-          <span className="font-mono text-[0.6rem] font-bold uppercase tracking-[0.18em] text-cp-sanguine">
+          <span className="font-mono text-[0.6rem] font-bold uppercase tracking-[0.18em] text-cp-paprika">
             Total
           </span>
           <span className="font-display text-2xl font-bold leading-none tracking-tight text-cp-ink">
@@ -94,7 +94,7 @@ export function BookingCard({
           )}
           <Link
             href={href}
-            className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.22em] text-cp-ink underline-offset-4 decoration-[1.5px] decoration-cp-ink/40 hover:underline hover:text-cp-sanguine hover:decoration-cp-sanguine"
+            className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.22em] text-cp-ink underline-offset-4 decoration-[1.5px] decoration-cp-ink/40 hover:underline hover:text-cp-paprika hover:decoration-cp-paprika"
           >
             Ouvrir →
           </Link>

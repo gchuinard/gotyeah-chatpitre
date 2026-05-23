@@ -34,11 +34,11 @@ export default async function BookingDetailPage({
         aria-label="Fil d'Ariane"
         className="mb-10 flex items-center gap-2 font-mono text-[0.65rem] font-bold uppercase tracking-[0.18em] text-cp-ink-soft"
       >
-        <Link href="/dashboard" className="hover:text-cp-sanguine">
+        <Link href="/dashboard" className="hover:text-cp-paprika">
           Mon espace
         </Link>
         <span aria-hidden>/</span>
-        <Link href="/dashboard/bookings" className="hover:text-cp-sanguine">
+        <Link href="/dashboard/bookings" className="hover:text-cp-paprika">
           Séjours
         </Link>
         <span aria-hidden>/</span>
@@ -49,7 +49,7 @@ export default async function BookingDetailPage({
       <header className="space-y-6">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <LibraryStamp boxed>
-            § Séjour N° {booking.reference} — {booking.nights} nuit{booking.nights > 1 ? "s" : ""}
+            Séjour N° {booking.reference} — {booking.nights} nuit{booking.nights > 1 ? "s" : ""}
           </LibraryStamp>
           <BookingStatusBadge status={booking.status} />
         </div>
@@ -67,7 +67,7 @@ export default async function BookingDetailPage({
         </p>
       </header>
 
-      <RuleDivider weight="heavy" className="my-12" />
+      <RuleDivider className="my-12" />
 
       {/* Récap chiffres + cats + note */}
       <section className="grid gap-px overflow-hidden border border-cp-ink bg-cp-ink lg:grid-cols-3">
@@ -86,8 +86,8 @@ export default async function BookingDetailPage({
 
       {booking.notes && (
         <RuledBox variant="deep" className="mt-10">
-          <p className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.22em] text-cp-sanguine">
-            § note de séjour
+          <p className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.22em] text-cp-paprika">
+            note de séjour
           </p>
           <p className="mt-3 font-body text-base leading-relaxed text-cp-ink">
             {booking.notes}
@@ -95,7 +95,7 @@ export default async function BookingDetailPage({
         </RuledBox>
       )}
 
-      <RuleDivider className="my-16" label="Fil de discussion" weight="heavy" />
+      <RuleDivider className="my-16" label="Fil de discussion" />
 
       {/* Fil de discussion */}
       <section aria-labelledby="thread-title" className="space-y-8">
@@ -115,9 +115,9 @@ export default async function BookingDetailPage({
         >
           <label
             htmlFor="reply-body"
-            className="block font-mono text-[0.65rem] font-bold uppercase tracking-[0.22em] text-cp-sanguine"
+            className="block font-mono text-[0.65rem] font-bold uppercase tracking-[0.22em] text-cp-paprika"
           >
-            § Nouveau message
+            Nouveau message
           </label>
           <Textarea
             id="reply-body"
@@ -133,13 +133,13 @@ export default async function BookingDetailPage({
         </form>
       </section>
 
-      <RuleDivider weight="heavy" className="my-16" />
+      <RuleDivider className="my-16" />
 
       {/* Actions */}
       <footer className="flex flex-wrap items-center justify-between gap-3">
         <Link
           href="/dashboard/bookings"
-          className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.22em] text-cp-ink-soft hover:text-cp-sanguine"
+          className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.22em] text-cp-ink-soft hover:text-cp-paprika"
         >
           ← Retour aux séjours
         </Link>
@@ -171,7 +171,7 @@ function DetailTile({
 }) {
   return (
     <div className="flex flex-col gap-1 bg-cp-paper p-6 sm:p-8">
-      <p className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.22em] text-cp-sanguine">
+      <p className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.22em] text-cp-paprika">
         {label}
       </p>
       <p className="font-display text-4xl font-bold leading-none tracking-tight text-cp-ink sm:text-5xl">

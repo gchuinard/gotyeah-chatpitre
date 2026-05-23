@@ -36,7 +36,7 @@ export default function LeLieuPage() {
         </p>
       </header>
 
-      <RuleDivider weight="heavy" className="my-20" />
+      <RuleDivider className="my-20" />
 
       {/* Galerie placeholder — grille asymétrique brutalist editorial */}
       <section aria-labelledby="gallery-title" className="space-y-8">
@@ -72,7 +72,7 @@ export default function LeLieuPage() {
         </div>
       </section>
 
-      <RuleDivider weight="heavy" className="my-20" />
+      <RuleDivider className="my-20" />
 
       {/* Description articulée — chaque pièce dans son §. */}
       <section className="grid gap-12 lg:grid-cols-[1fr_2fr]">
@@ -168,7 +168,7 @@ export default function LeLieuPage() {
         </div>
       </section>
 
-      <RuleDivider weight="heavy" className="my-20" />
+      <RuleDivider className="my-20" />
 
       {/* Pratique */}
       <section
@@ -206,7 +206,7 @@ export default function LeLieuPage() {
         </div>
       </section>
 
-      <RuleDivider weight="heavy" className="my-20" />
+      <RuleDivider className="my-20" />
 
       {/* Citation finale */}
       <RuledBox variant="deep" className="text-center">
@@ -214,8 +214,8 @@ export default function LeLieuPage() {
           « La maison s&apos;organise autour du chat, pas l&apos;inverse.
           C&apos;est la seule règle écrite qu&apos;on tienne à conserver. »
         </p>
-        <p className="mt-6 font-mono text-[0.65rem] font-bold uppercase tracking-[0.22em] text-cp-sanguine">
-          § règle première — fondation 2024
+        <p className="mt-6 font-mono text-[0.65rem] font-bold uppercase tracking-[0.22em] text-cp-paprika">
+          règle première — fondation 2024
         </p>
       </RuledBox>
     </article>
@@ -265,7 +265,7 @@ function PracticalTile({
 }) {
   return (
     <div className="space-y-3 bg-cp-paper p-6">
-      <h3 className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.22em] text-cp-sanguine">
+      <h3 className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.22em] text-cp-paprika">
         {title}
       </h3>
       <p className="font-body text-sm leading-relaxed text-cp-ink">

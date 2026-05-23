@@ -2,10 +2,10 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { AdmissionCriteria } from "@/components/admission-criteria";
+import { CatIllustration } from "@/components/cat-illustration";
 import { FaqAccordion, type FaqItem } from "@/components/faq-accordion";
 import { LibraryStamp } from "@/components/library-stamp";
 import { PriceCard } from "@/components/price-card";
-import { RuleDivider } from "@/components/rule-divider";
 import { RuledBox } from "@/components/ruled-box";
 import { SectionHeading } from "@/components/section-heading";
 import { buttonVariants } from "@/components/ui/button";
@@ -81,71 +81,82 @@ export default function HomePage() {
   return (
     <>
       {/* ============================================================
-          HERO — wordmark gigantesque + sous-titre italique + CTA.
+          HERO — wordmark + tagline + CTAs + grand chat illustré.
           ============================================================ */}
       <section className="relative">
-        <div className="mx-auto w-full max-w-6xl px-6 pt-20 pb-24 sm:px-10 sm:pt-28 sm:pb-32 lg:pt-32 lg:pb-40">
-          {/* Méta haute */}
-          <div className="cp-reveal mb-12 flex flex-wrap items-center justify-between gap-3 sm:mb-16">
-            <LibraryStamp>
+        <div className="mx-auto w-full max-w-6xl px-6 pt-16 pb-20 sm:px-10 sm:pt-24 sm:pb-28 lg:pt-28 lg:pb-32">
+          <div className="cp-reveal mb-10 flex flex-wrap items-center justify-between gap-3">
+            <LibraryStamp tone="cobalt">
               N° 047 — rue de la Chartreuse — Bordeaux
             </LibraryStamp>
-            <LibraryStamp>Établissement permanent · Est. 2024</LibraryStamp>
+            <LibraryStamp tone="paprika">Établissement permanent · Est. 2024</LibraryStamp>
           </div>
 
-          {/* Wordmark — typographie démesurée, fade au load */}
-          <Wordmark
-            as="h1"
-            className="cp-fade text-[clamp(4rem,16vw,12rem)]"
-          />
+          <div className="grid items-center gap-10 lg:grid-cols-[7fr_5fr] lg:gap-16">
+            <div>
+              <Wordmark
+                as="h1"
+                className="cp-fade text-[clamp(3.5rem,12vw,9rem)]"
+              />
 
-          {/* Sous-titre italique grand */}
-          <p
-            className="cp-reveal mt-10 max-w-3xl font-display text-3xl italic leading-[1.05] tracking-tight text-cp-ink sm:text-4xl lg:text-5xl"
-            style={{ "--cp-delay": "120ms" } as React.CSSProperties}
-          >
-            Maison de villégiature pour les félins de bonne compagnie.
-          </p>
+              <p
+                className="cp-reveal mt-8 max-w-2xl font-display text-3xl italic leading-[1.05] tracking-tight text-cp-ink sm:text-4xl lg:text-5xl"
+                style={{ "--cp-delay": "120ms" } as React.CSSProperties}
+              >
+                Maison de villégiature pour les félins de bonne compagnie.
+              </p>
 
-          {/* Sous-titre corps */}
-          <p
-            className="cp-reveal mt-8 max-w-xl font-body text-base leading-relaxed text-cp-ink-soft sm:text-lg"
-            style={{ "--cp-delay": "220ms" } as React.CSSProperties}
-          >
-            Sept chambres pour les chats de Bordeaux et d&apos;ailleurs. Sept
-            caractères, sept manies, sept façons d&apos;être ailleurs en
-            restant chez soi.
-          </p>
+              <p
+                className="cp-reveal mt-8 max-w-xl font-body text-base leading-relaxed text-cp-ink-soft sm:text-lg"
+                style={{ "--cp-delay": "220ms" } as React.CSSProperties}
+              >
+                Sept chambres pour les chats de Bordeaux et d&apos;ailleurs.
+                Sept caractères, sept manies, sept façons d&apos;être ailleurs
+                en restant chez soi.
+              </p>
 
-          {/* CTAs */}
-          <div
-            className="cp-reveal mt-12 flex flex-wrap items-center gap-5"
-            style={{ "--cp-delay": "320ms" } as React.CSSProperties}
-          >
-            <Link
-              href="/signup"
-              className={buttonVariants({
-                size: "lg",
-                className: "px-10",
-              })}
+              <div
+                className="cp-reveal mt-10 flex flex-wrap items-center gap-4"
+                style={{ "--cp-delay": "320ms" } as React.CSSProperties}
+              >
+                <Link
+                  href="/signup"
+                  className={buttonVariants({
+                    size: "lg",
+                    className: "px-10",
+                  })}
+                >
+                  Réserver un séjour →
+                </Link>
+                <Link
+                  href="/le-lieu"
+                  className={buttonVariants({
+                    variant: "ghost",
+                    size: "lg",
+                  })}
+                >
+                  Visiter la maison
+                </Link>
+              </div>
+            </div>
+
+            {/* Illustration hero — grand chat canari (couleur soleil) */}
+            <div
+              className="cp-reveal mx-auto w-full max-w-md lg:mx-0"
+              style={{ "--cp-delay": "200ms" } as React.CSSProperties}
             >
-              Réserver un séjour →
-            </Link>
-            <Link
-              href="/le-lieu"
-              className={buttonVariants({
-                variant: "ghost",
-                size: "lg",
-              })}
-            >
-              Visiter la maison
-            </Link>
+              <div className="overflow-hidden rounded-md border-2 border-cp-ink shadow-[8px_8px_0_0_var(--color-cp-ink)]">
+                <CatIllustration
+                  variant="canari"
+                  pose="sitting"
+                  ariaLabel="Chat assis, pensionnaire de la maison"
+                  className="aspect-square w-full"
+                />
+              </div>
+            </div>
           </div>
         </div>
       </section>
-
-      {/* Bande horizontale d'encre — séparation forte avant le contenu */}
-      <RuleDivider weight="heavy" className="mx-auto w-full max-w-6xl px-6 sm:px-10" />
 
       {/* ============================================================
           01 — CONDITIONS D'ADMISSION
@@ -153,18 +164,19 @@ export default function HomePage() {
       <section
         id="admission"
         aria-labelledby="admission-title"
-        className="scroll-mt-24"
+        className="scroll-mt-24 border-t border-cp-ink"
       >
-        <div className="mx-auto w-full max-w-6xl px-6 py-24 sm:px-10 sm:py-32">
+        <div className="mx-auto w-full max-w-6xl px-6 py-20 sm:px-10 sm:py-28">
           <SectionHeading
             number="01"
             title="Conditions d'admission"
             kicker="Quatre exigences. Pas une de plus."
+            tone="cobalt"
           />
-          <div className="mt-16">
+          <div className="mt-12">
             <AdmissionCriteria />
           </div>
-          <p className="mt-10 max-w-2xl font-body text-base leading-relaxed text-cp-ink-soft">
+          <p className="mt-10 max-w-2xl font-body text-base leading-relaxed text-cp-ink">
             Une exigence manquante n&apos;est pas un refus automatique :
             écrivez-nous, nous regardons au cas par cas. Les chats qui ne
             répondent à aucun de ces critères sont en revanche redirigés vers
@@ -173,23 +185,22 @@ export default function HomePage() {
         </div>
       </section>
 
-      <RuleDivider weight="heavy" className="mx-auto w-full max-w-6xl px-6 sm:px-10" />
-
       {/* ============================================================
           02 — TARIF DES SÉJOURS
           ============================================================ */}
       <section
         id="tarif"
         aria-labelledby="tarif-title"
-        className="scroll-mt-24 bg-cp-paper-deep cp-grain"
+        className="scroll-mt-24 border-t border-cp-ink bg-cp-paper-deep"
       >
-        <div className="mx-auto w-full max-w-6xl px-6 py-24 sm:px-10 sm:py-32">
+        <div className="mx-auto w-full max-w-6xl px-6 py-20 sm:px-10 sm:py-28">
           <SectionHeading
             number="02"
             title="Tarif des séjours"
             kicker="Une formule par chat, une formule par foyer."
+            tone="paprika"
           />
-          <div className="mt-16 grid gap-6 lg:grid-cols-2">
+          <div className="mt-12 grid gap-6 lg:grid-cols-2">
             <PriceCard
               reference="A"
               title="Un chat"
@@ -216,18 +227,16 @@ export default function HomePage() {
           </div>
           <RuledBox className="mt-10 max-w-3xl">
             <p className="font-body text-base leading-relaxed text-cp-ink">
-              <span className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.22em] text-cp-sanguine">
-                § acompte
-              </span>{" "}
-              — 30 % à la réservation par virement, solde au départ.
-              Annulation gratuite jusqu&apos;à sept jours avant l&apos;arrivée ;
-              au-delà, l&apos;acompte reste acquis à la maison.
+              <span className="font-mono text-xs font-bold uppercase tracking-[0.18em] text-cp-paprika">
+                Acompte —{" "}
+              </span>
+              30 % à la réservation par virement, solde au départ. Annulation
+              gratuite jusqu&apos;à sept jours avant l&apos;arrivée ; au-delà,
+              l&apos;acompte reste acquis à la maison.
             </p>
           </RuledBox>
         </div>
       </section>
-
-      <RuleDivider weight="heavy" className="mx-auto w-full max-w-6xl px-6 sm:px-10" />
 
       {/* ============================================================
           03 — DÉROULEMENT
@@ -235,37 +244,55 @@ export default function HomePage() {
       <section
         id="deroulement"
         aria-labelledby="deroulement-title"
-        className="scroll-mt-24"
+        className="scroll-mt-24 border-t border-cp-ink"
       >
-        <div className="mx-auto w-full max-w-6xl px-6 py-24 sm:px-10 sm:py-32">
+        <div className="mx-auto w-full max-w-6xl px-6 py-20 sm:px-10 sm:py-28">
           <SectionHeading
             number="03"
             title="Déroulement"
             kicker="Quatre étapes — un mois en avance, de préférence."
+            tone="feuille"
           />
-          <ol className="mt-16 border-t border-cp-ink">
-            {STEPS.map((s, i) => (
-              <li
-                key={s.number}
-                className="cp-reveal grid grid-cols-[auto_1fr] items-baseline gap-x-6 gap-y-2 border-b border-cp-ink py-10 sm:grid-cols-[5rem_1fr_2fr] sm:gap-x-10 sm:py-14"
-                style={{ "--cp-delay": `${i * 80}ms` } as React.CSSProperties}
-              >
-                <span className="font-display text-6xl font-bold leading-none tracking-tight text-cp-ink sm:text-7xl">
-                  {s.number}
-                </span>
-                <h3 className="col-span-1 font-display text-2xl font-medium leading-tight text-cp-ink sm:text-3xl">
-                  {s.title}
-                </h3>
-                <p className="col-span-2 max-w-xl font-body text-base leading-relaxed text-cp-ink-soft sm:col-span-1">
-                  {s.gloss}
-                </p>
-              </li>
-            ))}
-          </ol>
+
+          <div className="mt-14 grid gap-10 lg:grid-cols-[7fr_5fr] lg:items-center">
+            <ol className="border-t border-cp-ink">
+              {STEPS.map((s, i) => (
+                <li
+                  key={s.number}
+                  className="cp-reveal grid grid-cols-[auto_1fr] items-baseline gap-x-6 gap-y-2 border-b border-cp-ink py-8 sm:gap-x-10"
+                  style={{ "--cp-delay": `${i * 80}ms` } as React.CSSProperties}
+                >
+                  <span className="font-display text-5xl font-semibold leading-none tracking-tight text-cp-feuille sm:text-6xl">
+                    {s.number}
+                  </span>
+                  <div className="space-y-2">
+                    <h3 className="font-display text-2xl font-semibold leading-tight text-cp-ink sm:text-3xl">
+                      {s.title}
+                    </h3>
+                    <p className="font-body text-base leading-relaxed text-cp-ink-soft">
+                      {s.gloss}
+                    </p>
+                  </div>
+                </li>
+              ))}
+            </ol>
+
+            <div
+              className="cp-reveal hidden lg:block"
+              style={{ "--cp-delay": "320ms" } as React.CSSProperties}
+            >
+              <div className="overflow-hidden rounded-md border-2 border-cp-ink shadow-[8px_8px_0_0_var(--color-cp-ink)]">
+                <CatIllustration
+                  variant="feuille"
+                  pose="watching"
+                  ariaLabel="Chat observant"
+                  className="aspect-square w-full"
+                />
+              </div>
+            </div>
+          </div>
         </div>
       </section>
-
-      <RuleDivider weight="heavy" className="mx-auto w-full max-w-6xl px-6 sm:px-10" />
 
       {/* ============================================================
           04 — QUESTIONS D'HONNEUR
@@ -273,52 +300,65 @@ export default function HomePage() {
       <section
         id="questions"
         aria-labelledby="questions-title"
-        className="scroll-mt-24"
+        className="scroll-mt-24 border-t border-cp-ink bg-cp-paper-deep"
       >
-        <div className="mx-auto w-full max-w-6xl px-6 py-24 sm:px-10 sm:py-32">
+        <div className="mx-auto w-full max-w-6xl px-6 py-20 sm:px-10 sm:py-28">
           <SectionHeading
             number="04"
             title="Questions d'honneur"
             kicker="Les réponses aux interrogations légitimes."
+            tone="canari"
           />
-          <div className="mt-16">
+          <div className="mt-12">
             <FaqAccordion items={FAQ} />
           </div>
         </div>
       </section>
 
-      <RuleDivider weight="heavy" className="mx-auto w-full max-w-6xl px-6 sm:px-10" />
-
       {/* ============================================================
           CTA finale
           ============================================================ */}
-      <section className="bg-cp-ink text-cp-paper">
-        <div className="mx-auto w-full max-w-6xl px-6 py-24 sm:px-10 sm:py-32">
-          <p className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.22em] text-cp-paper/70">
-            § rendez-vous
-          </p>
-          <p className="mt-6 max-w-4xl font-display text-4xl font-medium leading-[1.05] tracking-tight text-cp-paper sm:text-5xl lg:text-6xl">
-            Confiez-nous votre chat pour quelques nuits — il ne sera pas seul,
-            et vous saurez où il dort.
-          </p>
-          <div className="mt-12 flex flex-wrap items-center gap-5">
-            <Link
-              href="/signup"
-              className={buttonVariants({
-                variant: "secondary",
-                size: "lg",
-                className:
-                  "px-10 bg-cp-paper text-cp-ink border-cp-paper hover:bg-cp-sanguine hover:text-cp-paper hover:border-cp-sanguine",
-              })}
-            >
-              Réserver un séjour →
-            </Link>
-            <Link
-              href="/login"
-              className="font-mono text-xs font-bold uppercase tracking-[0.22em] text-cp-paper/70 underline-offset-[6px] decoration-[1.5px] hover:underline hover:text-cp-paper"
-            >
-              J&apos;ai déjà un compte
-            </Link>
+      <section className="border-t border-cp-ink bg-cp-cobalt text-cp-paper">
+        <div className="mx-auto w-full max-w-6xl px-6 py-20 sm:px-10 sm:py-28">
+          <div className="grid items-center gap-10 lg:grid-cols-[7fr_5fr] lg:gap-16">
+            <div>
+              <p className="font-mono text-xs font-bold uppercase tracking-[0.18em] text-cp-canari">
+                rendez-vous
+              </p>
+              <p className="mt-6 max-w-3xl font-display text-4xl font-medium leading-[1.05] tracking-tight text-cp-paper sm:text-5xl lg:text-6xl">
+                Confiez-nous votre chat pour quelques nuits — il ne sera pas
+                seul, et vous saurez où il dort.
+              </p>
+              <div className="mt-10 flex flex-wrap items-center gap-5">
+                <Link
+                  href="/signup"
+                  className={buttonVariants({
+                    size: "lg",
+                    className:
+                      "px-10 border-cp-canari bg-cp-canari text-cp-ink hover:bg-cp-canari-deep hover:border-cp-canari-deep",
+                  })}
+                >
+                  Réserver un séjour →
+                </Link>
+                <Link
+                  href="/login"
+                  className="font-body text-sm font-semibold text-cp-paper/80 underline underline-offset-[5px] decoration-[1.5px] decoration-cp-paper/40 hover:decoration-cp-canari hover:text-cp-canari"
+                >
+                  J&apos;ai déjà un compte
+                </Link>
+              </div>
+            </div>
+
+            <div className="mx-auto w-full max-w-md lg:mx-0">
+              <div className="overflow-hidden rounded-md border-2 border-cp-canari shadow-[8px_8px_0_0_var(--color-cp-canari)]">
+                <CatIllustration
+                  variant="paprika"
+                  pose="sleeping"
+                  ariaLabel="Chat endormi"
+                  className="aspect-square w-full"
+                />
+              </div>
+            </div>
           </div>
         </div>
       </section>

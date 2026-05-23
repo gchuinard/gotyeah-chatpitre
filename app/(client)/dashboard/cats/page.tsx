@@ -19,7 +19,7 @@ export default function CatsListPage() {
         aria-label="Fil d'Ariane"
         className="mb-10 flex items-center gap-2 font-mono text-[0.65rem] font-bold uppercase tracking-[0.18em] text-cp-ink-soft"
       >
-        <Link href="/dashboard" className="hover:text-cp-sanguine">
+        <Link href="/dashboard" className="hover:text-cp-paprika">
           Mon espace
         </Link>
         <span aria-hidden>/</span>
@@ -29,7 +29,7 @@ export default function CatsListPage() {
       <header className="flex flex-wrap items-end justify-between gap-8">
         <div className="space-y-4">
           <LibraryStamp boxed>
-            § La troupe — {cats.length} pensionnaire{cats.length > 1 ? "s" : ""}
+            La troupe — {cats.length} pensionnaire{cats.length > 1 ? "s" : ""}
           </LibraryStamp>
           <h1 className="font-display text-5xl font-medium leading-[0.95] tracking-[-0.01em] text-cp-ink sm:text-6xl">
             Mes pensionnaires
@@ -49,7 +49,7 @@ export default function CatsListPage() {
         </Link>
       </header>
 
-      <RuleDivider weight="heavy" className="my-14" />
+      <RuleDivider className="my-14" />
 
       {cats.length === 0 ? (
         <EmptyTroop />
@@ -59,7 +59,7 @@ export default function CatsListPage() {
             <li key={cat.id}>
               <Link
                 href={`/dashboard/cats/${cat.id}/edit`}
-                className="group block outline-none focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-cp-sanguine"
+                className="group block outline-none focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-cp-paprika"
               >
                 <CatCard
                   reference={cat.reference}
@@ -82,7 +82,7 @@ export default function CatsListPage() {
 function EmptyTroop() {
   return (
     <div className="flex flex-col items-start gap-6 border border-cp-ink/40 bg-cp-paper-deep/60 p-10 sm:p-14">
-      <LibraryStamp>§ aucune fiche déclarée</LibraryStamp>
+      <LibraryStamp>aucune fiche déclarée</LibraryStamp>
       <p className="font-display text-3xl italic leading-tight text-cp-ink">
         La troupe est encore vide.
       </p>

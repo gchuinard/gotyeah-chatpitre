@@ -1,20 +1,40 @@
 import { cn } from "@/lib/utils";
 
-/// Filet horizontal brutaliste — remplace l'ornement Belle Époque.
-/// Variante simple (filet continu) ou avec libellé centré en mono caps
-/// (le filet se coupe pour laisser place au texte). Trait sur l'encre,
-/// pas sur le doré : c'est la fiche, pas le programme.
+/// Filet de séparation : continu ou avec libellé central. Trois épaisseurs
+/// (regular, heavy) et trois tons (ink, cobalt, paprika). Plus chaud que
+/// la version brutalist (libellé en sentence case avec italique sur
+/// Newsreader plutôt que mono caps).
 export function RuleDivider({
   label,
   className,
   weight = "regular",
+  tone = "ink",
 }: {
   label?: string;
   className?: string;
   weight?: "regular" | "heavy";
+  tone?: "ink" | "cobalt" | "paprika" | "canari" | "feuille";
 }) {
-  const ruleClass =
-    weight === "heavy" ? "h-[2px] bg-cp-ink" : "h-px bg-cp-ink";
+  const ruleColor = {
+    ink: "bg-cp-ink",
+    cobalt: "bg-cp-cobalt",
+    paprika: "bg-cp-paprika",
+    canari: "bg-cp-canari-deep",
+    feuille: "bg-cp-feuille",
+  }[tone];
+
+  const labelColor = {
+    ink: "text-cp-ink-soft",
+    cobalt: "text-cp-cobalt",
+    paprika: "text-cp-paprika",
+    canari: "text-cp-canari-deep",
+    feuille: "text-cp-feuille",
+  }[tone];
+
+  const ruleClass = cn(
+    weight === "heavy" ? "h-[2px]" : "h-px",
+    ruleColor,
+  );
 
   return (
     <div
@@ -24,7 +44,12 @@ export function RuleDivider({
     >
       <span aria-hidden className={cn("flex-1", ruleClass)} />
       {label && (
-        <span className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.28em] text-cp-ink-soft">
+        <span
+          className={cn(
+            "font-display text-base italic leading-none",
+            labelColor,
+          )}
+        >
           {label}
         </span>
       )}

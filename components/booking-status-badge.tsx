@@ -1,9 +1,9 @@
 import { cn } from "@/lib/utils";
 
-/// Les 6 statuts de réservation, version brutalist editorial : un numéro
-/// d'ordre, un label en mono caps, et une variante visuelle qui suit la
-/// gravité de l'état. Sanguine n'est utilisée qu'aux moments forts
-/// (besoin du client, refus) ; le reste joue sur le contraste encre/papier.
+/// Les 6 statuts de réservation — version mid-century illustré. Chaque
+/// statut a sa propre couleur jewel-tone qui dialogue avec le sens :
+/// cobalt pour l'attente sereine, paprika pour l'action requise, feuille
+/// pour la confirmation, ink pour les refus, mute pour les passés.
 export type BookingStatus =
   | "PENDING"
   | "QUESTION_ASKED"
@@ -19,41 +19,41 @@ type Config = {
 };
 
 const STATUS_CONFIG: Record<BookingStatus, Config> = {
-  // En attente — fiche déposée, en cours de lecture.
+  // En attente — la fiche est lue, on patiente. Cobalt outline.
   PENDING: {
     index: "01",
     label: "En attente",
-    classes: "border-cp-ink text-cp-ink bg-cp-paper",
+    classes: "border-cp-cobalt text-cp-cobalt bg-cp-paper",
   },
-  // Question posée — la maison attend une réponse du client (sanguine outline).
+  // Question posée — paprika plein : action requise du client.
   QUESTION_ASKED: {
     index: "02",
     label: "Question posée",
-    classes: "border-cp-sanguine text-cp-sanguine bg-cp-paper",
+    classes: "border-cp-paprika bg-cp-paprika text-cp-paper",
   },
-  // Acceptée — séjour confirmé, encre pleine (engagement institutionnel).
+  // Acceptée — feuille plein : le séjour est confirmé, la joie est là.
   ACCEPTED: {
     index: "03",
     label: "Acceptée",
-    classes: "border-cp-ink bg-cp-ink text-cp-paper",
+    classes: "border-cp-feuille bg-cp-feuille text-cp-paper",
   },
-  // Refusée — sanguine pleine, accent du refus.
+  // Refusée — ink plein : le « non » est net, sobre.
   REJECTED: {
     index: "04",
     label: "Refusée",
-    classes: "border-cp-sanguine bg-cp-sanguine text-cp-paper",
+    classes: "border-cp-ink bg-cp-ink text-cp-paper",
   },
-  // Annulée — état neutre estompé.
+  // Annulée — état neutre, mute outline.
   CANCELLED: {
     index: "05",
     label: "Annulée",
     classes: "border-cp-mute text-cp-mute bg-cp-paper",
   },
-  // Terminée — séjour passé, encre estompée.
+  // Terminée — passé serein, cobalt outline.
   COMPLETED: {
     index: "06",
     label: "Terminée",
-    classes: "border-cp-ink-soft text-cp-ink-soft bg-cp-paper",
+    classes: "border-cp-cobalt text-cp-cobalt bg-cp-paper",
   },
 };
 
@@ -68,7 +68,7 @@ export function BookingStatusBadge({
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-2 border px-2.5 py-1 font-mono text-[0.65rem] font-bold uppercase tracking-[0.18em]",
+        "inline-flex items-center gap-2 rounded-sm border px-2.5 py-1 font-mono text-[0.65rem] font-bold uppercase tracking-[0.16em]",
         classes,
         className,
       )}

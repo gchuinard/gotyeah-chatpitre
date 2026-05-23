@@ -47,7 +47,7 @@ export default function AdminBookingsListPage() {
         aria-label="Fil d'Ariane"
         className="mb-10 flex items-center gap-2 font-mono text-[0.65rem] font-bold uppercase tracking-[0.18em] text-cp-ink-soft"
       >
-        <Link href="/admin" className="hover:text-cp-sanguine">
+        <Link href="/admin" className="hover:text-cp-paprika">
           Administration
         </Link>
         <span aria-hidden>/</span>
@@ -56,7 +56,7 @@ export default function AdminBookingsListPage() {
 
       <header className="space-y-4">
         <LibraryStamp boxed>
-          § Tous les séjours — {BOOKINGS.length} entrée{BOOKINGS.length > 1 ? "s" : ""}
+          Tous les séjours — {BOOKINGS.length} entrée{BOOKINGS.length > 1 ? "s" : ""}
         </LibraryStamp>
         <h1 className="font-display text-5xl font-medium leading-[0.95] tracking-[-0.01em] text-cp-ink sm:text-6xl">
           Séjours
@@ -66,7 +66,7 @@ export default function AdminBookingsListPage() {
         </p>
       </header>
 
-      <RuleDivider weight="heavy" className="my-12" />
+      <RuleDivider className="my-12" />
 
       {/* Chips de comptage par statut */}
       <section
@@ -112,7 +112,7 @@ export default function AdminBookingsListPage() {
                   <Td>
                     <Link
                       href={`/admin/bookings/${b.reference}`}
-                      className="font-mono text-sm font-bold uppercase tracking-[0.16em] text-cp-sanguine hover:text-cp-ink"
+                      className="font-mono text-sm font-bold uppercase tracking-[0.16em] text-cp-paprika hover:text-cp-ink"
                     >
                       N° {b.reference}
                     </Link>
@@ -153,7 +153,7 @@ export default function AdminBookingsListPage() {
                   <Td>
                     <Link
                       href={`/admin/bookings/${b.reference}`}
-                      className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.22em] text-cp-ink-soft hover:text-cp-sanguine"
+                      className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.22em] text-cp-ink-soft hover:text-cp-paprika"
                     >
                       Ouvrir →
                     </Link>

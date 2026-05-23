@@ -3,10 +3,10 @@ import type { ReactNode } from "react";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 
-/// Regroupement label + contrôle + indication / erreur. Le contrôle est
-/// fourni par le caller (Input, Select, Textarea…). Erreur en sanguine
-/// avec marqueur dièse, indication en italique encre douce, astérisque
-/// sanguine pour les champs requis.
+/// Regroupement label + contrôle + hint/error. Erreur en paprika avec
+/// marqueur, indication en italique encre douce, astérisque paprika pour
+/// les champs requis. Cohérent avec la DA mid-century — pas de mono caps
+/// sur les libellés, juste Manrope semibold lisible.
 export function Field({
   label,
   htmlFor,
@@ -29,14 +29,14 @@ export function Field({
       <Label htmlFor={htmlFor}>
         <span>{label}</span>
         {required && (
-          <span aria-hidden className="font-display text-cp-sanguine">
+          <span aria-hidden className="font-display text-cp-paprika">
             *
           </span>
         )}
       </Label>
       {children}
       {error ? (
-        <p className="flex items-baseline gap-2 font-body text-xs font-medium text-cp-sanguine">
+        <p className="flex items-baseline gap-2 font-body text-xs font-medium text-cp-paprika">
           <span aria-hidden className="font-mono font-bold">
             ↳
           </span>

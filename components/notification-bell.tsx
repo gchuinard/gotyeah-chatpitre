@@ -26,13 +26,13 @@ export function NotificationBell({
     <Popover.Root>
       <Popover.Trigger
         aria-label={`Notifications${unreadCount ? ` (${unreadCount} non lue${unreadCount > 1 ? "s" : ""})` : ""}`}
-        className="group relative grid size-10 place-items-center border border-cp-ink/40 bg-cp-paper text-cp-ink outline-none transition-colors hover:border-cp-ink hover:bg-cp-ink hover:text-cp-paper focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cp-sanguine"
+        className="group relative grid size-10 place-items-center rounded-md border border-cp-ink/40 bg-cp-paper text-cp-ink outline-none transition-colors hover:border-cp-cobalt hover:bg-cp-cobalt hover:text-cp-paper focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cp-paprika"
       >
         <Bell className="size-4" strokeWidth={1.6} aria-hidden />
         {unreadCount > 0 && (
           <span
             aria-hidden
-            className="absolute -top-1.5 -right-1.5 grid size-5 place-items-center border border-cp-paper bg-cp-sanguine font-mono text-[0.55rem] font-bold leading-none text-cp-paper"
+            className="absolute -top-1.5 -right-1.5 grid size-5 place-items-center rounded-full border border-cp-paper bg-cp-paprika font-mono text-[0.6rem] font-bold leading-none text-cp-paper"
           >
             {unreadCount}
           </span>
@@ -40,10 +40,10 @@ export function NotificationBell({
       </Popover.Trigger>
       <Popover.Portal>
         <Popover.Positioner sideOffset={8} align="end">
-          <Popover.Popup className="origin-top w-[min(22rem,calc(100vw-1.5rem))] border border-cp-ink bg-cp-paper text-cp-ink shadow-[6px_6px_0_0_var(--color-cp-ink)] outline-none">
+          <Popover.Popup className="origin-top w-[min(22rem,calc(100vw-1.5rem))] rounded-md border border-cp-ink bg-cp-paper text-cp-ink shadow-[6px_6px_0_0_var(--color-cp-cobalt)] outline-none">
             <header className="flex items-center justify-between border-b border-cp-ink px-4 py-3">
-              <p className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.22em] text-cp-sanguine">
-                § notifications
+              <p className="font-mono text-[0.7rem] font-bold uppercase tracking-[0.16em] text-cp-paprika">
+                Notifications
               </p>
               <p className="font-mono text-[0.6rem] font-bold uppercase tracking-[0.18em] text-cp-ink-soft">
                 {unreadCount > 0 ? `${unreadCount} non lue${unreadCount > 1 ? "s" : ""}` : "Tout lu"}
@@ -67,7 +67,7 @@ export function NotificationBell({
             <footer className="border-t border-cp-ink px-4 py-3">
               <button
                 type="button"
-                className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.22em] text-cp-ink-soft transition-colors hover:text-cp-sanguine"
+                className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.22em] text-cp-ink-soft transition-colors hover:text-cp-paprika"
               >
                 Tout marquer comme lu →
               </button>
@@ -94,7 +94,7 @@ function NotificationRow({ item }: { item: NotificationItem }) {
         {item.unread && (
           <span
             aria-hidden
-            className="mt-1 size-2 shrink-0 rounded-full bg-cp-sanguine"
+            className="mt-1 size-2 shrink-0 rounded-full bg-cp-paprika"
           />
         )}
       </div>
@@ -108,7 +108,7 @@ function NotificationRow({ item }: { item: NotificationItem }) {
     return (
       <a
         href={item.href}
-        className="block focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-cp-sanguine"
+        className="block focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-cp-paprika"
       >
         {content}
       </a>

@@ -23,11 +23,11 @@ export default function NewBookingPage() {
         aria-label="Fil d'Ariane"
         className="mb-10 flex items-center gap-2 font-mono text-[0.65rem] font-bold uppercase tracking-[0.18em] text-cp-ink-soft"
       >
-        <Link href="/dashboard" className="hover:text-cp-sanguine">
+        <Link href="/dashboard" className="hover:text-cp-paprika">
           Mon espace
         </Link>
         <span aria-hidden>/</span>
-        <Link href="/dashboard/bookings" className="hover:text-cp-sanguine">
+        <Link href="/dashboard/bookings" className="hover:text-cp-paprika">
           Séjours
         </Link>
         <span aria-hidden>/</span>
@@ -35,7 +35,7 @@ export default function NewBookingPage() {
       </nav>
 
       <header className="space-y-5">
-        <LibraryStamp boxed>§ Nouvelle demande de séjour</LibraryStamp>
+        <LibraryStamp boxed>Nouvelle demande de séjour</LibraryStamp>
         <h1 className="font-display text-5xl font-medium leading-[0.95] tracking-[-0.01em] text-cp-ink sm:text-6xl">
           Réserver un séjour
         </h1>
@@ -45,7 +45,7 @@ export default function NewBookingPage() {
         </p>
       </header>
 
-      <RuleDivider weight="heavy" className="my-12" />
+      <RuleDivider className="my-12" />
 
       <form action="/dashboard/bookings" method="get" className="space-y-14">
         {/* 01 — Dates */}
@@ -122,7 +122,7 @@ export default function NewBookingPage() {
           </Field>
         </FormSection>
 
-        <RuleDivider weight="heavy" />
+        <RuleDivider />
 
         <footer className="flex flex-wrap items-center justify-between gap-4">
           <p className="font-body text-sm text-cp-ink-soft">
@@ -190,7 +190,7 @@ function CatPickRow({
         className={cn(
           "relative flex cursor-pointer items-start gap-4 bg-cp-paper p-5 transition-colors hover:bg-cp-paper-deep",
           "has-[input:checked]:bg-cp-paper-deep",
-          "has-[input:focus-visible]:outline has-[input:focus-visible]:outline-2 has-[input:focus-visible]:-outline-offset-2 has-[input:focus-visible]:outline-cp-sanguine",
+          "has-[input:focus-visible]:outline has-[input:focus-visible]:outline-2 has-[input:focus-visible]:-outline-offset-2 has-[input:focus-visible]:outline-cp-paprika",
         )}
       >
         <input

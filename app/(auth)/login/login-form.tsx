@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 
 /// Formulaire de connexion brutalist editorial : poste vers /api/auth/login
 /// puis redirige. L'authentification réelle reste intacte (juste un
-/// restylage). Erreur API affichée en sanguine avec marqueur § §.
+/// restylage). Erreur API affichée en sanguine avec marqueur §.
 
 export function LoginForm({ next }: { next: string }) {
   const router = useRouter();
@@ -46,7 +46,7 @@ export function LoginForm({ next }: { next: string }) {
   return (
     <div className="space-y-10">
       <header className="space-y-4">
-        <LibraryStamp>§ 01 — Accès à la fiche personnelle</LibraryStamp>
+        <LibraryStamp tone="cobalt">Accès à votre espace</LibraryStamp>
         <h1 className="font-display text-5xl font-medium leading-[0.95] tracking-[-0.01em] text-cp-ink sm:text-6xl">
           Se connecter
         </h1>
@@ -89,7 +89,7 @@ export function LoginForm({ next }: { next: string }) {
         {error && (
           <p
             role="alert"
-            className="flex items-baseline gap-2 border border-cp-sanguine bg-cp-sanguine/8 px-4 py-3 font-body text-sm text-cp-sanguine"
+            className="flex items-baseline gap-2 border border-cp-paprika bg-cp-paprika/8 px-4 py-3 font-body text-sm text-cp-paprika"
           >
             <span aria-hidden className="font-mono font-bold">
               §§
@@ -108,7 +108,7 @@ export function LoginForm({ next }: { next: string }) {
           Pas encore inscrit ?{" "}
           <Link
             href="/signup"
-            className="font-medium text-cp-ink underline underline-offset-4 decoration-[1.5px] decoration-cp-ink/40 hover:decoration-cp-sanguine hover:text-cp-sanguine"
+            className="font-medium text-cp-ink underline underline-offset-4 decoration-[1.5px] decoration-cp-ink/40 hover:decoration-cp-paprika hover:text-cp-paprika"
           >
             Créer un compte →
           </Link>

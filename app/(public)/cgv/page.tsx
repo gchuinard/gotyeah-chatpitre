@@ -31,7 +31,7 @@ export default function CGVPage() {
         </p>
       </header>
 
-      <RuleDivider weight="heavy" className="my-16" />
+      <RuleDivider className="my-16" />
 
       <div className="space-y-14">
         <Article number="01" title="Objet">
@@ -130,10 +130,10 @@ export default function CGVPage() {
         </Article>
       </div>
 
-      <RuleDivider weight="heavy" className="mt-16" />
+      <RuleDivider className="mt-16" />
 
       <p className="mt-10 font-mono text-[0.65rem] font-bold uppercase tracking-[0.22em] text-cp-ink-soft">
-        § fin du document — édition à valider par le propriétaire
+        fin du document — édition à valider par le propriétaire
       </p>
     </article>
   );
@@ -151,8 +151,8 @@ function Article({
   return (
     <section className="space-y-5">
       <header className="flex items-baseline gap-4">
-        <span className="font-mono text-sm font-bold uppercase tracking-[0.16em] text-cp-sanguine">
-          § {number}
+        <span className="font-mono text-sm font-bold uppercase tracking-[0.16em] text-cp-paprika">
+          {number}
         </span>
         <h2 className="font-display text-2xl font-medium leading-tight tracking-tight text-cp-ink sm:text-3xl">
           {title}

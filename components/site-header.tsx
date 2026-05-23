@@ -1,29 +1,22 @@
 import Link from "next/link";
 
 import { buttonVariants } from "@/components/ui/button";
-import { LibraryStamp } from "@/components/library-stamp";
 import { Wordmark } from "@/components/wordmark";
 
-/// En-tête partagée des pages publiques. Composition fiche bibliothèque :
-/// wordmark à gauche, méta-mention catalogue centrale, nav + CTA à droite.
-/// Sticky avec filet d'encre en bas pour rester lisible sur le grain.
+/// En-tête partagée des pages publiques. Wordmark Newsreader italique à
+/// gauche, navigation Manrope au centre, bouton « Réserver » paprika à
+/// droite. Sticky avec filet d'encre fin.
 export function SiteHeader() {
   return (
-    <header className="sticky top-0 z-40 border-b border-cp-ink bg-cp-paper/95 backdrop-blur-sm">
+    <header className="sticky top-0 z-40 border-b border-cp-ink/30 bg-cp-paper/95 backdrop-blur-sm">
       <div className="mx-auto flex w-full max-w-6xl items-center gap-6 px-6 py-4 sm:gap-10 sm:px-10">
         <Link
           href="/"
           aria-label="Le Chat-Pitre — accueil"
-          className="shrink-0 transition-colors hover:text-cp-sanguine focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-cp-sanguine"
+          className="shrink-0 transition-colors hover:text-cp-paprika focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-cp-paprika"
         >
-          <Wordmark className="text-lg sm:text-xl" />
+          <Wordmark className="text-xl sm:text-2xl" />
         </Link>
-
-        <span aria-hidden className="hidden h-7 w-px bg-cp-ink/40 sm:block" />
-
-        <LibraryStamp className="hidden md:inline-flex">
-          Maison de villégiature — Est. 2024
-        </LibraryStamp>
 
         <nav
           aria-label="Sections du site"
@@ -33,17 +26,17 @@ export function SiteHeader() {
             <Link
               key={l.href}
               href={l.href}
-              className="font-mono text-[0.7rem] font-bold uppercase tracking-[0.18em] text-cp-ink-soft transition-colors hover:text-cp-sanguine"
+              className="font-body text-sm font-semibold text-cp-ink-soft transition-colors hover:text-cp-paprika"
             >
               {l.label}
             </Link>
           ))}
         </nav>
 
-        <div className="ml-auto flex items-center gap-3 lg:ml-0">
+        <div className="ml-auto flex items-center gap-4 lg:ml-0">
           <Link
             href="/login"
-            className="hidden font-mono text-[0.7rem] font-bold uppercase tracking-[0.18em] text-cp-ink-soft transition-colors hover:text-cp-sanguine sm:inline-block"
+            className="hidden font-body text-sm font-semibold text-cp-ink-soft transition-colors hover:text-cp-paprika sm:inline-block"
           >
             Se connecter
           </Link>

@@ -62,7 +62,7 @@ export default function SignupPage() {
   return (
     <div className="space-y-10">
       <header className="space-y-4">
-        <LibraryStamp>§ 02 — Ouverture d&apos;une fiche</LibraryStamp>
+        <LibraryStamp tone="paprika">Ouverture d&apos;une fiche</LibraryStamp>
         <h1 className="font-display text-5xl font-medium leading-[0.95] tracking-[-0.01em] text-cp-ink sm:text-6xl">
           Créer un compte
         </h1>
@@ -155,7 +155,7 @@ export default function SignupPage() {
         {error && (
           <p
             role="alert"
-            className="flex items-baseline gap-2 border border-cp-sanguine bg-cp-sanguine/8 px-4 py-3 font-body text-sm text-cp-sanguine"
+            className="flex items-baseline gap-2 border border-cp-paprika bg-cp-paprika/8 px-4 py-3 font-body text-sm text-cp-paprika"
           >
             <span aria-hidden className="font-mono font-bold">
               §§
@@ -174,7 +174,7 @@ export default function SignupPage() {
           Vous avez déjà un compte ?{" "}
           <Link
             href="/login"
-            className="font-medium text-cp-ink underline underline-offset-4 decoration-[1.5px] decoration-cp-ink/40 hover:decoration-cp-sanguine hover:text-cp-sanguine"
+            className="font-medium text-cp-ink underline underline-offset-4 decoration-[1.5px] decoration-cp-ink/40 hover:decoration-cp-paprika hover:text-cp-paprika"
           >
             Se connecter →
           </Link>
