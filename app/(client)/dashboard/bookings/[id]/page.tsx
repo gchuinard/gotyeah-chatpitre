@@ -2,18 +2,23 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { BookingStatusBadge } from "@/components/booking-status-badge";
-import { LibraryStamp } from "@/components/library-stamp";
+import { CancelBookingButton } from "@/components/cancel-booking-button";
 import { ConversationView } from "@/components/conversation-view";
-import { MaquetteActionButton } from "@/components/maquette-form";
-import { StayJournal } from "@/components/stay-journal";
+import { LibraryStamp } from "@/components/library-stamp";
 import { RuleDivider } from "@/components/rule-divider";
 import { RuledBox } from "@/components/ruled-box";
 import { SectionHeading } from "@/components/section-heading";
-import { buttonVariants } from "@/components/ui/button";
-import { getBooking, getCat } from "@/lib/fixtures";
+import { StayJournal } from "@/components/stay-journal";
+import { getCurrentUser, isAdmin } from "@/lib/auth";
+import {
+  displayRef,
+  formatDate,
+  getBookingFor,
+  nightsBetween,
+} from "@/lib/repository";
 
-/// Détail d'un séjour : récapitulatif tarif/dates/pensionnaires, fil de
-/// discussion, formulaire de nouveau message (maquette, action GET).
+/// Détail d'un séjour côté client — lecture Prisma avec auth check, fil
+/// de discussion qui POST réellement, annulation qui PATCH le statut.
 
 export default async function BookingDetailPage({
   params,
@@ -21,12 +26,28 @@ export default async function BookingDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const booking = getBooking(id);
+  const user = await getCurrentUser();
+  if (!user) return null;
+
+  const booking = await getBookingFor(id, user.id, isAdmin(user));
   if (!booking) notFound();
 
-  const cats = booking.catIds
-    .map((catId) => getCat(catId))
-    .filter((c): c is NonNullable<typeof c> => Boolean(c));
+  const cats = booking.cats.map((link) => link.cat);
+  const nights = nightsBetween(booking.startDate, booking.endDate);
+  const ref = displayRef(booking.id);
+
+  // Mappe les messages Prisma vers le format attendu par ConversationView.
+  const messages = booking.messages.map((m) => ({
+    id: m.id,
+    body: m.content,
+    fromAdmin: m.isFromAdmin,
+    authorLabel: m.isFromAdmin
+      ? "La maison"
+      : m.author.firstName === user.firstName
+        ? "Vous"
+        : `${m.author.firstName}`,
+    sentAt: m.createdAt.toISOString(),
+  }));
 
   return (
     <article className="mx-auto w-full max-w-5xl px-6 py-12 sm:px-10 sm:py-16">
@@ -43,36 +64,40 @@ export default async function BookingDetailPage({
           Séjours
         </Link>
         <span aria-hidden>/</span>
-        <span className="text-cp-ink">N° {booking.reference}</span>
+        <span className="text-cp-ink">N° {ref}</span>
       </nav>
 
       {/* En-tête éditoriale */}
       <header className="space-y-6">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <LibraryStamp boxed>
-            Séjour N° {booking.reference} — {booking.nights} nuit{booking.nights > 1 ? "s" : ""}
+            Séjour N° {ref} — {nights} nuit{nights > 1 ? "s" : ""}
           </LibraryStamp>
           <BookingStatusBadge status={booking.status} />
         </div>
 
         <h1 className="font-display text-5xl font-medium leading-[0.95] tracking-[-0.01em] text-cp-ink sm:text-6xl">
-          Du {booking.startDate}
+          Du {formatDate(booking.startDate)}
           <br />
-          <span className="italic font-normal">au {booking.endDate}.</span>
+          <span className="italic font-normal">au {formatDate(booking.endDate)}.</span>
         </h1>
 
         <p className="max-w-2xl font-display text-xl italic leading-snug text-cp-ink-soft">
-          {cats.map((c) => c.name).join(" · ")} —{" "}
-          {booking.nights} nuit{booking.nights > 1 ? "s" : ""} pour{" "}
-          {cats.length} pensionnaire{cats.length > 1 ? "s" : ""}.
+          {cats.map((c) => c.name).join(" · ")} — {nights} nuit
+          {nights > 1 ? "s" : ""} pour {cats.length} pensionnaire
+          {cats.length > 1 ? "s" : ""}.
         </p>
       </header>
 
       <RuleDivider className="my-12" />
 
-      {/* Récap chiffres + cats + note */}
-      <section className="grid gap-px overflow-hidden border border-cp-ink bg-cp-ink lg:grid-cols-3">
-        <DetailTile label="Tarif total" value={`${booking.total}€`} gloss={`${booking.pricePerNight}€ × ${booking.nights} nuits`} />
+      {/* Récap chiffres */}
+      <section className="grid gap-4 lg:grid-cols-3">
+        <DetailTile
+          label="Tarif total"
+          value={`${Number(booking.totalAmount).toLocaleString("fr-FR")}€`}
+          gloss={`${Number(booking.pricePerFirstCat)}€ + ${Number(booking.pricePerExtraCat)}€ × ${cats.length - 1} · ${nights} nuits`}
+        />
         <DetailTile
           label="Pensionnaires"
           value={cats.length.toString().padStart(2, "0")}
@@ -80,23 +105,23 @@ export default async function BookingDetailPage({
         />
         <DetailTile
           label="Acompte"
-          value={`${Math.round(booking.total * 0.3)}€`}
-          gloss="30 % à la réservation"
+          value={`${Number(booking.depositAmount).toLocaleString("fr-FR")}€`}
+          gloss={`${booking.depositPercentage} % à la réservation`}
         />
       </section>
 
-      {booking.notes && (
+      {booking.clientNotes && (
         <RuledBox variant="deep" className="mt-10">
           <p className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.22em] text-cp-paprika">
-            note de séjour
+            Note de séjour
           </p>
           <p className="mt-3 font-body text-base leading-relaxed text-cp-ink">
-            {booking.notes}
+            {booking.clientNotes}
           </p>
         </RuledBox>
       )}
 
-      {/* Facture PDF — toujours téléchargeable côté client */}
+      {/* Facture PDF — toujours téléchargeable */}
       <aside className="mt-10 flex flex-wrap items-center justify-between gap-4 rounded-md border border-cp-cobalt bg-cp-cobalt p-5 text-cp-paper sm:p-6">
         <div>
           <p className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.18em] text-cp-canari">
@@ -107,7 +132,7 @@ export default async function BookingDetailPage({
           </p>
         </div>
         <a
-          href={`/api/invoices/${booking.reference}/pdf`}
+          href={`/api/invoices/${booking.id}/pdf`}
           target="_blank"
           rel="noopener"
           className="inline-flex items-center gap-2 rounded-md border border-cp-canari bg-cp-canari px-5 py-2.5 font-body text-sm font-semibold text-cp-ink transition-colors hover:bg-cp-canari-deep"
@@ -118,7 +143,7 @@ export default async function BookingDetailPage({
 
       <RuleDivider className="my-16" label="Carnet de séjour" tone="cobalt" />
 
-      {/* Carnet de séjour — photos + notes quotidiennes */}
+      {/* Carnet de séjour — entrées Prisma */}
       <section aria-labelledby="journal-title" className="space-y-8">
         <SectionHeading
           number="01"
@@ -132,17 +157,18 @@ export default async function BookingDetailPage({
 
       <RuleDivider className="my-16" label="Fil de discussion" tone="paprika" />
 
-      {/* Fil de discussion */}
+      {/* Fil de discussion — POST réel sur /api/bookings/[id]/messages */}
       <section aria-labelledby="thread-title" className="space-y-8">
         <SectionHeading
           number="02"
           title="Échanges avec la maison"
-          kicker={`${booking.messages.length} message${booking.messages.length > 1 ? "s" : ""} jusqu'ici.`}
+          kicker={`${messages.length} message${messages.length > 1 ? "s" : ""} jusqu'ici.`}
           tone="paprika"
         />
 
         <ConversationView
-          initialMessages={booking.messages}
+          bookingId={booking.id}
+          initialMessages={messages}
           voice="client"
         />
       </section>
@@ -159,15 +185,7 @@ export default async function BookingDetailPage({
         </Link>
 
         {["PENDING", "QUESTION_ASKED"].includes(booking.status) && (
-          <MaquetteActionButton
-            className={buttonVariants({
-              variant: "destructive",
-              size: "sm",
-            })}
-            successMessage="Demande d'annulation enregistrée — maquette."
-          >
-            Annuler la demande
-          </MaquetteActionButton>
+          <CancelBookingButton bookingId={booking.id} />
         )}
       </footer>
     </article>
@@ -184,7 +202,7 @@ function DetailTile({
   gloss: string;
 }) {
   return (
-    <div className="flex flex-col gap-1 bg-cp-paper p-6 sm:p-8">
+    <div className="flex flex-col gap-1 rounded-md border border-cp-ink bg-cp-paper p-6 sm:p-8">
       <p className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.22em] text-cp-paprika">
         {label}
       </p>
