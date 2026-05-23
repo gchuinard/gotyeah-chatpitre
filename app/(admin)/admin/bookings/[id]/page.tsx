@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 
 import { BookingStatusBadge } from "@/components/booking-status-badge";
 import { LibraryStamp } from "@/components/library-stamp";
+import { MaquetteActionButton, MaquetteForm } from "@/components/maquette-form";
 import { MessageThread } from "@/components/message-thread";
 import { StayJournal } from "@/components/stay-journal";
 import { RuleDivider } from "@/components/rule-divider";
@@ -180,21 +181,24 @@ export default async function AdminBookingDetailPage({
             Quelle suite donnez-vous ?
           </p>
           <div className="mt-6 flex flex-wrap items-center gap-3">
-            <form action="/admin/bookings" method="get">
-              <Button type="submit" size="default">
-                Accepter →
-              </Button>
-            </form>
-            <form action="/admin/bookings" method="get">
-              <Button type="submit" variant="secondary" size="default">
-                Poser une question
-              </Button>
-            </form>
-            <form action="/admin/bookings" method="get">
-              <Button type="submit" variant="destructive" size="default">
-                Refuser
-              </Button>
-            </form>
+            <MaquetteActionButton
+              className={buttonVariants({ size: "default" })}
+              successMessage="Séjour accepté — maquette."
+            >
+              Accepter →
+            </MaquetteActionButton>
+            <MaquetteActionButton
+              className={buttonVariants({ variant: "secondary", size: "default" })}
+              successMessage="Question posée au client — maquette."
+            >
+              Poser une question
+            </MaquetteActionButton>
+            <MaquetteActionButton
+              className={buttonVariants({ variant: "destructive", size: "default" })}
+              successMessage="Séjour refusé — maquette."
+            >
+              Refuser
+            </MaquetteActionButton>
           </div>
         </section>
       )}
@@ -227,10 +231,9 @@ export default async function AdminBookingDetailPage({
         <MessageThread messages={booking.messages} />
 
         {/* Formulaire admin */}
-        <form
-          action="/admin/bookings"
-          method="get"
-          className="space-y-4 border border-cp-ink bg-cp-ink p-6 text-cp-paper sm:p-8"
+        <MaquetteForm
+          className="space-y-4 rounded-md border border-cp-ink bg-cp-ink p-6 text-cp-paper sm:p-8"
+          successMessage="Réponse envoyée au client — maquette."
         >
           <label
             htmlFor="admin-reply"
@@ -255,7 +258,7 @@ export default async function AdminBookingDetailPage({
               Envoyer →
             </Button>
           </div>
-        </form>
+        </MaquetteForm>
       </section>
 
       <RuleDivider className="my-16" />
