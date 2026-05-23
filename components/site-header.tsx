@@ -1,11 +1,13 @@
 import Link from "next/link";
 
+import { MobileNav } from "@/components/mobile-nav";
 import { buttonVariants } from "@/components/ui/button";
 import { Wordmark } from "@/components/wordmark";
 
 /// En-tête partagée des pages publiques. Wordmark Newsreader italique à
-/// gauche, navigation Manrope au centre, bouton « Réserver » paprika à
-/// droite. Sticky avec filet d'encre fin.
+/// gauche, navigation Manrope au centre (sous lg : remplacée par un
+/// hamburger MobileNav qui ouvre un Dialog plein-écran), bouton
+/// « Réserver » paprika à droite. Sticky avec filet d'encre fin.
 export function SiteHeader() {
   return (
     <header className="sticky top-0 z-40 border-b border-cp-ink/30 bg-cp-paper/95 backdrop-blur-sm">
@@ -33,10 +35,10 @@ export function SiteHeader() {
           ))}
         </nav>
 
-        <div className="ml-auto flex items-center gap-4 lg:ml-0">
+        <div className="ml-auto flex items-center gap-3 lg:ml-0">
           <Link
             href="/login"
-            className="hidden font-body text-sm font-semibold text-cp-ink-soft transition-colors hover:text-cp-paprika sm:inline-block"
+            className="hidden font-body text-sm font-semibold text-cp-ink-soft transition-colors hover:text-cp-paprika sm:inline-block lg:inline-block"
           >
             Se connecter
           </Link>
@@ -44,11 +46,12 @@ export function SiteHeader() {
             href="/signup"
             className={buttonVariants({
               size: "sm",
-              className: "whitespace-nowrap",
+              className: "hidden whitespace-nowrap sm:inline-flex",
             })}
           >
             Réserver →
           </Link>
+          <MobileNav links={NAV_LINKS} />
         </div>
       </div>
     </header>
@@ -57,6 +60,7 @@ export function SiteHeader() {
 
 const NAV_LINKS: { href: string; label: string }[] = [
   { href: "/le-lieu", label: "Le lieu" },
+  { href: "/a-propos", label: "À propos" },
   { href: "/#admission", label: "Admission" },
   { href: "/#tarif", label: "Tarif" },
   { href: "/#deroulement", label: "Déroulement" },
