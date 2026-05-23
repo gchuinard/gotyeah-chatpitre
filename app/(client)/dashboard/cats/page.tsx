@@ -19,7 +19,7 @@ export default function CatsListPage() {
         aria-label="Fil d'Ariane"
         className="mb-10 flex items-center gap-2 font-mono text-[0.65rem] font-bold uppercase tracking-[0.18em] text-cp-ink-soft"
       >
-        <Link href="/dashboard" className="hover:text-cp-sanguine">
+        <Link href="/dashboard" className="hover:text-cp-paprika">
           Mon espace
         </Link>
         <span aria-hidden>/</span>
@@ -59,7 +59,7 @@ export default function CatsListPage() {
             <li key={cat.id}>
               <Link
                 href={`/dashboard/cats/${cat.id}/edit`}
-                className="group block outline-none focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-cp-sanguine"
+                className="group block outline-none focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-cp-paprika"
               >
                 <CatCard
                   reference={cat.reference}

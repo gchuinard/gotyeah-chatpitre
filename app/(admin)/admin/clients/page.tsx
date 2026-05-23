@@ -21,7 +21,7 @@ export default function AdminClientsListPage() {
         aria-label="Fil d'Ariane"
         className="mb-10 flex items-center gap-2 font-mono text-[0.65rem] font-bold uppercase tracking-[0.18em] text-cp-ink-soft"
       >
-        <Link href="/admin" className="hover:text-cp-sanguine">
+        <Link href="/admin" className="hover:text-cp-paprika">
           Administration
         </Link>
         <span aria-hidden>/</span>
@@ -84,7 +84,7 @@ export default function AdminClientsListPage() {
                 className="border-t border-cp-ink/20 transition-colors hover:bg-cp-paper-deep/40"
               >
                 <Td>
-                  <p className="font-mono text-sm font-bold uppercase tracking-[0.16em] text-cp-sanguine">
+                  <p className="font-mono text-sm font-bold uppercase tracking-[0.16em] text-cp-paprika">
                     {c.id.replace("u-", "").padStart(3, "0")}
                   </p>
                 </Td>
@@ -97,7 +97,7 @@ export default function AdminClientsListPage() {
                   <p className="font-body text-sm text-cp-ink">
                     <a
                       href={`mailto:${c.email}`}
-                      className="underline underline-offset-4 decoration-cp-ink/30 hover:decoration-cp-sanguine hover:text-cp-sanguine"
+                      className="underline underline-offset-4 decoration-cp-ink/30 hover:decoration-cp-paprika hover:text-cp-paprika"
                     >
                       {c.email}
                     </a>
@@ -179,7 +179,7 @@ function StatTile({
 }) {
   return (
     <div className="flex flex-col gap-1 bg-cp-paper p-6 sm:p-8">
-      <p className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.22em] text-cp-sanguine">
+      <p className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.22em] text-cp-paprika">
         {label}
       </p>
       <p className="font-display text-5xl font-bold leading-none tracking-tight text-cp-ink sm:text-6xl">

@@ -41,7 +41,7 @@ export function AdmissionCriteria({ className }: { className?: string }) {
           className="cp-reveal flex flex-col gap-3 bg-cp-paper p-8 sm:p-10"
           style={{ "--cp-delay": `${i * 80}ms` } as React.CSSProperties}
         >
-          <span className="font-mono text-xs font-bold uppercase tracking-[0.22em] text-cp-sanguine">
+          <span className="font-mono text-xs font-bold uppercase tracking-[0.22em] text-cp-paprika">
             {c.number} — exigence
           </span>
           <h3 className="font-display text-4xl font-bold uppercase leading-none tracking-[0.02em] text-cp-ink sm:text-5xl">

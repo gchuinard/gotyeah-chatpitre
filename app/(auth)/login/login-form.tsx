@@ -89,7 +89,7 @@ export function LoginForm({ next }: { next: string }) {
         {error && (
           <p
             role="alert"
-            className="flex items-baseline gap-2 border border-cp-sanguine bg-cp-sanguine/8 px-4 py-3 font-body text-sm text-cp-sanguine"
+            className="flex items-baseline gap-2 border border-cp-paprika bg-cp-paprika/8 px-4 py-3 font-body text-sm text-cp-paprika"
           >
             <span aria-hidden className="font-mono font-bold">
               §§
@@ -108,7 +108,7 @@ export function LoginForm({ next }: { next: string }) {
           Pas encore inscrit ?{" "}
           <Link
             href="/signup"
-            className="font-medium text-cp-ink underline underline-offset-4 decoration-[1.5px] decoration-cp-ink/40 hover:decoration-cp-sanguine hover:text-cp-sanguine"
+            className="font-medium text-cp-ink underline underline-offset-4 decoration-[1.5px] decoration-cp-ink/40 hover:decoration-cp-paprika hover:text-cp-paprika"
           >
             Créer un compte →
           </Link>

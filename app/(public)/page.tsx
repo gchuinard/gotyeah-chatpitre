@@ -216,7 +216,7 @@ export default function HomePage() {
           </div>
           <RuledBox className="mt-10 max-w-3xl">
             <p className="font-body text-base leading-relaxed text-cp-ink">
-              <span className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.22em] text-cp-sanguine">
+              <span className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.22em] text-cp-paprika">
                 § acompte
               </span>{" "}
               — 30 % à la réservation par virement, solde au départ.
@@ -308,7 +308,7 @@ export default function HomePage() {
                 variant: "secondary",
                 size: "lg",
                 className:
-                  "px-10 bg-cp-paper text-cp-ink border-cp-paper hover:bg-cp-sanguine hover:text-cp-paper hover:border-cp-sanguine",
+                  "px-10 bg-cp-paper text-cp-ink border-cp-paper hover:bg-cp-paprika hover:text-cp-paper hover:border-cp-paprika",
               })}
             >
               Réserver un séjour →

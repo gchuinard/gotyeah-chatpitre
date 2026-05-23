@@ -47,7 +47,7 @@ export function MessageBubble({ message }: { message: FixtureMessage }) {
         <span
           className={cn(
             "font-mono text-[0.6rem] font-bold uppercase tracking-[0.22em]",
-            fromAdmin ? "text-cp-paper" : "text-cp-sanguine",
+            fromAdmin ? "text-cp-paper" : "text-cp-paprika",
           )}
         >
           § {message.authorLabel}

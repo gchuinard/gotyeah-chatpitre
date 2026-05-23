@@ -6,6 +6,11 @@ import {
   type BookingStatus,
 } from "@/components/booking-status-badge";
 import { CatCard } from "@/components/cat-card";
+import {
+  CatIllustration,
+  type CatIllustrationPose,
+  type CatIllustrationVariant,
+} from "@/components/cat-illustration";
 import { Field } from "@/components/field";
 import { LibraryStamp } from "@/components/library-stamp";
 import { RuleDivider } from "@/components/rule-divider";
@@ -13,54 +18,29 @@ import { RuledBox } from "@/components/ruled-box";
 import { SectionHeading } from "@/components/section-heading";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Wordmark } from "@/components/wordmark";
 
 /// Page de référence du design system. Publique, hors `(public)` (donc sans
-/// chrome partagé). À supprimer ou à conserver une fois la DA validée.
+/// chrome partagé).
 export const metadata: Metadata = {
   title: "Styleguide — Le Chat-Pitre",
   description: "Langage visuel du site : palette, typographies, composants.",
 };
 
-const PALETTE: {
-  name: string;
-  hex: string;
-  usage: string;
-  ink?: "light" | "dark";
-}[] = [
-  { name: "cp-paper", hex: "#EFE9DD", usage: "Fond unique — bone", ink: "dark" },
-  {
-    name: "cp-paper-deep",
-    hex: "#E3DCC9",
-    usage: "Fond alternatif des sections",
-    ink: "dark",
-  },
-  { name: "cp-ink", hex: "#0A0A0A", usage: "Texte principal", ink: "light" },
-  {
-    name: "cp-ink-soft",
-    hex: "#2A2A2A",
-    usage: "Texte secondaire",
-    ink: "light",
-  },
-  { name: "cp-rule", hex: "#1A1A1A", usage: "Filets, traits", ink: "light" },
-  {
-    name: "cp-mute",
-    hex: "#6A6A6A",
-    usage: "Texte estompé, états passés",
-    ink: "light",
-  },
-  {
-    name: "cp-sanguine",
-    hex: "#7A1818",
-    usage: "Accent unique — CTA, alerte",
-    ink: "light",
-  },
-  {
-    name: "cp-sanguine-deep",
-    hex: "#5A1010",
-    usage: "Hover sanguine",
-    ink: "light",
-  },
+const PALETTE: { name: string; hex: string; usage: string }[] = [
+  { name: "cp-paper", hex: "#FFF4D9", usage: "Fond unique — crème chaud" },
+  { name: "cp-paper-deep", hex: "#F7E7BA", usage: "Crème profond, sections alternées" },
+  { name: "cp-ink", hex: "#0A0A0A", usage: "Texte principal" },
+  { name: "cp-ink-soft", hex: "#2F2A26", usage: "Texte secondaire chaud" },
+  { name: "cp-mute", hex: "#6F6A64", usage: "Texte estompé, états passés" },
+];
+
+const ACCENTS: { name: string; hex: string; usage: string }[] = [
+  { name: "cp-cobalt", hex: "#1A4B8E", usage: "Primaire institutionnel — comptes, liens" },
+  { name: "cp-paprika", hex: "#C9532E", usage: "Accent festif — CTA, alerte, focus" },
+  { name: "cp-canari", hex: "#F4C20D", usage: "Soleil — highlights, joie pure" },
+  { name: "cp-feuille", hex: "#2E7D3D", usage: "Vert vif — statuts positifs" },
 ];
 
 const STATUSES: BookingStatus[] = [
@@ -72,16 +52,30 @@ const STATUSES: BookingStatus[] = [
   "COMPLETED",
 ];
 
+const CAT_VARIANTS: CatIllustrationVariant[] = [
+  "cobalt",
+  "paprika",
+  "canari",
+  "feuille",
+];
+
+const CAT_POSES: CatIllustrationPose[] = [
+  "sitting",
+  "sleeping",
+  "standing",
+  "watching",
+];
+
 export default function StyleguidePage() {
   return (
     <main className="mx-auto w-full max-w-6xl px-6 py-16 sm:px-10 sm:py-24">
-      {/* En-tête fiche bibliothèque */}
+      {/* En-tête */}
       <header className="space-y-10">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <LibraryStamp boxed>
-            N° 001 — Design System — Édition 2026
+            Design system — Édition 2026
           </LibraryStamp>
-          <LibraryStamp>Représentation permanente</LibraryStamp>
+          <LibraryStamp tone="cobalt">Représentation permanente</LibraryStamp>
         </div>
 
         <Wordmark
@@ -93,8 +87,9 @@ export default function StyleguidePage() {
           className="cp-reveal max-w-2xl font-display text-2xl italic leading-snug text-cp-ink-soft sm:text-3xl"
           style={{ "--cp-delay": "120ms" } as React.CSSProperties}
         >
-          Langage visuel — brutalist editorial, fiche bibliothèque, encre noire
-          sur bone. Pas d&apos;ornement. Que de la typographie.
+          Langage visuel — mid-century illustré. Chats géométriques flat color
+          à la Charley Harper sur palette saturée jewel-tone. Newsreader
+          (serif chaud) + Manrope (body) + JetBrains Mono.
         </p>
       </header>
 
@@ -105,41 +100,63 @@ export default function StyleguidePage() {
         <SectionHeading
           number="01"
           title="Palette"
-          kicker="Huit couleurs. Pas une de plus."
+          kicker="Cinq couleurs structurelles + quatre jewel-tones festives."
         />
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-          {PALETTE.map((c) => (
-            <Swatch key={c.name} {...c} />
-          ))}
+
+        <div className="space-y-5">
+          <p className="font-mono text-[0.7rem] font-semibold uppercase tracking-[0.16em] text-cp-cobalt">
+            structurelles — partout
+          </p>
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
+            {PALETTE.map((c) => (
+              <Swatch key={c.name} {...c} />
+            ))}
+          </div>
         </div>
-        <p className="max-w-2xl font-body text-sm leading-relaxed text-cp-ink-soft">
-          <span className="font-mono font-bold uppercase tracking-[0.16em] text-cp-sanguine">
-            Sanguine
+
+        <div className="space-y-5">
+          <p className="font-mono text-[0.7rem] font-semibold uppercase tracking-[0.16em] text-cp-paprika">
+            accents jewel-tone — les couleurs qui font la joie
+          </p>
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+            {ACCENTS.map((c) => (
+              <Swatch key={c.name} {...c} />
+            ))}
+          </div>
+        </div>
+
+        <p className="max-w-2xl font-body text-base leading-relaxed text-cp-ink">
+          <span className="font-mono font-bold uppercase tracking-[0.12em] text-cp-paprika">
+            Paprika
           </span>{" "}
-          est l&apos;accent unique : CTA, alerte, refus, focus. Tout le reste
-          se joue sur le contraste encre/papier. Aucun statut ne dépend
-          uniquement de la couleur (label mono + symbole assurent l&apos;AA).
+          fait l&apos;action festive (CTA, accents). <span className="font-mono font-bold uppercase tracking-[0.12em] text-cp-cobalt">cobalt</span>{" "}
+          joue le rôle institutionnel (comptes, liens calmes).{" "}
+          <span className="font-mono font-bold uppercase tracking-[0.12em] text-cp-canari bg-cp-ink px-1">canari</span>{" "}
+          pour les highlights solaires.{" "}
+          <span className="font-mono font-bold uppercase tracking-[0.12em] text-cp-feuille">feuille</span>{" "}
+          pour les statuts positifs.
         </p>
       </section>
 
-      <RuleDivider className="my-20" label="Typographies" />
+      <RuleDivider className="my-20" label="Typographies" tone="paprika" />
 
       {/* 02 — Typographies */}
       <section aria-labelledby="sg-typo" className="space-y-12">
         <SectionHeading
           number="02"
           title="Typographies"
-          kicker="Trois voix pour trois rôles."
+          kicker="Une voix chaude pour les titres, une voix lisible pour le corps."
+          tone="paprika"
         />
 
         <FontSample
-          label="Display — Bodoni Moda"
+          label="Display — Newsreader"
           variable="font-display"
-          weight="400 / 700 + italique"
-          usage="Très grands titres, noms de pensionnaires en italique."
+          weight="variable + italique"
+          usage="Hero, titres de section, noms de pensionnaires italiques."
           sample={
             <div className="space-y-6 text-cp-ink">
-              <p className="font-display text-5xl font-bold uppercase leading-[0.95] tracking-[0.02em] sm:text-7xl">
+              <p className="font-display text-5xl font-medium leading-[1.02] sm:text-7xl">
                 Maison de villégiature
               </p>
               <p className="font-display text-3xl italic leading-snug text-cp-ink-soft sm:text-4xl">
@@ -150,50 +167,50 @@ export default function StyleguidePage() {
         />
 
         <FontSample
-          label="Body — Inter"
+          label="Body — Manrope"
           variable="font-body"
           weight="variable"
-          usage="Corps de texte, navigation, formulaires."
+          usage="Corps de texte, navigation, formulaires, étiquettes."
           sample={
             <p className="max-w-2xl font-body text-base leading-relaxed text-cp-ink">
-              Le corps de texte courant : lisible, sobre, sans afféterie. Il
-              porte les informations pratiques quand le titre fait l&apos;affiche.
-              Sur fond bone, l&apos;encre profonde garantit le contraste exigé
-              par la maison.
+              Le corps de texte courant : lisible, géométrique-chaleureux,
+              sans afféterie. Manrope est un grotesque humaniste qui se lit
+              bien aux petits corps tout en gardant du caractère aux grands.
             </p>
           }
         />
 
         <FontSample
-          label="Mono — Space Mono"
+          label="Mono — JetBrains Mono"
           variable="font-mono"
-          weight="400 / 700"
+          weight="400 / 700 + italique"
           usage="Mentions catalogue, numéros, métadonnées."
           sample={
-            <p className="font-mono text-sm font-bold uppercase tracking-[0.22em] text-cp-ink-soft">
+            <p className="font-mono text-sm font-semibold uppercase tracking-[0.16em] text-cp-cobalt">
               N° 047 — Rue de la Chartreuse — Bordeaux — Est. 2024
             </p>
           }
         />
       </section>
 
-      <RuleDivider className="my-20" label="Boutons" />
+      <RuleDivider className="my-20" label="Boutons" tone="cobalt" />
 
       {/* 03 — Boutons */}
       <section aria-labelledby="sg-buttons" className="space-y-10">
         <SectionHeading
           number="03"
           title="Boutons"
-          kicker="Encre pleine, alternative outline, action sanguine."
+          kicker="Paprika pour l'action, cobalt pour l'alternative, encre pour le danger."
+          tone="paprika"
         />
 
         <div className="space-y-6">
           <div className="flex flex-wrap items-center gap-4">
             <Button>Réserver un séjour</Button>
-            <Button variant="secondary">Se connecter</Button>
+            <Button variant="secondary">Créer un compte</Button>
             <Button variant="outline">Voir les détails</Button>
             <Button variant="ghost">Annuler</Button>
-            <Button variant="destructive">Refuser le séjour</Button>
+            <Button variant="destructive">Supprimer la fiche</Button>
             <Button variant="link">en savoir plus</Button>
           </div>
 
@@ -206,49 +223,110 @@ export default function StyleguidePage() {
         </div>
       </section>
 
-      <RuleDivider className="my-20" label="Statuts" />
+      <RuleDivider className="my-20" label="Illustrations" tone="canari" />
 
-      {/* 04 — Statuts */}
-      <section aria-labelledby="sg-statuses" className="space-y-8">
+      {/* 04 — Illustrations chats */}
+      <section aria-labelledby="sg-cats" className="space-y-10">
         <SectionHeading
           number="04"
+          title="Chats géométriques"
+          kicker="Quatre palettes × quatre poses, dérivées du nom du chat — chaque pensionnaire reçoit une combinaison stable."
+          tone="canari"
+        />
+
+        <div className="space-y-6">
+          <p className="font-mono text-[0.7rem] font-semibold uppercase tracking-[0.16em] text-cp-paprika">
+            quatre palettes — pose assise
+          </p>
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+            {CAT_VARIANTS.map((v) => (
+              <figure
+                key={v}
+                className="overflow-hidden rounded-md border border-cp-ink"
+              >
+                <CatIllustration
+                  variant={v}
+                  pose="sitting"
+                  ariaLabel={`Chat en ${v}`}
+                  className="aspect-square w-full"
+                />
+                <figcaption className="border-t border-cp-ink bg-cp-paper px-3 py-2 font-mono text-[0.65rem] font-semibold uppercase tracking-[0.16em] text-cp-ink-soft">
+                  {v}
+                </figcaption>
+              </figure>
+            ))}
+          </div>
+        </div>
+
+        <div className="space-y-6">
+          <p className="font-mono text-[0.7rem] font-semibold uppercase tracking-[0.16em] text-cp-paprika">
+            quatre poses — palette cobalt
+          </p>
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+            {CAT_POSES.map((p) => (
+              <figure
+                key={p}
+                className="overflow-hidden rounded-md border border-cp-ink"
+              >
+                <CatIllustration
+                  variant="cobalt"
+                  pose={p}
+                  ariaLabel={`Chat en pose ${p}`}
+                  className="aspect-square w-full"
+                />
+                <figcaption className="border-t border-cp-ink bg-cp-paper px-3 py-2 font-mono text-[0.65rem] font-semibold uppercase tracking-[0.16em] text-cp-ink-soft">
+                  {p}
+                </figcaption>
+              </figure>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <RuleDivider className="my-20" label="Statuts" tone="cobalt" />
+
+      {/* 05 — Statuts */}
+      <section aria-labelledby="sg-statuses" className="space-y-8">
+        <SectionHeading
+          number="05"
           title="Statuts de séjour"
-          kicker="Les six états d'une réservation."
+          kicker="Les six états — chacun avec sa couleur signifiante."
+          tone="cobalt"
         />
         <div className="flex flex-wrap items-center gap-3">
           {STATUSES.map((s) => (
             <BookingStatusBadge key={s} status={s} />
           ))}
         </div>
-        <p className="max-w-2xl font-body text-sm leading-relaxed text-cp-ink-soft">
-          Numéro d&apos;ordre + libellé mono caps. Sanguine signale l&apos;action
-          requise (question, refus). Encre pleine valide l&apos;engagement
-          (acceptation). Mute neutralise (annulé, terminé).
+        <p className="max-w-2xl font-body text-base leading-relaxed text-cp-ink">
+          Cobalt = attente sereine. Paprika = action requise du client.
+          Feuille = confirmation joyeuse. Encre = refus net. Mute = annulé.
         </p>
       </section>
 
-      <RuleDivider className="my-20" label="Formulaire" />
+      <RuleDivider className="my-20" label="Formulaire" tone="paprika" />
 
-      {/* 05 — Champs de formulaire */}
+      {/* 06 — Formulaire */}
       <section aria-labelledby="sg-form" className="space-y-10">
         <SectionHeading
-          number="05"
+          number="06"
           title="Champs de formulaire"
-          kicker="Trait fin, focus sanguine, indication italique."
+          kicker="Trait noir fin, focus paprika, indication italique."
+          tone="paprika"
         />
 
         <div className="grid gap-8 sm:grid-cols-2">
           <Field
-            label="Email"
+            label="Adresse email"
             htmlFor="sg-email"
             required
-            hint="Renseigné dans votre fiche."
+            hint="Renseignée sur votre fiche."
           >
             <Input
               id="sg-email"
               type="email"
               placeholder="adresse@maison.fr"
-              defaultValue="madame.cliquot@chat-pitre.fr"
+              defaultValue="henriette.berthier@chat-pitre.fr"
             />
           </Field>
 
@@ -265,57 +343,82 @@ export default function StyleguidePage() {
               aria-invalid="true"
             />
           </Field>
+
+          <Field
+            label="Note libre"
+            htmlFor="sg-note"
+            className="sm:col-span-2"
+          >
+            <Textarea
+              id="sg-note"
+              rows={4}
+              placeholder="Maestro est un peu chasseur de mouches, à surveiller le matin."
+            />
+          </Field>
         </div>
       </section>
 
-      <RuleDivider className="my-20" label="Cartouches & sections" />
+      <RuleDivider className="my-20" label="Cartouches" tone="feuille" />
 
-      {/* 06 — Section + ruled box */}
+      {/* 07 — Section + ruled box */}
       <section aria-labelledby="sg-section" className="space-y-12">
         <SectionHeading
-          number="06"
-          title="Composition d'une section"
-          kicker="Numéro, filet, titre, kicker italique, corps."
+          number="07"
+          title="Encadrés colorés"
+          kicker="Variantes regular / deep / cobalt / paprika / feuille / ink."
+          tone="feuille"
         />
 
-        <div className="grid gap-8 lg:grid-cols-[2fr_1fr]">
-          <article className="space-y-6">
-            <SectionHeading
-              number="A"
-              title="Exemple"
-              kicker="Une mise en page typique du site."
-              as="h3"
-            />
-
-            <p className="font-body text-base leading-relaxed text-cp-ink">
-              La section commence par un numéro d&apos;entrée mono sanguine.
-              Le titre est en Bodoni Moda. Le kicker en italique. Le corps
-              en Inter. Toute la composition se lit comme une fiche de
-              catalogue : on entre par le numéro, on confirme par le titre.
+        <div className="grid gap-6 lg:grid-cols-2">
+          <RuledBox variant="regular">
+            <p className="font-mono text-[0.65rem] font-semibold uppercase tracking-[0.16em] text-cp-paprika">
+              regular — cadre encre sur paper
             </p>
-          </article>
-
-          <RuledBox variant="deep" as="blockquote" className="font-display italic">
-            <p className="text-xl leading-snug text-cp-ink sm:text-2xl">
-              « Pour être admis sur la scène de notre établissement, le
-              félin se doit d&apos;être stérilisé, identifié, vacciné, et
-              sociable avec ses congénères. »
+            <p className="mt-3 font-display text-xl italic text-cp-ink">
+              « Le ronron est la musique de fond de cette maison. »
             </p>
-            <p className="mt-4 font-mono text-[0.65rem] font-bold not-italic uppercase tracking-[0.22em] text-cp-sanguine">
-              § 02 — Règlement de la maison
+          </RuledBox>
+
+          <RuledBox variant="cobalt">
+            <p className="font-mono text-[0.65rem] font-semibold uppercase tracking-[0.16em] text-cp-paper/80">
+              cobalt — bloc institutionnel
+            </p>
+            <p className="mt-3 font-display text-xl italic text-cp-paper">
+              Pour appeler à l&apos;ouverture d&apos;un compte ou à
+              l&apos;accès à une fiche.
+            </p>
+          </RuledBox>
+
+          <RuledBox variant="paprika">
+            <p className="font-mono text-[0.65rem] font-semibold uppercase tracking-[0.16em] text-cp-paper/80">
+              paprika — moment fort
+            </p>
+            <p className="mt-3 font-display text-xl italic text-cp-paper">
+              Pour les CTA principaux, les alertes, les moments où il faut
+              que le regard se pose.
+            </p>
+          </RuledBox>
+
+          <RuledBox variant="feuille">
+            <p className="font-mono text-[0.65rem] font-semibold uppercase tracking-[0.16em] text-cp-paper/80">
+              feuille — confirmation positive
+            </p>
+            <p className="mt-3 font-display text-xl italic text-cp-paper">
+              Pour les acceptations, les validations, les « tout est bon ».
             </p>
           </RuledBox>
         </div>
       </section>
 
-      <RuleDivider className="my-20" label="Fiches" />
+      <RuleDivider className="my-20" label="Fiches" tone="canari" />
 
-      {/* 07 — Cat cards */}
-      <section aria-labelledby="sg-cat" className="space-y-8">
+      {/* 08 — Fiches pensionnaires */}
+      <section aria-labelledby="sg-cat-cards" className="space-y-8">
         <SectionHeading
-          number="07"
+          number="08"
           title="Fiches de pensionnaires"
-          kicker="Numéro de catalogue, nom italique, critères d'admission."
+          kicker="Illustration dérivée du nom, critères d'admission en ✓/✕."
+          tone="canari"
         />
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           <CatCard
@@ -324,12 +427,7 @@ export default function StyleguidePage() {
             sex="FEMALE"
             breed="Européenne tricolore"
             ageLabel="6 ans"
-            criteria={{
-              sterilized: true,
-              identified: true,
-              vaccines: true,
-              sociable: true,
-            }}
+            criteria={{ sterilized: true, identified: true, vaccines: true, sociable: true }}
           />
           <CatCard
             reference="012"
@@ -337,12 +435,7 @@ export default function StyleguidePage() {
             sex="MALE"
             breed="Chartreux"
             ageLabel="3 ans"
-            criteria={{
-              sterilized: true,
-              identified: true,
-              vaccines: false,
-              sociable: true,
-            }}
+            criteria={{ sterilized: true, identified: true, vaccines: false, sociable: true }}
           />
           <CatCard
             reference="024"
@@ -350,12 +443,7 @@ export default function StyleguidePage() {
             sex="MALE"
             breed="Roux des toits"
             ageLabel="1 an"
-            criteria={{
-              sterilized: false,
-              identified: false,
-              vaccines: true,
-              sociable: true,
-            }}
+            criteria={{ sterilized: false, identified: false, vaccines: true, sociable: true }}
           />
         </div>
       </section>
@@ -363,8 +451,8 @@ export default function StyleguidePage() {
       <RuleDivider className="mt-24 mb-12" weight="heavy" />
 
       <footer className="flex flex-col gap-3 pb-8 text-center sm:flex-row sm:items-center sm:justify-between sm:text-left">
-        <LibraryStamp>Fin du document — § 07</LibraryStamp>
-        <p className="font-body text-xs italic text-cp-ink-soft">
+        <LibraryStamp>Fin du document</LibraryStamp>
+        <p className="font-display text-sm italic text-cp-ink-soft">
           Page de référence — supprimable une fois la DA validée.
         </p>
       </footer>
@@ -373,7 +461,7 @@ export default function StyleguidePage() {
 }
 
 /* ------------------------------------------------------------------ */
-/* Helpers internes à la page                                          */
+/* Helpers internes                                                    */
 /* ------------------------------------------------------------------ */
 
 function Swatch({
@@ -384,22 +472,21 @@ function Swatch({
   name: string;
   hex: string;
   usage: string;
-  ink?: "light" | "dark";
 }) {
   return (
-    <div className="border border-cp-ink bg-cp-paper">
+    <div className="overflow-hidden rounded-md border border-cp-ink bg-cp-paper">
       <div
         className="h-24 w-full border-b border-cp-ink"
         style={{ backgroundColor: hex }}
       />
       <div className="space-y-1 px-3 py-3">
-        <p className="font-mono text-xs font-bold uppercase tracking-[0.14em] text-cp-ink">
+        <p className="font-mono text-xs font-semibold uppercase tracking-[0.12em] text-cp-ink">
           {name}
         </p>
         <p className="font-mono text-[0.65rem] uppercase tracking-[0.14em] text-cp-ink-soft">
           {hex}
         </p>
-        <p className="font-body text-xs leading-snug text-cp-ink-soft">
+        <p className="font-body text-sm leading-snug text-cp-ink-soft">
           {usage}
         </p>
       </div>
@@ -423,14 +510,14 @@ function FontSample({
   return (
     <div className="space-y-4 border-t border-cp-ink/30 pt-8 first:border-t-0 first:pt-0">
       <div className="flex flex-wrap items-baseline gap-x-5 gap-y-1">
-        <p className="font-mono text-xs font-bold uppercase tracking-[0.22em] text-cp-sanguine">
+        <p className="font-mono text-xs font-semibold uppercase tracking-[0.18em] text-cp-paprika">
           {label}
         </p>
-        <p className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-cp-ink-soft">
+        <p className="font-mono text-[0.65rem] uppercase tracking-[0.14em] text-cp-ink-soft">
           .{variable} · {weight}
         </p>
       </div>
-      <p className="font-body text-sm italic text-cp-ink-soft">{usage}</p>
+      <p className="font-display text-base italic text-cp-ink-soft">{usage}</p>
       <div className="pt-2">{sample}</div>
     </div>
   );

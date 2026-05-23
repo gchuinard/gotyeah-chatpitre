@@ -57,7 +57,7 @@ export function ClientHeader({
         <Link
           href={isAdmin ? "/admin" : "/dashboard"}
           aria-label="Le Chat-Pitre — accueil"
-          className="shrink-0 transition-colors hover:text-cp-sanguine"
+          className="shrink-0 transition-colors hover:text-cp-paprika"
         >
           <Wordmark className="text-base sm:text-lg" />
         </Link>

@@ -23,11 +23,11 @@ export default function NewBookingPage() {
         aria-label="Fil d'Ariane"
         className="mb-10 flex items-center gap-2 font-mono text-[0.65rem] font-bold uppercase tracking-[0.18em] text-cp-ink-soft"
       >
-        <Link href="/dashboard" className="hover:text-cp-sanguine">
+        <Link href="/dashboard" className="hover:text-cp-paprika">
           Mon espace
         </Link>
         <span aria-hidden>/</span>
-        <Link href="/dashboard/bookings" className="hover:text-cp-sanguine">
+        <Link href="/dashboard/bookings" className="hover:text-cp-paprika">
           Séjours
         </Link>
         <span aria-hidden>/</span>
@@ -190,7 +190,7 @@ function CatPickRow({
         className={cn(
           "relative flex cursor-pointer items-start gap-4 bg-cp-paper p-5 transition-colors hover:bg-cp-paper-deep",
           "has-[input:checked]:bg-cp-paper-deep",
-          "has-[input:focus-visible]:outline has-[input:focus-visible]:outline-2 has-[input:focus-visible]:-outline-offset-2 has-[input:focus-visible]:outline-cp-sanguine",
+          "has-[input:focus-visible]:outline has-[input:focus-visible]:outline-2 has-[input:focus-visible]:-outline-offset-2 has-[input:focus-visible]:outline-cp-paprika",
         )}
       >
         <input

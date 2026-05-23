@@ -126,7 +126,7 @@ export default async function AdminDashboardPage() {
                   key={b.id}
                   className="grid gap-3 border-b border-cp-ink/30 py-5 sm:grid-cols-[6rem_2fr_2fr_auto_auto] sm:items-center sm:gap-5"
                 >
-                  <p className="font-mono text-sm font-bold uppercase tracking-[0.18em] text-cp-sanguine">
+                  <p className="font-mono text-sm font-bold uppercase tracking-[0.18em] text-cp-paprika">
                     N° {b.reference}
                   </p>
                   <div className="space-y-0.5">
@@ -197,7 +197,7 @@ function StatTile({
     <div className={`flex flex-col gap-1 ${accent ? "bg-cp-ink text-cp-paper" : "bg-cp-paper text-cp-ink"} p-6 sm:p-8`}>
       <p
         className={`font-mono text-[0.65rem] font-bold uppercase tracking-[0.22em] ${
-          accent ? "text-cp-paper/70" : "text-cp-sanguine"
+          accent ? "text-cp-paper/70" : "text-cp-paprika"
         }`}
       >
         {label}

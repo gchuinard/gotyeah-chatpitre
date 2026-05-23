@@ -209,7 +209,7 @@ export default async function DashboardPage() {
                 key={b.id}
                 className="grid gap-4 border-b border-cp-ink/30 py-5 sm:grid-cols-[6rem_2fr_3fr_auto] sm:items-center sm:gap-6"
               >
-                <p className="font-mono text-sm font-bold uppercase tracking-[0.18em] text-cp-sanguine">
+                <p className="font-mono text-sm font-bold uppercase tracking-[0.18em] text-cp-paprika">
                   N° {b.reference}
                 </p>
                 <p className="font-display text-lg italic leading-tight text-cp-ink">
@@ -226,7 +226,7 @@ export default async function DashboardPage() {
                   <BookingStatusBadge status={b.status} />
                   <Link
                     href={`/dashboard/bookings/${b.reference}`}
-                    className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.22em] text-cp-ink-soft hover:text-cp-sanguine"
+                    className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.22em] text-cp-ink-soft hover:text-cp-paprika"
                   >
                     Ouvrir →
                   </Link>
@@ -239,7 +239,7 @@ export default async function DashboardPage() {
         <div className="flex justify-end">
           <Link
             href="/dashboard/bookings"
-            className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.22em] text-cp-ink-soft hover:text-cp-sanguine"
+            className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.22em] text-cp-ink-soft hover:text-cp-paprika"
           >
             Tous les séjours →
           </Link>
@@ -262,7 +262,7 @@ function StatTile({
 }) {
   return (
     <div className="flex flex-col gap-1 bg-cp-paper p-6 sm:p-8">
-      <p className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.22em] text-cp-sanguine">
+      <p className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.22em] text-cp-paprika">
         {label}
       </p>
       <p className="font-display text-6xl font-bold leading-none tracking-tight text-cp-ink sm:text-7xl">
@@ -282,7 +282,7 @@ function DetailField({
 }) {
   return (
     <div className="space-y-2">
-      <p className="font-mono text-[0.6rem] font-bold uppercase tracking-[0.22em] text-cp-sanguine">
+      <p className="font-mono text-[0.6rem] font-bold uppercase tracking-[0.22em] text-cp-paprika">
         {label}
       </p>
       {children}

@@ -33,7 +33,7 @@ export function FaqAccordion({
           >
             <Accordion.Header>
               <Accordion.Trigger className="group flex w-full items-baseline gap-6 py-7 text-left transition-colors hover:bg-cp-paper-deep/60 focus-visible:bg-cp-paper-deep/60 focus-visible:outline-none sm:py-8">
-                <span className="shrink-0 font-mono text-xs font-bold uppercase tracking-[0.22em] text-cp-sanguine">
+                <span className="shrink-0 font-mono text-xs font-bold uppercase tracking-[0.22em] text-cp-paprika">
                   {index}
                 </span>
                 <span className="flex-1 font-display text-2xl font-medium leading-snug tracking-tight text-cp-ink sm:text-3xl">

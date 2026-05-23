@@ -83,7 +83,7 @@ export default function MentionsLegalesPage() {
             de rectification et d&apos;effacement, en écrivant à{" "}
             <a
               href="mailto:bonjour@chat-pitre.fr"
-              className="underline underline-offset-4 decoration-cp-ink/40 hover:text-cp-sanguine hover:decoration-cp-sanguine"
+              className="underline underline-offset-4 decoration-cp-ink/40 hover:text-cp-paprika hover:decoration-cp-paprika"
             >
               bonjour@chat-pitre.fr
             </a>
@@ -128,7 +128,7 @@ function Article({
   return (
     <section className="space-y-5">
       <header className="flex items-baseline gap-4">
-        <span className="font-mono text-sm font-bold uppercase tracking-[0.16em] text-cp-sanguine">
+        <span className="font-mono text-sm font-bold uppercase tracking-[0.16em] text-cp-paprika">
           § {number}
         </span>
         <h2 className="font-display text-2xl font-medium leading-tight tracking-tight text-cp-ink sm:text-3xl">

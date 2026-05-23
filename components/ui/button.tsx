@@ -3,38 +3,38 @@ import { cva, type VariantProps } from "class-variance-authority"
 
 import { cn } from "@/lib/utils"
 
-// Boutons brutalist editorial : rectangles plats, capitales serrées, zéro
-// radius, transition d'inversion encre/papier au survol. La variante par
-// défaut est noire pleine (CTA institutionnelle) ; la sanguine est réservée
-// aux actions destructives ou aux alertes (refus de séjour, suppression).
+// Boutons « mid-century illustré » : sentence case, weight medium, légère
+// rondeur (3px), focus paprika franc. Le default est paprika (l'action
+// festive) ; le secondary est cobalt (l'alternative institutionnelle).
 const buttonVariants = cva(
-  "inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap font-body font-medium uppercase tracking-[0.16em] outline-none transition-colors select-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cp-sanguine disabled:pointer-events-none disabled:opacity-40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+  "inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-md font-body font-semibold tracking-[0.01em] outline-none transition-colors select-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cp-paprika disabled:pointer-events-none disabled:opacity-40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
   {
     variants: {
       variant: {
-        // Encre pleine — CTA principale, sans ornement.
+        // Paprika plein — l'action festive principale.
         default:
-          "border border-cp-ink bg-cp-ink text-cp-paper hover:bg-cp-sanguine hover:border-cp-sanguine",
-        // Cadre encre, fond bone — alternative neutre, inversion au survol.
+          "border border-cp-paprika bg-cp-paprika text-cp-paper hover:bg-cp-paprika-deep hover:border-cp-paprika-deep",
+        // Cobalt plein — l'alternative institutionnelle (créer un compte,
+        // accéder à un espace, etc.).
         secondary:
-          "border border-cp-ink bg-cp-paper text-cp-ink hover:bg-cp-ink hover:text-cp-paper",
-        // Cadre seul, plus fin — pour barres d'actions secondaires.
+          "border border-cp-cobalt bg-cp-cobalt text-cp-paper hover:bg-cp-cobalt-deep hover:border-cp-cobalt-deep",
+        // Cadre noir fin — pour barres d'actions secondaires.
         outline:
-          "border border-cp-ink/55 bg-transparent text-cp-ink hover:border-cp-ink hover:bg-cp-ink hover:text-cp-paper",
-        // Sans cadre, juste du texte. Souligne au survol.
+          "border border-cp-ink/45 bg-transparent text-cp-ink hover:border-cp-ink hover:bg-cp-ink hover:text-cp-paper",
+        // Sans cadre — souligne en paprika au survol.
         ghost:
-          "text-cp-ink underline-offset-[6px] decoration-[1.5px] hover:underline hover:decoration-cp-sanguine hover:text-cp-sanguine",
-        // Lien éditorial sanguine souligné.
+          "text-cp-ink underline-offset-[5px] decoration-[1.5px] hover:underline hover:decoration-cp-paprika hover:text-cp-paprika",
+        // Lien éditorial paprika souligné.
         link:
-          "normal-case tracking-normal font-normal text-cp-sanguine underline underline-offset-[5px] decoration-[1.5px] hover:decoration-[2.5px]",
-        // Action destructive — sanguine.
+          "tracking-normal font-medium text-cp-paprika underline underline-offset-[5px] decoration-[1.5px] hover:decoration-[2.5px]",
+        // Destructive — encre pleine, clairement distincte du paprika.
         destructive:
-          "border border-cp-sanguine bg-cp-sanguine text-cp-paper hover:bg-cp-sanguine-deep hover:border-cp-sanguine-deep",
+          "border border-cp-ink bg-cp-ink text-cp-paper hover:bg-cp-ink-soft hover:border-cp-ink-soft",
       },
       size: {
-        sm: "h-8 px-3 text-[0.65rem]",
-        default: "h-11 px-6 text-[0.72rem]",
-        lg: "h-13 px-9 text-[0.8rem]",
+        sm: "h-8 px-3 text-xs",
+        default: "h-11 px-5 text-sm",
+        lg: "h-13 px-8 text-base",
         icon: "size-11",
       },
     },

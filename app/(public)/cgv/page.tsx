@@ -151,7 +151,7 @@ function Article({
   return (
     <section className="space-y-5">
       <header className="flex items-baseline gap-4">
-        <span className="font-mono text-sm font-bold uppercase tracking-[0.16em] text-cp-sanguine">
+        <span className="font-mono text-sm font-bold uppercase tracking-[0.16em] text-cp-paprika">
           § {number}
         </span>
         <h2 className="font-display text-2xl font-medium leading-tight tracking-tight text-cp-ink sm:text-3xl">

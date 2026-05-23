@@ -39,7 +39,7 @@ export function UserMenu({
   return (
     <Menu.Root>
       <Menu.Trigger
-        className="group flex items-center gap-3 border border-cp-ink/40 bg-cp-paper px-3 py-1.5 text-cp-ink outline-none transition-colors hover:border-cp-ink hover:bg-cp-ink hover:text-cp-paper focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cp-sanguine"
+        className="group flex items-center gap-3 border border-cp-ink/40 bg-cp-paper px-3 py-1.5 text-cp-ink outline-none transition-colors hover:border-cp-ink hover:bg-cp-ink hover:text-cp-paper focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cp-paprika"
       >
         <span
           aria-hidden
@@ -60,7 +60,7 @@ export function UserMenu({
         <Menu.Positioner sideOffset={8} align="end">
           <Menu.Popup className="w-60 border border-cp-ink bg-cp-paper text-cp-ink shadow-[6px_6px_0_0_var(--color-cp-ink)] outline-none">
             <div className="border-b border-cp-ink px-4 py-3">
-              <p className="font-mono text-[0.6rem] font-bold uppercase tracking-[0.22em] text-cp-sanguine">
+              <p className="font-mono text-[0.6rem] font-bold uppercase tracking-[0.22em] text-cp-paprika">
                 § fiche personnelle
               </p>
               <p className="mt-1 font-display text-base italic leading-tight text-cp-ink">
@@ -87,7 +87,7 @@ export function UserMenu({
             <Menu.Item
               onClick={logout}
               disabled={pending}
-              className={cn(menuItemClass, "text-cp-sanguine hover:text-cp-paper hover:bg-cp-sanguine")}
+              className={cn(menuItemClass, "text-cp-paprika hover:text-cp-paper hover:bg-cp-paprika")}
             >
               {pending ? "Déconnexion…" : "Se déconnecter ↗"}
             </Menu.Item>

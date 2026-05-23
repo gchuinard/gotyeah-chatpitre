@@ -39,7 +39,7 @@ export function PriceCard({
         <span
           className={cn(
             "font-mono text-xs font-bold uppercase tracking-[0.22em]",
-            isFeature ? "text-cp-paper/70" : "text-cp-sanguine",
+            isFeature ? "text-cp-paper/70" : "text-cp-paprika",
           )}
         >
           Tarif {reference}

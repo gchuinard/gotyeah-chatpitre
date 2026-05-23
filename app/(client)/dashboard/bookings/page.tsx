@@ -29,7 +29,7 @@ export default function BookingsListPage() {
         aria-label="Fil d'Ariane"
         className="mb-10 flex items-center gap-2 font-mono text-[0.65rem] font-bold uppercase tracking-[0.18em] text-cp-ink-soft"
       >
-        <Link href="/dashboard" className="hover:text-cp-sanguine">
+        <Link href="/dashboard" className="hover:text-cp-paprika">
           Mon espace
         </Link>
         <span aria-hidden>/</span>
@@ -63,7 +63,7 @@ export default function BookingsListPage() {
       <section aria-labelledby="active-title" className="space-y-6">
         <h2
           id="active-title"
-          className="font-mono text-xs font-bold uppercase tracking-[0.22em] text-cp-sanguine"
+          className="font-mono text-xs font-bold uppercase tracking-[0.22em] text-cp-paprika"
         >
           § Actifs — {active.length}
         </h2>

@@ -36,11 +36,11 @@ export default async function AdminBookingDetailPage({
         aria-label="Fil d'Ariane"
         className="mb-10 flex items-center gap-2 font-mono text-[0.65rem] font-bold uppercase tracking-[0.18em] text-cp-ink-soft"
       >
-        <Link href="/admin" className="hover:text-cp-sanguine">
+        <Link href="/admin" className="hover:text-cp-paprika">
           Administration
         </Link>
         <span aria-hidden>/</span>
-        <Link href="/admin/bookings" className="hover:text-cp-sanguine">
+        <Link href="/admin/bookings" className="hover:text-cp-paprika">
           Séjours
         </Link>
         <span aria-hidden>/</span>
@@ -120,7 +120,7 @@ export default async function AdminBookingDetailPage({
                 <p className="font-display text-2xl italic leading-tight text-cp-ink">
                   {cat.name}
                 </p>
-                <p className="font-mono text-[0.6rem] font-bold uppercase tracking-[0.18em] text-cp-sanguine">
+                <p className="font-mono text-[0.6rem] font-bold uppercase tracking-[0.18em] text-cp-paprika">
                   N° {cat.reference}
                 </p>
               </header>
@@ -140,7 +140,7 @@ export default async function AdminBookingDetailPage({
 
       {booking.notes && (
         <RuledBox variant="deep" className="mt-10">
-          <p className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.22em] text-cp-sanguine">
+          <p className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.22em] text-cp-paprika">
             § Note du client
           </p>
           <p className="mt-3 font-body text-base leading-relaxed text-cp-ink">
@@ -152,7 +152,7 @@ export default async function AdminBookingDetailPage({
       {/* Actions de statut */}
       {["PENDING", "QUESTION_ASKED"].includes(booking.status) && (
         <section className="mt-14 border border-cp-ink bg-cp-paper-deep/60 p-6 sm:p-8">
-          <p className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.22em] text-cp-sanguine">
+          <p className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.22em] text-cp-paprika">
             § Décision à prendre
           </p>
           <p className="mt-3 font-display text-2xl italic leading-snug text-cp-ink sm:text-3xl">
@@ -245,7 +245,7 @@ function DetailTile({
 }) {
   return (
     <div className="flex flex-col gap-2 bg-cp-paper p-6 sm:p-8">
-      <p className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.22em] text-cp-sanguine">
+      <p className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.22em] text-cp-paprika">
         {label}
       </p>
       {children}
@@ -256,7 +256,7 @@ function DetailTile({
 function Criterion({ ok, label }: { ok: boolean; label: string }) {
   return (
     <li
-      className={`flex items-center gap-1.5 ${ok ? "text-cp-ink" : "text-cp-sanguine"}`}
+      className={`flex items-center gap-1.5 ${ok ? "text-cp-ink" : "text-cp-paprika"}`}
     >
       <span aria-hidden className="inline-block w-3 text-center">
         {ok ? "✓" : "—"}

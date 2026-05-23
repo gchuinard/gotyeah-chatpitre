@@ -1,33 +1,31 @@
 import type { Metadata } from "next";
-import { Bodoni_Moda, Inter, Space_Mono } from "next/font/google";
+import { JetBrains_Mono, Manrope, Newsreader } from "next/font/google";
 import "./globals.css";
 
-// Typographie « brutalist editorial » :
-// - Bodoni Moda (variable, opsz + ital) → display ET serif, didone à fort
-//   contraste, qui porte les très grands titres et les noms italiques.
-// - Inter (variable) → corps de texte, navigation, formulaires.
-// - Space Mono → mentions catalogue, numéros, métadonnées « fiche ».
+// Typographie « mid-century illustré » :
+// - Newsreader (variable, opsz + italic) → serif chaleureux, italique
+//   expressive, presence sur les très gros titres.
+// - Manrope (variable) → grotesque géométrique chaleureux, corps de
+//   texte, navigation, formulaires.
+// - JetBrains Mono → mentions catalogue, numéros, métadonnées.
 //
-// Les `variable` exposent les fontes en CSS custom property sur <html> ;
-// globals.css les remappe sur `--font-display` / `--font-body` / `--font-mono`
-// via `@theme`.
-const bodoniModa = Bodoni_Moda({
+// Les `variable` exposent les fontes en CSS custom property sur <html>.
+const newsreader = Newsreader({
   subsets: ["latin"],
   display: "swap",
   style: ["normal", "italic"],
   variable: "--font-cp-display",
 });
 
-const inter = Inter({
+const manrope = Manrope({
   subsets: ["latin"],
   display: "swap",
   variable: "--font-cp-body",
 });
 
-const spaceMono = Space_Mono({
+const jetbrains = JetBrains_Mono({
   subsets: ["latin"],
   display: "swap",
-  weight: ["400", "700"],
   style: ["normal", "italic"],
   variable: "--font-cp-mono",
 });
@@ -46,7 +44,7 @@ export default function RootLayout({
   return (
     <html
       lang="fr"
-      className={`${bodoniModa.variable} ${inter.variable} ${spaceMono.variable} h-full antialiased`}
+      className={`${newsreader.variable} ${manrope.variable} ${jetbrains.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">{children}</body>
     </html>

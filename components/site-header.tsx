@@ -14,7 +14,7 @@ export function SiteHeader() {
         <Link
           href="/"
           aria-label="Le Chat-Pitre — accueil"
-          className="shrink-0 transition-colors hover:text-cp-sanguine focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-cp-sanguine"
+          className="shrink-0 transition-colors hover:text-cp-paprika focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-cp-paprika"
         >
           <Wordmark className="text-lg sm:text-xl" />
         </Link>
@@ -33,7 +33,7 @@ export function SiteHeader() {
             <Link
               key={l.href}
               href={l.href}
-              className="font-mono text-[0.7rem] font-bold uppercase tracking-[0.18em] text-cp-ink-soft transition-colors hover:text-cp-sanguine"
+              className="font-mono text-[0.7rem] font-bold uppercase tracking-[0.18em] text-cp-ink-soft transition-colors hover:text-cp-paprika"
             >
               {l.label}
             </Link>
@@ -43,7 +43,7 @@ export function SiteHeader() {
         <div className="ml-auto flex items-center gap-3 lg:ml-0">
           <Link
             href="/login"
-            className="hidden font-mono text-[0.7rem] font-bold uppercase tracking-[0.18em] text-cp-ink-soft transition-colors hover:text-cp-sanguine sm:inline-block"
+            className="hidden font-mono text-[0.7rem] font-bold uppercase tracking-[0.18em] text-cp-ink-soft transition-colors hover:text-cp-paprika sm:inline-block"
           >
             Se connecter
           </Link>

@@ -34,11 +34,11 @@ export default async function BookingDetailPage({
         aria-label="Fil d'Ariane"
         className="mb-10 flex items-center gap-2 font-mono text-[0.65rem] font-bold uppercase tracking-[0.18em] text-cp-ink-soft"
       >
-        <Link href="/dashboard" className="hover:text-cp-sanguine">
+        <Link href="/dashboard" className="hover:text-cp-paprika">
           Mon espace
         </Link>
         <span aria-hidden>/</span>
-        <Link href="/dashboard/bookings" className="hover:text-cp-sanguine">
+        <Link href="/dashboard/bookings" className="hover:text-cp-paprika">
           Séjours
         </Link>
         <span aria-hidden>/</span>
@@ -86,7 +86,7 @@ export default async function BookingDetailPage({
 
       {booking.notes && (
         <RuledBox variant="deep" className="mt-10">
-          <p className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.22em] text-cp-sanguine">
+          <p className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.22em] text-cp-paprika">
             § note de séjour
           </p>
           <p className="mt-3 font-body text-base leading-relaxed text-cp-ink">
@@ -115,7 +115,7 @@ export default async function BookingDetailPage({
         >
           <label
             htmlFor="reply-body"
-            className="block font-mono text-[0.65rem] font-bold uppercase tracking-[0.22em] text-cp-sanguine"
+            className="block font-mono text-[0.65rem] font-bold uppercase tracking-[0.22em] text-cp-paprika"
           >
             § Nouveau message
           </label>
@@ -139,7 +139,7 @@ export default async function BookingDetailPage({
       <footer className="flex flex-wrap items-center justify-between gap-3">
         <Link
           href="/dashboard/bookings"
-          className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.22em] text-cp-ink-soft hover:text-cp-sanguine"
+          className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.22em] text-cp-ink-soft hover:text-cp-paprika"
         >
           ← Retour aux séjours
         </Link>
@@ -171,7 +171,7 @@ function DetailTile({
 }) {
   return (
     <div className="flex flex-col gap-1 bg-cp-paper p-6 sm:p-8">
-      <p className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.22em] text-cp-sanguine">
+      <p className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.22em] text-cp-paprika">
         {label}
       </p>
       <p className="font-display text-4xl font-bold leading-none tracking-tight text-cp-ink sm:text-5xl">

@@ -2,9 +2,9 @@ import * as React from "react"
 
 import { cn } from "@/lib/utils"
 
-// Carte « fiche catalogue » : cadre encre 1.5px sur bone, zéro radius,
-// zéro ombre. Sous-composants conformes à l'API shadcn pour ne pas casser
-// les usages futurs.
+// Carte « livre d'illustration » : cadre encre fin, fond paper, légère
+// rondeur (3px), zéro ombre — la matière vient de la couleur, pas du
+// drop shadow. Sous-composants conformes à l'API shadcn.
 function Card({
   className,
   size = "default",
@@ -15,7 +15,7 @@ function Card({
       data-slot="card"
       data-size={size}
       className={cn(
-        "group/card flex flex-col gap-4 overflow-hidden border border-cp-ink bg-cp-paper py-5 text-sm text-cp-ink has-data-[slot=card-footer]:pb-0 has-[>img:first-child]:pt-0 data-[size=sm]:gap-3 data-[size=sm]:py-4 data-[size=sm]:has-data-[slot=card-footer]:pb-0",
+        "group/card flex flex-col gap-4 overflow-hidden rounded-md border border-cp-ink bg-cp-paper py-5 text-sm text-cp-ink has-data-[slot=card-footer]:pb-0 has-[>img:first-child]:pt-0 data-[size=sm]:gap-3 data-[size=sm]:py-4 data-[size=sm]:has-data-[slot=card-footer]:pb-0",
         className
       )}
       {...props}
@@ -41,7 +41,7 @@ function CardTitle({ className, ...props }: React.ComponentProps<"div">) {
     <div
       data-slot="card-title"
       className={cn(
-        "font-display text-2xl leading-[1.05] tracking-tight text-cp-ink group-data-[size=sm]/card:text-lg",
+        "font-display text-2xl leading-tight text-cp-ink group-data-[size=sm]/card:text-lg",
         className
       )}
       {...props}

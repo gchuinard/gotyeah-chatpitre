@@ -26,7 +26,7 @@ export function SiteFooter() {
               <br />
               <a
                 href="mailto:bonjour@chat-pitre.fr"
-                className="underline underline-offset-4 decoration-cp-ink/40 hover:decoration-cp-sanguine hover:text-cp-sanguine"
+                className="underline underline-offset-4 decoration-cp-ink/40 hover:decoration-cp-paprika hover:text-cp-paprika"
               >
                 bonjour@chat-pitre.fr
               </a>
@@ -76,7 +76,7 @@ function FooterColumn({
 }) {
   return (
     <div className="space-y-4">
-      <h2 className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.22em] text-cp-sanguine">
+      <h2 className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.22em] text-cp-paprika">
         {title}
       </h2>
       <ul className="space-y-2">{children}</ul>
@@ -95,7 +95,7 @@ function FooterLink({
     <li>
       <Link
         href={href}
-        className="font-body text-sm text-cp-ink underline-offset-4 decoration-[1.5px] decoration-cp-ink/20 hover:underline hover:decoration-cp-sanguine hover:text-cp-sanguine"
+        className="font-body text-sm text-cp-ink underline-offset-4 decoration-[1.5px] decoration-cp-ink/20 hover:underline hover:decoration-cp-paprika hover:text-cp-paprika"
       >
         {children}
       </Link>

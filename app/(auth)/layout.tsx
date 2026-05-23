@@ -35,7 +35,7 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
             « Vous nous confiez un chat. Nous vous en rendons compte.{" "}
             <span className="not-italic">— C&apos;est tout ce que cette maison sait faire.</span> »
           </p>
-          <p className="mt-8 font-mono text-[0.65rem] font-bold uppercase tracking-[0.22em] text-cp-sanguine">
+          <p className="mt-8 font-mono text-[0.65rem] font-bold uppercase tracking-[0.22em] text-cp-paprika">
             § règle première — fondation 2024
           </p>
         </div>
@@ -55,7 +55,7 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
         <header className="flex items-center justify-end gap-6 border-b border-cp-ink px-6 py-4 sm:px-10">
           <Link
             href="/"
-            className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.22em] text-cp-ink-soft transition-colors hover:text-cp-sanguine"
+            className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.22em] text-cp-ink-soft transition-colors hover:text-cp-paprika"
           >
             ← Retour à l&apos;accueil
           </Link>

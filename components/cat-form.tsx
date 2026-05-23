@@ -48,11 +48,11 @@ export function CatForm({
         aria-label="Fil d'Ariane"
         className="mb-10 flex items-center gap-2 font-mono text-[0.65rem] font-bold uppercase tracking-[0.18em] text-cp-ink-soft"
       >
-        <Link href="/dashboard" className="hover:text-cp-sanguine">
+        <Link href="/dashboard" className="hover:text-cp-paprika">
           Mon espace
         </Link>
         <span aria-hidden>/</span>
-        <Link href="/dashboard/cats" className="hover:text-cp-sanguine">
+        <Link href="/dashboard/cats" className="hover:text-cp-paprika">
           Pensionnaires
         </Link>
         <span aria-hidden>/</span>
@@ -267,7 +267,7 @@ function RadioPill({
       className={cn(
         "relative grid cursor-pointer place-items-center bg-cp-paper px-4 py-3 text-center font-mono text-[0.7rem] font-bold uppercase tracking-[0.18em] text-cp-ink-soft transition-colors hover:bg-cp-paper-deep",
         "has-[input:checked]:bg-cp-ink has-[input:checked]:text-cp-paper",
-        "has-[input:focus-visible]:outline has-[input:focus-visible]:outline-2 has-[input:focus-visible]:-outline-offset-2 has-[input:focus-visible]:outline-cp-sanguine",
+        "has-[input:focus-visible]:outline has-[input:focus-visible]:outline-2 has-[input:focus-visible]:-outline-offset-2 has-[input:focus-visible]:outline-cp-paprika",
       )}
     >
       <input
@@ -307,7 +307,7 @@ function CriterionCheckbox({
         className={cn(
           "relative flex cursor-pointer items-start gap-4 bg-cp-paper p-5 transition-colors hover:bg-cp-paper-deep",
           "has-[input:checked]:bg-cp-paper-deep",
-          "has-[input:focus-visible]:outline has-[input:focus-visible]:outline-2 has-[input:focus-visible]:-outline-offset-2 has-[input:focus-visible]:outline-cp-sanguine",
+          "has-[input:focus-visible]:outline has-[input:focus-visible]:outline-2 has-[input:focus-visible]:-outline-offset-2 has-[input:focus-visible]:outline-cp-paprika",
         )}
       >
         <input

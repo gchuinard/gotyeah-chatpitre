@@ -214,7 +214,7 @@ export default function LeLieuPage() {
           « La maison s&apos;organise autour du chat, pas l&apos;inverse.
           C&apos;est la seule règle écrite qu&apos;on tienne à conserver. »
         </p>
-        <p className="mt-6 font-mono text-[0.65rem] font-bold uppercase tracking-[0.22em] text-cp-sanguine">
+        <p className="mt-6 font-mono text-[0.65rem] font-bold uppercase tracking-[0.22em] text-cp-paprika">
           § règle première — fondation 2024
         </p>
       </RuledBox>
@@ -265,7 +265,7 @@ function PracticalTile({
 }) {
   return (
     <div className="space-y-3 bg-cp-paper p-6">
-      <h3 className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.22em] text-cp-sanguine">
+      <h3 className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.22em] text-cp-paprika">
         {title}
       </h3>
       <p className="font-body text-sm leading-relaxed text-cp-ink">

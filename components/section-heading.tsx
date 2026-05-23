@@ -1,16 +1,17 @@
 import { cn } from "@/lib/utils";
 
-/// En-tête de section style « entrée de catalogue » : un numéro mono
-/// sanguine (« 01. »), un filet d'encre fin, un grand titre Bodoni Moda,
-/// et un éventuel kicker en italique Bodoni. Remplace l'ancien
-/// `ActHeading` théâtral. Le numéro est obligatoire pour conserver la
-/// logique de table des matières.
+/// En-tête de section « livre d'illustration » : un numéro mono dans un
+/// bloc coloré (cobalt par défaut), le titre Newsreader grand corps, et
+/// un kicker en italique chaud. Plus généreux et coloré que la version
+/// brutalist — la couleur du chip souligne la personnalité de la section.
+
 export function SectionHeading({
   number,
   title,
   kicker,
   align = "left",
   as: Tag = "h2",
+  tone = "cobalt",
   className,
 }: {
   number: string;
@@ -18,8 +19,17 @@ export function SectionHeading({
   kicker?: string;
   align?: "left" | "center";
   as?: "h1" | "h2" | "h3";
+  tone?: "cobalt" | "paprika" | "canari" | "feuille" | "ink";
   className?: string;
 }) {
+  const chipClass = {
+    cobalt: "bg-cp-cobalt text-cp-paper",
+    paprika: "bg-cp-paprika text-cp-paper",
+    canari: "bg-cp-canari text-cp-ink",
+    feuille: "bg-cp-feuille text-cp-paper",
+    ink: "bg-cp-ink text-cp-paper",
+  }[tone];
+
   return (
     <header
       className={cn(
@@ -30,16 +40,21 @@ export function SectionHeading({
     >
       <div
         className={cn(
-          "flex items-baseline gap-4",
+          "flex items-center gap-4",
           align === "center" && "justify-center",
         )}
       >
-        <span className="font-mono text-sm font-bold uppercase tracking-[0.16em] text-cp-sanguine">
-          {number}.
+        <span
+          className={cn(
+            "inline-flex h-7 items-center justify-center rounded-sm px-2.5 font-mono text-xs font-bold uppercase tracking-[0.14em]",
+            chipClass,
+          )}
+        >
+          n° {number}
         </span>
-        <span aria-hidden className="h-px flex-1 bg-cp-ink" />
+        <span aria-hidden className="h-px flex-1 bg-cp-ink/30" />
       </div>
-      <Tag className="font-display text-4xl font-medium leading-[0.98] tracking-[-0.01em] text-cp-ink sm:text-5xl lg:text-6xl">
+      <Tag className="font-display text-4xl font-medium leading-[1.02] tracking-tight text-cp-ink sm:text-5xl lg:text-6xl">
         {title}
       </Tag>
       {kicker && (
