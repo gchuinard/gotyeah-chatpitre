@@ -1,8 +1,11 @@
+"use client";
+
+import { useState, useTransition, type FormEvent } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 import { Field } from "@/components/field";
 import { LibraryStamp } from "@/components/library-stamp";
-import { MaquetteForm } from "@/components/maquette-form";
 import { RuleDivider } from "@/components/rule-divider";
 import { SectionHeading } from "@/components/section-heading";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -10,12 +13,12 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 
-/// Formulaire de déclaration / édition de pensionnaire. Maquette statique
-/// — pas de câblage Prisma : le bouton « Enregistrer » renvoie à la liste
-/// via un Link. Les champs sont fonctionnels (typing OK, focus OK) mais
-/// non persistés.
+/// Formulaire de déclaration / édition de pensionnaire — câblé sur l'API
+/// `/api/cats` (POST en création) et `/api/cats/[id]` (PATCH en édition).
+/// Au succès, redirige vers la liste avec un refresh.
 
 export type CatFormValues = {
+  id?: string;
   name?: string;
   sex?: "MALE" | "FEMALE";
   breed?: string;
@@ -38,9 +41,77 @@ export function CatForm({
   defaultValues?: CatFormValues;
   reference?: string;
 }) {
+  const router = useRouter();
   const v = defaultValues ?? {};
   const c = v.criteria ?? {};
   const isEdit = mode === "edit";
+
+  const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [pending, startTransition] = useTransition();
+
+  function onSubmit(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setError(null);
+    setFieldErrors({});
+
+    const fd = new FormData(e.currentTarget);
+    const name = String(fd.get("name") ?? "").trim();
+    const sex = String(fd.get("sex") ?? "").trim();
+    const breed = String(fd.get("breed") ?? "").trim();
+    const birthYearStr = String(fd.get("birthYear") ?? "").trim();
+    const notes = String(fd.get("notes") ?? "").trim();
+
+    if (!name) {
+      setFieldErrors({ name: "Le nom du chat est requis." });
+      return;
+    }
+    if (sex !== "MALE" && sex !== "FEMALE") {
+      setFieldErrors({ sex: "Sélectionnez un sexe." });
+      return;
+    }
+
+    let birthDate: string | undefined;
+    if (birthYearStr) {
+      const year = Number(birthYearStr);
+      if (!Number.isInteger(year) || year < 1990 || year > 2100) {
+        setFieldErrors({ birthYear: "Année invalide." });
+        return;
+      }
+      birthDate = `${year}-01-01`;
+    }
+
+    const payload = {
+      name,
+      sex,
+      breed: breed || undefined,
+      birthDate,
+      personality: notes || undefined,
+      isSterilized: fd.get("sterilized") === "on",
+      isIdentified: fd.get("identified") === "on",
+      vaccinesUpToDate: fd.get("vaccines") === "on",
+      isSociable: fd.get("sociable") === "on",
+    };
+
+    startTransition(async () => {
+      const url = isEdit && v.id ? `/api/cats/${v.id}` : "/api/cats";
+      const method = isEdit ? "PATCH" : "POST";
+      const res = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) {
+        const data: { error?: string; fields?: Record<string, string> } =
+          await res.json().catch(() => ({}));
+        setError(data.error ?? "Échec de l'enregistrement.");
+        if (data.fields) setFieldErrors(data.fields);
+        return;
+      }
+      router.push("/dashboard/cats");
+      router.refresh();
+    });
+  }
 
   return (
     <div className="mx-auto w-full max-w-4xl px-6 py-12 sm:px-10 sm:py-20">
@@ -80,14 +151,7 @@ export function CatForm({
 
       <RuleDivider className="my-12" />
 
-      <MaquetteForm
-        className="space-y-14"
-        successMessage={
-          isEdit
-            ? "Fiche mise à jour — maquette."
-            : "Fiche enregistrée — maquette."
-        }
-      >
+      <form className="space-y-14" noValidate onSubmit={onSubmit}>
         {/* Section 01 — Identité */}
         <FormSection
           number="01"
@@ -95,7 +159,12 @@ export function CatForm({
           description="Le nom et le sexe sont les seules informations indispensables."
         >
           <div className="grid gap-6 sm:grid-cols-[2fr_1fr]">
-            <Field label="Nom de scène" htmlFor="cat-name" required>
+            <Field
+              label="Nom de scène"
+              htmlFor="cat-name"
+              required
+              error={fieldErrors.name}
+            >
               <Input
                 id="cat-name"
                 name="name"
@@ -104,8 +173,13 @@ export function CatForm({
                 required
               />
             </Field>
-            <Field label="Sexe" htmlFor="cat-sex-male" required>
-              <div className="grid grid-cols-2 gap-px overflow-hidden border border-cp-ink bg-cp-ink">
+            <Field
+              label="Sexe"
+              htmlFor="cat-sex-male"
+              required
+              error={fieldErrors.sex}
+            >
+              <div className="grid grid-cols-2 gap-px overflow-hidden rounded-md border border-cp-ink bg-cp-ink">
                 <RadioPill
                   id="cat-sex-male"
                   name="sex"
@@ -146,6 +220,7 @@ export function CatForm({
               label="Année de naissance"
               htmlFor="cat-birthyear"
               hint="Approximative pour les chats trouvés."
+              error={fieldErrors.birthYear}
             >
               <Input
                 id="cat-birthyear"
@@ -167,7 +242,7 @@ export function CatForm({
           title="Conditions d'admission"
           description="Cochez ce qui est à jour. Une lacune n'est pas un refus automatique — c'est un sujet de conversation."
         >
-          <ul className="grid gap-px overflow-hidden border border-cp-ink bg-cp-ink sm:grid-cols-2">
+          <ul className="grid gap-px overflow-hidden rounded-md border border-cp-ink bg-cp-ink sm:grid-cols-2">
             <CriterionCheckbox
               id="crit-sterilized"
               name="sterilized"
@@ -222,17 +297,24 @@ export function CatForm({
 
         {/* Actions */}
         <footer className="flex flex-wrap items-center justify-end gap-3">
+          {error && (
+            <p className="font-body text-sm text-cp-paprika">{error}</p>
+          )}
           <Link
             href="/dashboard/cats"
             className={buttonVariants({ variant: "ghost", size: "default" })}
           >
             Annuler
           </Link>
-          <Button type="submit" size="lg" className="px-10">
-            {isEdit ? "Mettre à jour la fiche →" : "Enregistrer la fiche →"}
+          <Button type="submit" size="lg" className="px-10" disabled={pending}>
+            {pending
+              ? "Enregistrement…"
+              : isEdit
+                ? "Mettre à jour la fiche →"
+                : "Enregistrer la fiche →"}
           </Button>
         </footer>
-      </MaquetteForm>
+      </form>
     </div>
   );
 }
@@ -304,10 +386,6 @@ function CriterionCheckbox({
   gloss: string;
   defaultChecked?: boolean;
 }) {
-  // Astuce d'affichage de la coche : l'indicateur démarre `bg-cp-paper text-cp-paper`
-  // (SVG paper sur fond paper = invisible). À l'état coché (peer-checked sur le
-  // <input> frère), il bascule en `bg-cp-ink` : le SVG paper devient visible
-  // sur l'encre.
   return (
     <li>
       <label

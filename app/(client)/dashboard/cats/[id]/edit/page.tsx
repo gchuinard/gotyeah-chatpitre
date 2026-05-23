@@ -1,31 +1,44 @@
 import { notFound } from "next/navigation";
 
 import { CatForm } from "@/components/cat-form";
-import { getCat } from "@/lib/fixtures";
+import { getCurrentUser } from "@/lib/auth";
+import { prisma } from "@/lib/db";
+import { displayRef } from "@/lib/repository";
 
-/// Édition d'une fiche existante. Params en Promise (convention Next 16).
-/// Le formulaire est pré-rempli depuis les fixtures ; le « Mettre à jour »
-/// renvoie pour l'instant à la liste (pas de câblage Prisma).
+/// Édition d'une fiche pensionnaire — lecture Prisma, vérification que
+/// le chat appartient bien à l'utilisateur courant. Le CatForm gère le
+/// PATCH /api/cats/[id] au submit.
 export default async function EditCatPage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const cat = getCat(id);
-  if (!cat) notFound();
+  const user = await getCurrentUser();
+  if (!user) return null;
+
+  const cat = await prisma.cat.findUnique({ where: { id } });
+  if (!cat || cat.ownerId !== user.id) notFound();
 
   return (
     <CatForm
       mode="edit"
-      reference={cat.reference}
+      reference={displayRef(cat.id)}
       defaultValues={{
+        id: cat.id,
         name: cat.name,
         sex: cat.sex,
         breed: cat.breed ?? undefined,
-        // L'année est dérivable de l'âge en maquette : reste vide
-        // tant que le champ birthdate n'est pas câblé.
-        criteria: cat.criteria,
+        birthYear: cat.birthDate
+          ? String(cat.birthDate.getFullYear())
+          : undefined,
+        notes: cat.personality ?? undefined,
+        criteria: {
+          sterilized: cat.isSterilized,
+          identified: cat.isIdentified,
+          vaccines: cat.vaccinesUpToDate,
+          sociable: cat.isSociable,
+        },
       }}
     />
   );
