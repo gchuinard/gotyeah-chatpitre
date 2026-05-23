@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 
 import { BookingStatusBadge } from "@/components/booking-status-badge";
 import { LibraryStamp } from "@/components/library-stamp";
+import { MaquetteActionButton, MaquetteForm } from "@/components/maquette-form";
 import { MessageThread } from "@/components/message-thread";
 import { StayJournal } from "@/components/stay-journal";
 import { RuleDivider } from "@/components/rule-divider";
@@ -144,10 +145,9 @@ export default async function BookingDetailPage({
         <MessageThread messages={booking.messages} />
 
         {/* Formulaire nouveau message — maquette */}
-        <form
-          action="/dashboard/bookings"
-          method="get"
-          className="space-y-4 border border-cp-ink bg-cp-paper p-6 sm:p-8"
+        <MaquetteForm
+          className="space-y-4 rounded-md border border-cp-ink bg-cp-paper p-6 sm:p-8"
+          successMessage="Message envoyé — maquette, le câblage data viendra."
         >
           <label
             htmlFor="reply-body"
@@ -166,7 +166,7 @@ export default async function BookingDetailPage({
               Envoyer →
             </Button>
           </div>
-        </form>
+        </MaquetteForm>
       </section>
 
       <RuleDivider className="my-16" />
@@ -181,15 +181,15 @@ export default async function BookingDetailPage({
         </Link>
 
         {["PENDING", "QUESTION_ASKED"].includes(booking.status) && (
-          <Link
-            href="/dashboard/bookings"
+          <MaquetteActionButton
             className={buttonVariants({
               variant: "destructive",
               size: "sm",
             })}
+            successMessage="Demande d'annulation enregistrée — maquette."
           >
             Annuler la demande
-          </Link>
+          </MaquetteActionButton>
         )}
       </footer>
     </article>

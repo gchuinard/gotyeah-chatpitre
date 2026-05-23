@@ -3,6 +3,7 @@ import Link from "next/link";
 import { DateRangePicker } from "@/components/date-range-picker";
 import { Field } from "@/components/field";
 import { LibraryStamp } from "@/components/library-stamp";
+import { MaquetteForm } from "@/components/maquette-form";
 import { RuleDivider } from "@/components/rule-divider";
 import { SectionHeading } from "@/components/section-heading";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -47,7 +48,10 @@ export default function NewBookingPage() {
 
       <RuleDivider className="my-12" />
 
-      <form action="/dashboard/bookings" method="get" className="space-y-14">
+      <MaquetteForm
+        className="space-y-14"
+        successMessage="Demande envoyée à la maison — maquette."
+      >
         {/* 01 — Dates */}
         <FormSection
           number="01"
@@ -134,7 +138,7 @@ export default function NewBookingPage() {
             </Button>
           </div>
         </footer>
-      </form>
+      </MaquetteForm>
     </div>
   );
 }

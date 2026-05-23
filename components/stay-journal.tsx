@@ -1,6 +1,7 @@
 import { CatIllustration } from "@/components/cat-illustration";
 import { Field } from "@/components/field";
 import { LibraryStamp } from "@/components/library-stamp";
+import { MaquetteForm } from "@/components/maquette-form";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
@@ -111,10 +112,9 @@ function JournalEntry({
 
 function NewEntryForm() {
   return (
-    <form
-      action="/admin/bookings"
-      method="get"
+    <MaquetteForm
       className="space-y-4 rounded-md border border-cp-cobalt bg-cp-cobalt p-6 text-cp-paper sm:p-8"
+      successMessage="Entrée publiée — maquette, le carnet réel attend le câblage data."
     >
       <p className="font-mono text-[0.7rem] font-bold uppercase tracking-[0.16em] text-cp-canari">
         Nouvelle entrée du carnet
@@ -141,6 +141,6 @@ function NewEntryForm() {
           Publier l&apos;entrée →
         </Button>
       </div>
-    </form>
+    </MaquetteForm>
   );
 }

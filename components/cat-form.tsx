@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import { Field } from "@/components/field";
 import { LibraryStamp } from "@/components/library-stamp";
+import { MaquetteForm } from "@/components/maquette-form";
 import { RuleDivider } from "@/components/rule-divider";
 import { SectionHeading } from "@/components/section-heading";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -79,7 +80,14 @@ export function CatForm({
 
       <RuleDivider className="my-12" />
 
-      <form action="/dashboard/cats" method="get" className="space-y-14">
+      <MaquetteForm
+        className="space-y-14"
+        successMessage={
+          isEdit
+            ? "Fiche mise à jour — maquette."
+            : "Fiche enregistrée — maquette."
+        }
+      >
         {/* Section 01 — Identité */}
         <FormSection
           number="01"
@@ -224,7 +232,7 @@ export function CatForm({
             {isEdit ? "Mettre à jour la fiche →" : "Enregistrer la fiche →"}
           </Button>
         </footer>
-      </form>
+      </MaquetteForm>
     </div>
   );
 }
