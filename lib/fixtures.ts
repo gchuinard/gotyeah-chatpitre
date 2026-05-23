@@ -58,6 +58,23 @@ export type FixtureClient = {
   bookingCount: number;
 };
 
+/// Une entrée du « carnet de séjour » : la maison poste régulièrement
+/// une note + une photo pour chaque pensionnaire en cours de séjour. Le
+/// client la voit sur la page détail de sa réservation.
+///
+/// `imageVariant` / `imagePose` désignent l'illustration Charley Harper
+/// utilisée à la place de la vraie photo, en attendant l'upload réel.
+export type FixtureStayUpdate = {
+  id: string;
+  bookingId: string;
+  catId: string;
+  imageVariant: "cobalt" | "paprika" | "canari" | "feuille";
+  imagePose: "sitting" | "sleeping" | "standing" | "watching";
+  caption: string;
+  postedAt: string; // « 22 mai · 14h05 »
+  postedAtISO: string; // « 2026-05-22T14:05 » pour le tri
+};
+
 // --- Comptes -------------------------------------------------------------
 // L'utilisateur courant pointé par u-1 (les autres comptes sont en admin).
 
@@ -492,6 +509,177 @@ export function getBooking(id: string): FixtureBooking | undefined {
 
 export function getClient(id: string): FixtureClient | undefined {
   return CLIENTS.find((c) => c.id === id);
+}
+
+// --- Carnet de séjour ----------------------------------------------------
+
+export const STAY_UPDATES: FixtureStayUpdate[] = [
+  // === b-121 (passé) — Henriette, Salami + Maestro, mars 2026 ===
+  {
+    id: "u-121-1",
+    bookingId: "b-121",
+    catId: "c-1",
+    imageVariant: "paprika",
+    imagePose: "sitting",
+    caption:
+      "Salami est arrivé sans broncher. Il a tout reniflé en silence puis s'est installé sur la couverture qu'il connaît.",
+    postedAt: "14 mars · 12h40",
+    postedAtISO: "2026-03-14T12:40",
+  },
+  {
+    id: "u-121-2",
+    bookingId: "b-121",
+    catId: "c-2",
+    imageVariant: "cobalt",
+    imagePose: "watching",
+    caption:
+      "Maestro plus méfiant — il observe depuis le perchoir. Pâtée à peine entamée ce matin mais il a bu.",
+    postedAt: "15 mars · 09h15",
+    postedAtISO: "2026-03-15T09:15",
+  },
+  {
+    id: "u-121-3",
+    bookingId: "b-121",
+    catId: "c-1",
+    imageVariant: "feuille",
+    imagePose: "sleeping",
+    caption:
+      "Sieste de l'après-midi dans le jardin pour les deux. Salami a chassé une mouche. Maestro a regardé.",
+    postedAt: "17 mars · 16h20",
+    postedAtISO: "2026-03-17T16:20",
+  },
+  {
+    id: "u-121-4",
+    bookingId: "b-121",
+    catId: "c-2",
+    imageVariant: "canari",
+    imagePose: "standing",
+    caption:
+      "Maestro a fini par accepter une caresse. Reprise complète du rythme alimentaire. On approche du départ — tout est prêt.",
+    postedAt: "20 mars · 18h00",
+    postedAtISO: "2026-03-20T18:00",
+  },
+
+  // === b-130 (en cours) — Sidonie, Pompon + Comtesse, mai 2026 ===
+  {
+    id: "u-130-1",
+    bookingId: "b-130",
+    catId: "c-5",
+    imageVariant: "cobalt",
+    imagePose: "sitting",
+    caption:
+      "Pompon a pris ses marques dès la première heure — il dort déjà sur la couverture en laine. Le persan, ça connaît le confort.",
+    postedAt: "20 mai · 14h05",
+    postedAtISO: "2026-05-20T14:05",
+  },
+  {
+    id: "u-130-2",
+    bookingId: "b-130",
+    catId: "c-6",
+    imageVariant: "paprika",
+    imagePose: "watching",
+    caption:
+      "Comtesse plus prudente — elle a fait le tour de toute la chambre avant de daigner s'allonger. Repas du soir nickel.",
+    postedAt: "20 mai · 19h45",
+    postedAtISO: "2026-05-20T19:45",
+  },
+  {
+    id: "u-130-3",
+    bookingId: "b-130",
+    catId: "c-5",
+    imageVariant: "feuille",
+    imagePose: "sleeping",
+    caption:
+      "Première sortie dans le jardin pour les deux ensemble. Pompon a observé une mésange charbonnière sans bouger d'un poil.",
+    postedAt: "22 mai · 11h30",
+    postedAtISO: "2026-05-22T11:30",
+  },
+
+  // === b-131 (en cours) — Albert, Hugolin, mai 2026 ===
+  {
+    id: "u-131-1",
+    bookingId: "b-131",
+    catId: "c-7",
+    imageVariant: "canari",
+    imagePose: "watching",
+    caption:
+      "Hugolin connaît les lieux, séjour facile. Il a réclamé le perchoir de la fenêtre est dès l'arrivée — comme la dernière fois.",
+    postedAt: "19 mai · 11h00",
+    postedAtISO: "2026-05-19T11:00",
+  },
+  {
+    id: "u-131-2",
+    bookingId: "b-131",
+    catId: "c-7",
+    imageVariant: "paprika",
+    imagePose: "standing",
+    caption:
+      "Petite course dans le couloir ce matin avec une balle en papier froissé. Énergie au beau fixe.",
+    postedAt: "20 mai · 10h15",
+    postedAtISO: "2026-05-20T10:15",
+  },
+  {
+    id: "u-131-3",
+    bookingId: "b-131",
+    catId: "c-7",
+    imageVariant: "cobalt",
+    imagePose: "sleeping",
+    caption:
+      "Trois heures de sieste après le repas. C'est un chat qui sait profiter de ses vacances.",
+    postedAt: "21 mai · 15h30",
+    postedAtISO: "2026-05-21T15:30",
+  },
+  {
+    id: "u-131-4",
+    bookingId: "b-131",
+    catId: "c-7",
+    imageVariant: "feuille",
+    imagePose: "sitting",
+    caption:
+      "Visite vétérinaire de routine validée — tout est bon. Encore une semaine de vacances pour lui.",
+    postedAt: "23 mai · 09h20",
+    postedAtISO: "2026-05-23T09:20",
+  },
+
+  // === b-132 (en cours) — Jean-Loup, Madame Cliquot, mai 2026 ===
+  {
+    id: "u-132-1",
+    bookingId: "b-132",
+    catId: "c-4",
+    imageVariant: "paprika",
+    imagePose: "sitting",
+    caption:
+      "Madame Cliquot a marqué son territoire en 15 minutes. Tout va bien — elle a son coin lecture (pas de livres, juste le radiateur).",
+    postedAt: "22 mai · 11h20",
+    postedAtISO: "2026-05-22T11:20",
+  },
+  {
+    id: "u-132-2",
+    bookingId: "b-132",
+    catId: "c-4",
+    imageVariant: "canari",
+    imagePose: "watching",
+    caption:
+      "Le mûrier a tout son intérêt. Elle a passé la matinée à étudier la trajectoire d'une feuille morte.",
+    postedAt: "23 mai · 10h40",
+    postedAtISO: "2026-05-23T10:40",
+  },
+];
+
+/// Renvoie les entrées du carnet pour un séjour donné, triées de la plus
+/// récente à la plus ancienne.
+export function getStayUpdates(bookingId: string): FixtureStayUpdate[] {
+  return STAY_UPDATES.filter((u) => u.bookingId === bookingId).sort((a, b) =>
+    a.postedAtISO < b.postedAtISO ? 1 : -1,
+  );
+}
+
+/// Renvoie les entrées du carnet sur tous les séjours actuellement en
+/// cours — utile pour un fil d'activité côté admin.
+export function getRecentStayUpdates(limit = 5): FixtureStayUpdate[] {
+  return [...STAY_UPDATES]
+    .sort((a, b) => (a.postedAtISO < b.postedAtISO ? 1 : -1))
+    .slice(0, limit);
 }
 
 /// Renvoie les chats actuellement en séjour : ACCEPTED + dont la plage

@@ -58,11 +58,6 @@ function isoDate(d: Date): string {
   return `${y}-${m}-${day}`;
 }
 
-function parseISO(s: string): Date {
-  const [y, m, d] = s.split("-").map(Number);
-  return new Date(y, m - 1, d);
-}
-
 function frLabel(d: Date): string {
   return `${d.getDate()} ${MONTHS_SHORT[d.getMonth()]} ${d.getFullYear()}`;
 }
@@ -252,7 +247,6 @@ export function DateRangePicker({
           today={today}
           start={start}
           end={end}
-          previewEnd={previewEnd}
           onSelect={selectDay}
           onHover={setHovered}
           isInRange={isInRange}
@@ -263,7 +257,6 @@ export function DateRangePicker({
           today={today}
           start={start}
           end={end}
-          previewEnd={previewEnd}
           onSelect={selectDay}
           onHover={setHovered}
           isInRange={isInRange}
@@ -301,7 +294,6 @@ function MonthCalendar({
   today,
   start,
   end,
-  previewEnd,
   onSelect,
   onHover,
   isInRange,
@@ -311,7 +303,6 @@ function MonthCalendar({
   today: Date;
   start: Date | null;
   end: Date | null;
-  previewEnd: Date | null;
   onSelect: (d: Date) => void;
   onHover: (d: Date | null) => void;
   isInRange: (d: Date) => boolean;
