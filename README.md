@@ -4,14 +4,16 @@ Site web de la pension féline **Le Chat-Pitre** : comptes des propriétaires,
 fiches des chats, demandes de réservation de séjour, fil de discussion par
 réservation, notifications in-app et facturation.
 
-> **État du projet.** Le backend (schéma, auth, API, Docker) **et** la refonte
-> UI sont en place. Direction artistique « mid-century illustré » à la
-> Charley Harper — crème chaud, jewel-tones saturés (cobalt, paprika,
-> canari, feuille), chats géométriques flat color en SVG inline. Typo
-> Newsreader (serif chaleureux) + Manrope (body) + JetBrains Mono. Les
-> écrans client/admin tournent sur des **fixtures statiques**
-> (`lib/fixtures.ts`) ; le câblage Prisma/API arrivera dans un prompt
-> dédié.
+> **État du projet.** Backend (schéma, auth, API, Docker), refonte UI et
+> câblage data complet sont en place. Direction artistique « mid-century
+> illustré » à la Charley Harper — crème chaud, jewel-tones saturés
+> (cobalt, paprika, canari, feuille), chats géométriques flat color en
+> SVG inline. Typo Newsreader (serif chaleureux) + Manrope (body) +
+> JetBrains Mono. Les écrans client et admin lisent et écrivent Prisma
+> (séjours, chats, messages, carnet de séjour, notifications, factures
+> PDF). Le seed `npm run db:seed` (re)pose les comptes démo et un jeu
+> de séjours panachés ; en production il faut le lancer manuellement
+> dans le conteneur après chaque déploiement.
 
 ## Stack technique
 
@@ -228,6 +230,6 @@ PostgreSQL du homelab.
 
 ## Hors périmètre (étapes suivantes)
 
-Pages vitrine publiques et design, upload des photos de chats, génération des
-factures PDF, rappels automatiques d'arrivée (cron `ARRIVAL_REMINDER`),
-pipeline CI/CD de déploiement.
+Upload réel des photos de chats (en attendant, illustrations Charley Harper),
+rappels automatiques d'arrivée (cron `ARRIVAL_REMINDER`), pipeline CI/CD
+de déploiement.
