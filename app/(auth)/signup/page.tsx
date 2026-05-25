@@ -61,6 +61,18 @@ export default function SignupPage() {
 
   return (
     <div className="space-y-10">
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-md border border-cp-ink bg-cp-paper-deep px-5 py-4">
+        <p className="font-body text-base font-medium text-cp-ink">
+          Vous avez déjà un compte&nbsp;?
+        </p>
+        <Link
+          href="/login"
+          className="font-mono text-xs font-bold uppercase tracking-[0.18em] text-cp-paprika underline underline-offset-4 decoration-[1.5px] decoration-cp-paprika/60 hover:decoration-cp-paprika"
+        >
+          Se connecter →
+        </Link>
+      </div>
+
       <header className="space-y-4">
         <LibraryStamp tone="paprika">Ouverture d&apos;une fiche</LibraryStamp>
         <h1 className="font-display text-5xl font-medium leading-[0.95] tracking-[-0.01em] text-cp-ink sm:text-6xl">
@@ -165,21 +177,9 @@ export default function SignupPage() {
         )}
 
         <Button type="submit" disabled={loading} className="w-full" size="lg">
-          {loading ? "Création…" : "Ouvrir ma fiche →"}
+          {loading ? "Création…" : "Créer mon compte"}
         </Button>
       </form>
-
-      <footer className="border-t border-cp-ink/30 pt-6">
-        <p className="font-body text-sm text-cp-ink-soft">
-          Vous avez déjà un compte ?{" "}
-          <Link
-            href="/login"
-            className="font-medium text-cp-ink underline underline-offset-4 decoration-[1.5px] decoration-cp-ink/40 hover:decoration-cp-paprika hover:text-cp-paprika"
-          >
-            Se connecter →
-          </Link>
-        </p>
-      </footer>
     </div>
   );
 }
