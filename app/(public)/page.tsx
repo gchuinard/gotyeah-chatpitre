@@ -295,7 +295,7 @@ export default function HomePage() {
       </section>
 
       {/* ============================================================
-          04 — QUESTIONS D'HONNEUR
+          04 — FAQ
           ============================================================ */}
       <section
         id="questions"
@@ -305,7 +305,7 @@ export default function HomePage() {
         <div className="mx-auto w-full max-w-6xl px-6 py-20 sm:px-10 sm:py-28">
           <SectionHeading
             number="04"
-            title="Questions d'honneur"
+            title="FAQ"
             kicker="Les réponses aux interrogations légitimes."
             tone="canari"
           />

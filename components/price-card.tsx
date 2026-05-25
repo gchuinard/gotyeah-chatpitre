@@ -1,4 +1,3 @@
-import { LibraryStamp } from "@/components/library-stamp";
 import { cn } from "@/lib/utils";
 
 /// Carte tarifaire — montant énorme Newsreader, fond paper ou cobalt
@@ -33,7 +32,7 @@ export function PriceCard({
         className,
       )}
     >
-      <header className="flex items-center justify-between gap-3">
+      <header>
         <span
           className={cn(
             "font-mono text-xs font-bold uppercase tracking-[0.18em]",
@@ -42,14 +41,6 @@ export function PriceCard({
         >
           Tarif {reference}
         </span>
-        {isFeature && (
-          <LibraryStamp
-            tone="paprika"
-            className="border border-cp-paper/40 bg-cp-paper/15 px-2.5 py-1 text-cp-paper"
-          >
-            Formule recommandée
-          </LibraryStamp>
-        )}
       </header>
 
       <h3
