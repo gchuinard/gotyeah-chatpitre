@@ -20,8 +20,15 @@ export {
   formatDateTime,
   formatShortDate,
   nightsBetween,
+  relativeTime,
 } from "@/lib/format";
-import { displayRef as _displayRef, ageLabel as _ageLabel } from "@/lib/format";
+import {
+  ageLabel as _ageLabel,
+  displayRef as _displayRef,
+  relativeTime as _relativeTime,
+} from "@/lib/format";
+
+import type { NotificationItem } from "@/components/notification-bell";
 
 // =========================================================================
 // Adaptateurs Prisma → composants UI
@@ -192,6 +199,125 @@ export function getRecentStayUpdates(limit = 5) {
     orderBy: { createdAt: "desc" },
     take: limit,
   });
+}
+
+// =========================================================================
+// Occupancy
+// =========================================================================
+
+export type DayOccupancy = {
+  day: number;
+  count: number;
+  intensity: "low" | "medium" | "high";
+};
+
+/// Calcule l'occupation jour par jour d'un mois donné, à partir des
+/// bookings ACCEPTED qui chevauchent ce mois. Capacité maison = 7.
+export async function getMonthOccupancy(
+  year: number,
+  monthIndex: number,
+): Promise<DayOccupancy[]> {
+  const monthStart = new Date(Date.UTC(year, monthIndex, 1));
+  const nextMonthStart = new Date(Date.UTC(year, monthIndex + 1, 1));
+  const daysInMonth = new Date(year, monthIndex + 1, 0).getDate();
+
+  const bookings = await prisma.booking.findMany({
+    where: {
+      status: "ACCEPTED",
+      startDate: { lt: nextMonthStart },
+      endDate: { gte: monthStart },
+    },
+    select: {
+      startDate: true,
+      endDate: true,
+      cats: { select: { catId: true } },
+    },
+  });
+
+  const out: DayOccupancy[] = [];
+  for (let day = 1; day <= daysInMonth; day += 1) {
+    const date = new Date(Date.UTC(year, monthIndex, day));
+    const count = bookings
+      .filter((b) => b.startDate <= date && date < b.endDate)
+      .reduce((sum, b) => sum + b.cats.length, 0);
+
+    if (count === 0) continue;
+    out.push({
+      day,
+      count,
+      intensity: count >= 6 ? "high" : count >= 4 ? "medium" : "low",
+    });
+  }
+  return out;
+}
+
+// =========================================================================
+// Comptes (admin)
+// =========================================================================
+
+export type ClientWithCounts = User & {
+  catCount: number;
+  bookingCount: number;
+};
+
+function getAdminEmails(): string[] {
+  return (process.env.ADMIN_EMAILS ?? "")
+    .split(",")
+    .map((e) => e.trim().toLowerCase())
+    .filter(Boolean);
+}
+
+/// Liste les comptes clients (non admin) avec leur nombre de chats et
+/// de séjours pour la table /admin/clients.
+export async function getAllClients(): Promise<ClientWithCounts[]> {
+  const adminEmails = getAdminEmails();
+  const users = await prisma.user.findMany({
+    where: {
+      email: { notIn: adminEmails.length > 0 ? adminEmails : [""] },
+    },
+    orderBy: { createdAt: "desc" },
+    include: {
+      _count: { select: { cats: true, bookings: true } },
+    },
+  });
+  return users.map((u) => ({
+    ...u,
+    catCount: u._count.cats,
+    bookingCount: u._count.bookings,
+  }));
+}
+
+/// Compte total des comptes clients (hors admin).
+export function countClients(): Promise<number> {
+  const adminEmails = getAdminEmails();
+  return prisma.user.count({
+    where: {
+      email: { notIn: adminEmails.length > 0 ? adminEmails : [""] },
+    },
+  });
+}
+
+// =========================================================================
+// Notifications (in-app)
+// =========================================================================
+
+/// Renvoie les notifications récentes d'un utilisateur, formatées pour
+/// le composant `NotificationBell`. Triées par date desc, limitées à 10.
+export async function getNotificationsFor(
+  userId: string,
+): Promise<NotificationItem[]> {
+  const notifs = await prisma.notification.findMany({
+    where: { userId },
+    orderBy: { createdAt: "desc" },
+    take: 10,
+  });
+  return notifs.map((n) => ({
+    id: n.id,
+    label: n.title + (n.body ? ` — ${n.body}` : ""),
+    timeAgo: _relativeTime(n.createdAt),
+    unread: n.readAt === null,
+    href: n.link ?? undefined,
+  }));
 }
 
 // =========================================================================

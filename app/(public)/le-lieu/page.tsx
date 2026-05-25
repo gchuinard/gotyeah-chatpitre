@@ -12,6 +12,10 @@ export const metadata: Metadata = {
     "Une maison de villégiature à Bordeaux : sept chambres, un jardin clos, une cuisine, un humain.",
 };
 
+// CurrentResidentsWall lit la base (pensionnaires actuellement en séjour)
+// — donc cette page ne peut plus être prerendée statiquement au build.
+export const dynamic = "force-dynamic";
+
 /// /le-lieu — page éditoriale décrivant la maison, ses pièces, les
 /// modalités pratiques d'accès. Aucune photo réelle ; placeholders type
 /// fiche catalogue (cadre encre + caption mono).

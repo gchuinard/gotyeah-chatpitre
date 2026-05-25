@@ -3,45 +3,63 @@ import Link from "next/link";
 import { BookingStatusBadge } from "@/components/booking-status-badge";
 import { CurrentResidentsWall } from "@/components/current-residents-wall";
 import { LibraryStamp } from "@/components/library-stamp";
-import { OccupancyCalendar, type Occupancy } from "@/components/occupancy-calendar";
+import { OccupancyCalendar } from "@/components/occupancy-calendar";
 import { RuleDivider } from "@/components/rule-divider";
 import { RuledBox } from "@/components/ruled-box";
 import { SectionHeading } from "@/components/section-heading";
 import { buttonVariants } from "@/components/ui/button";
 import { getCurrentUser } from "@/lib/auth";
-import { BOOKINGS, CATS, CLIENTS, getCat, getClient } from "@/lib/fixtures";
+import { prisma } from "@/lib/db";
+import {
+  countClients,
+  displayRef,
+  formatDate,
+  getMonthOccupancy,
+  nightsBetween,
+} from "@/lib/repository";
 
-/// Tableau de bord administration. Vue d'ensemble brutalist editorial :
-/// stats compactes, file de décisions à traiter, calendrier d'occupation,
-/// activité récente.
+/// Tableau de bord administration — entièrement Prisma : décisions en
+/// attente, stats globales, calendrier d'occupation du mois courant,
+/// pensionnaires actuellement en séjour.
+
+const FRENCH_MONTHS = [
+  "Janvier", "Février", "Mars", "Avril", "Mai", "Juin",
+  "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre",
+];
 
 export default async function AdminDashboardPage() {
   const user = await getCurrentUser();
 
-  // Décompte des statuts pour les stats hautes
-  const pendingDecisions = BOOKINGS.filter((b) =>
-    ["PENDING", "QUESTION_ASKED"].includes(b.status),
-  );
-  const acceptedActive = BOOKINGS.filter((b) => b.status === "ACCEPTED");
+  // Mois courant pour le calendrier d'occupation.
+  const today = new Date();
+  const monthIndex = today.getMonth();
+  const year = today.getFullYear();
+  const monthLabel = FRENCH_MONTHS[monthIndex];
+  const firstOfMonth = new Date(year, monthIndex, 1);
+  // Lundi = 0, dimanche = 6
+  const firstWeekday = (firstOfMonth.getDay() + 6) % 7;
+  const daysInMonth = new Date(year, monthIndex + 1, 0).getDate();
 
-  // Calendrier — mars 2026 (mois le plus chargé des fixtures). Données
-  // statiques panachées pour montrer jours pleins / jours vides.
-  const marsOccupancy: Occupancy[] = [
-    { day: 14, count: 2, intensity: "low" },
-    { day: 15, count: 2, intensity: "low" },
-    { day: 16, count: 2, intensity: "low" },
-    { day: 17, count: 4, intensity: "medium" }, // arrivée d'un autre groupe
-    { day: 18, count: 5, intensity: "medium" },
-    { day: 19, count: 7, intensity: "high" },
-    { day: 20, count: 7, intensity: "high" },
-    { day: 21, count: 5, intensity: "medium" },
-    { day: 22, count: 3, intensity: "low" },
-    { day: 23, count: 3, intensity: "low" },
-    { day: 28, count: 2, intensity: "low" },
-    { day: 29, count: 2, intensity: "low" },
-    { day: 30, count: 2, intensity: "low" },
-    { day: 31, count: 2, intensity: "low" },
-  ];
+  const [
+    pendingDecisions,
+    acceptedActiveCount,
+    clientCount,
+    catCount,
+    occupancies,
+  ] = await Promise.all([
+    prisma.booking.findMany({
+      where: { status: { in: ["PENDING", "QUESTION_ASKED"] } },
+      orderBy: { startDate: "asc" },
+      include: {
+        cats: { include: { cat: true } },
+        user: true,
+      },
+    }),
+    prisma.booking.count({ where: { status: "ACCEPTED" } }),
+    countClients(),
+    prisma.cat.count(),
+    getMonthOccupancy(year, monthIndex),
+  ]);
 
   return (
     <div className="mx-auto w-full max-w-7xl px-6 py-12 sm:px-10 sm:py-16">
@@ -55,8 +73,8 @@ export default async function AdminDashboardPage() {
         </h1>
         <p className="max-w-2xl font-display text-xl italic leading-snug text-cp-ink-soft">
           {pendingDecisions.length} décision{pendingDecisions.length > 1 ? "s" : ""}{" "}
-          en attente, {acceptedActive.length} séjour{acceptedActive.length > 1 ? "s" : ""}{" "}
-          confirmé{acceptedActive.length > 1 ? "s" : ""}. La maison tourne.
+          en attente, {acceptedActiveCount} séjour{acceptedActiveCount > 1 ? "s" : ""}{" "}
+          confirmé{acceptedActiveCount > 1 ? "s" : ""}. La maison tourne.
         </p>
       </header>
 
@@ -75,17 +93,17 @@ export default async function AdminDashboardPage() {
         />
         <StatTile
           label="Séjours confirmés"
-          value={acceptedActive.length.toString().padStart(2, "0")}
+          value={acceptedActiveCount.toString().padStart(2, "0")}
           gloss="Statut ACCEPTED"
         />
         <StatTile
           label="Comptes inscrits"
-          value={CLIENTS.length.toString().padStart(2, "0")}
+          value={clientCount.toString().padStart(2, "0")}
           gloss="Propriétaires actifs"
         />
         <StatTile
           label="Pensionnaires"
-          value={CATS.length.toString().padStart(2, "0")}
+          value={catCount.toString().padStart(2, "0")}
           gloss="Toutes fiches confondues"
         />
       </section>
@@ -123,37 +141,35 @@ export default async function AdminDashboardPage() {
         ) : (
           <ul className="border-t border-cp-ink">
             {pendingDecisions.map((b) => {
-              const client = getClient(b.ownerId);
-              const cats = b.catIds
-                .map((id) => getCat(id))
-                .filter((c): c is NonNullable<typeof c> => Boolean(c));
+              const cats = b.cats.map((link) => link.cat);
+              const nights = nightsBetween(b.startDate, b.endDate);
               return (
                 <li
                   key={b.id}
                   className="grid gap-3 border-b border-cp-ink/30 py-5 sm:grid-cols-[6rem_2fr_2fr_auto_auto] sm:items-center sm:gap-5"
                 >
                   <p className="font-mono text-sm font-bold uppercase tracking-[0.18em] text-cp-paprika">
-                    N° {b.reference}
+                    N° {displayRef(b.id)}
                   </p>
                   <div className="space-y-0.5">
                     <p className="font-display text-lg italic leading-tight text-cp-ink">
-                      {b.startDate} → {b.endDate}
+                      {formatDate(b.startDate)} → {formatDate(b.endDate)}
                     </p>
                     <p className="font-body text-xs text-cp-ink-soft">
-                      {b.nights} nuit{b.nights > 1 ? "s" : ""} · {cats.map((c) => c.name).join(" · ")}
+                      {nights} nuit{nights > 1 ? "s" : ""} · {cats.map((c) => c.name).join(" · ")}
                     </p>
                   </div>
                   <div className="space-y-0.5">
                     <p className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.18em] text-cp-ink">
-                      {client ? `${client.firstName} ${client.lastName}` : "—"}
+                      {b.user.firstName} {b.user.lastName}
                     </p>
                     <p className="font-body text-xs text-cp-ink-soft">
-                      {client?.email}
+                      {b.user.email}
                     </p>
                   </div>
                   <BookingStatusBadge status={b.status} />
                   <Link
-                    href={`/admin/bookings/${b.reference}`}
+                    href={`/admin/bookings/${b.id}`}
                     className={buttonVariants({ variant: "secondary", size: "sm" })}
                   >
                     Ouvrir →
@@ -172,16 +188,16 @@ export default async function AdminDashboardPage() {
         <SectionHeading
           number="02"
           title="Calendrier d'occupation"
-          kicker="Vue d'ensemble du mois courant — capacité maximale : 7 chambres."
+          kicker="Vue du mois courant — capacité maximale : 7 chambres."
         />
         <OccupancyCalendar
-          monthLabel="Mars"
-          year={2026}
-          monthIndex={2}
-          firstWeekday={6} // 1er mars 2026 = dimanche
-          daysInMonth={31}
-          todayDay={20}
-          occupancies={marsOccupancy}
+          monthLabel={monthLabel}
+          year={year}
+          monthIndex={monthIndex}
+          firstWeekday={firstWeekday}
+          daysInMonth={daysInMonth}
+          todayDay={today.getDate()}
+          occupancies={occupancies}
         />
       </section>
     </div>

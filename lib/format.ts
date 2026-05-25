@@ -58,3 +58,21 @@ export function ageLabel(birthDate: Date | null | undefined): string {
 export function nightsBetween(start: Date, end: Date): number {
   return Math.round((end.getTime() - start.getTime()) / 86400000);
 }
+
+/// Temps relatif depuis une date passée, en français : « il y a 2 h »,
+/// « hier », « il y a 3 j », ou date formatée pour les plus anciennes.
+export function relativeTime(from: Date, reference: Date = new Date()): string {
+  const diffMs = reference.getTime() - from.getTime();
+  if (diffMs < 0) return "à l'instant";
+  const diffMinutes = Math.round(diffMs / 60000);
+  if (diffMinutes < 60) {
+    if (diffMinutes <= 1) return "à l'instant";
+    return `il y a ${diffMinutes} min`;
+  }
+  const diffHours = Math.round(diffMs / 3600000);
+  if (diffHours < 24) return `il y a ${diffHours} h`;
+  const diffDays = Math.round(diffMs / 86400000);
+  if (diffDays === 1) return "hier";
+  if (diffDays < 7) return `il y a ${diffDays} j`;
+  return formatShortDate(from);
+}
