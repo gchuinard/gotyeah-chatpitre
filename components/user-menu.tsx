@@ -1,7 +1,6 @@
 "use client";
 
-import { useTransition } from "react";
-import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { Menu } from "@base-ui/react/menu";
 import { ChevronDown } from "lucide-react";
 
@@ -9,7 +8,7 @@ import { cn } from "@/lib/utils";
 
 /// Menu utilisateur dans l'en-tête : pastille d'initiales + nom + chevron.
 /// Dropdown brutalist editorial avec liens vers les sections personnelles
-/// et bouton de déconnexion (POST /api/auth/logout via fetch + refresh).
+/// et bouton de déconnexion (POST /api/auth/logout + navigation forcée).
 
 export function UserMenu({
   firstName,
@@ -22,18 +21,18 @@ export function UserMenu({
   email: string;
   links: { href: string; label: string }[];
 }) {
-  const router = useRouter();
-  const [pending, startTransition] = useTransition();
+  const [pending, setPending] = useState(false);
 
   const initials = computeInitials(firstName, lastName, email);
   const displayName = [firstName, lastName].filter(Boolean).join(" ") || email;
 
   async function logout() {
+    setPending(true);
     await fetch("/api/auth/logout", { method: "POST" });
-    startTransition(() => {
-      router.push("/login");
-      router.refresh();
-    });
+    // Navigation complète : router.push() laissait parfois le client sur
+    // la page courante (cache RSC stale). window.location refait la
+    // requête avec les cookies effacés, le proxy renvoie /login.
+    window.location.assign("/login");
   }
 
   return (
