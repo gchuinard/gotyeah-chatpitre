@@ -310,15 +310,18 @@ export function InvoicePdf({
     year: "numeric",
   });
   const nights = nightsBetween(booking.startDate, booking.endDate);
-  const total = Number(booking.totalAmount);
-  const acompte = Number(booking.depositAmount);
+  const total = Number(booking.totalAmount ?? 0);
+  const acompte = Number(booking.depositAmount ?? 0);
   const solde = total - acompte;
   // Tarif par nuit reconstitué : 1er chat + extras (cohérent avec le calcul
-  // figé à la création du booking, cf. lib/pricing.ts).
+  // figé au moment où l'admin pose le devis, cf. lib/pricing.ts).
   const extras = Math.max(0, cats.length - 1);
   const pricePerNight =
-    Number(booking.pricePerFirstCat) +
-    extras * Number(booking.pricePerExtraCat);
+    Number(booking.pricePerFirstCat ?? 0) +
+    extras * Number(booking.pricePerExtraCat ?? 0);
+  const nightsSubtotal = pricePerNight * nights;
+  const extraAmount = Number(booking.extraAmount ?? 0);
+  const hasExtras = extraAmount > 0;
   const designation =
     cats.length === 1
       ? `Séjour d'un chat`
@@ -418,9 +421,27 @@ export function InvoicePdf({
               {formatAmount(pricePerNight)}
             </Text>
             <Text style={[styles.amountMono, styles.colTotal]}>
-              {formatAmount(total)}
+              {formatAmount(nightsSubtotal)}
             </Text>
           </View>
+
+          {hasExtras && (
+            <View style={styles.tableRow}>
+              <View style={styles.colDesignation}>
+                <Text style={styles.designationTitle}>
+                  Suppléments
+                </Text>
+                <Text style={styles.designationGloss}>
+                  {booking.extraNotes ?? "Conditions particulières chiffrées par la maison."}
+                </Text>
+              </View>
+              <Text style={[styles.amountText, styles.colQty]}>—</Text>
+              <Text style={[styles.amountMono, styles.colUnit]}>—</Text>
+              <Text style={[styles.amountMono, styles.colTotal]}>
+                {formatAmount(extraAmount)}
+              </Text>
+            </View>
+          )}
         </View>
 
         {/* TOTAUX */}
