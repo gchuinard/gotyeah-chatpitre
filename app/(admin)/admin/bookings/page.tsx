@@ -7,7 +7,12 @@ import {
 import { LibraryStamp } from "@/components/library-stamp";
 import { RuleDivider } from "@/components/rule-divider";
 import { SectionHeading } from "@/components/section-heading";
-import { BOOKINGS, getCat, getClient } from "@/lib/fixtures";
+import {
+  displayRef,
+  formatDate,
+  getAllBookings,
+  nightsBetween,
+} from "@/lib/repository";
 
 // Ordre d'affichage : décisions en attente d'abord, puis acceptées,
 // puis le reste (terminées, annulées, refusées).
@@ -21,14 +26,9 @@ const STATUS_ORDER: BookingStatus[] = [
 ];
 
 /// Liste admin des séjours : tableau brutalist, tri par priorité de statut.
-/// Filtre par statut en haut sous forme de chips mono caps (no-op pour
-/// l'instant — peut être câblé via query params plus tard).
 
-export default function AdminBookingsListPage() {
-  const sorted = [...BOOKINGS].sort(
-    (a, b) =>
-      STATUS_ORDER.indexOf(a.status) - STATUS_ORDER.indexOf(b.status),
-  );
+export default async function AdminBookingsListPage() {
+  const bookings = await getAllBookings();
 
   const counts: Record<BookingStatus, number> = {
     PENDING: 0,
@@ -38,7 +38,7 @@ export default function AdminBookingsListPage() {
     CANCELLED: 0,
     COMPLETED: 0,
   };
-  for (const b of BOOKINGS) counts[b.status] += 1;
+  for (const b of bookings) counts[b.status] += 1;
 
   return (
     <div className="mx-auto w-full max-w-7xl px-6 py-12 sm:px-10 sm:py-16">
@@ -56,7 +56,7 @@ export default function AdminBookingsListPage() {
 
       <header className="space-y-4">
         <LibraryStamp boxed>
-          Tous les séjours — {BOOKINGS.length} entrée{BOOKINGS.length > 1 ? "s" : ""}
+          Tous les séjours — {bookings.length} entrée{bookings.length > 1 ? "s" : ""}
         </LibraryStamp>
         <h1 className="font-display text-5xl font-medium leading-[0.95] tracking-[-0.01em] text-cp-ink sm:text-6xl">
           Séjours
@@ -71,7 +71,7 @@ export default function AdminBookingsListPage() {
       {/* Chips de comptage par statut */}
       <section
         aria-label="Répartition par statut"
-        className="grid gap-px overflow-hidden border border-cp-ink bg-cp-ink sm:grid-cols-3 lg:grid-cols-6"
+        className="grid gap-px overflow-hidden rounded-md border border-cp-ink bg-cp-ink sm:grid-cols-3 lg:grid-cols-6"
       >
         {STATUS_ORDER.map((s) => (
           <StatusChip key={s} status={s} count={counts[s]} />
@@ -85,7 +85,7 @@ export default function AdminBookingsListPage() {
         className="mt-14"
       />
 
-      <div className="mt-8 overflow-x-auto border border-cp-ink">
+      <div className="mt-8 overflow-x-auto rounded-md border border-cp-ink">
         <table className="w-full min-w-[60rem] border-collapse text-left">
           <thead className="bg-cp-paper-deep">
             <tr>
@@ -99,11 +99,10 @@ export default function AdminBookingsListPage() {
             </tr>
           </thead>
           <tbody>
-            {sorted.map((b) => {
-              const client = getClient(b.ownerId);
-              const cats = b.catIds
-                .map((id) => getCat(id))
-                .filter((c): c is NonNullable<typeof c> => Boolean(c));
+            {bookings.map((b) => {
+              const cats = b.cats.map((link) => link.cat);
+              const nights = nightsBetween(b.startDate, b.endDate);
+              const ref = displayRef(b.id);
               return (
                 <tr
                   key={b.id}
@@ -111,10 +110,10 @@ export default function AdminBookingsListPage() {
                 >
                   <Td>
                     <Link
-                      href={`/admin/bookings/${b.reference}`}
+                      href={`/admin/bookings/${b.id}`}
                       className="font-mono text-sm font-bold uppercase tracking-[0.16em] text-cp-paprika hover:text-cp-ink"
                     >
-                      N° {b.reference}
+                      N° {ref}
                     </Link>
                   </Td>
                   <Td>
@@ -122,22 +121,20 @@ export default function AdminBookingsListPage() {
                   </Td>
                   <Td>
                     <p className="font-display text-lg italic leading-tight text-cp-ink">
-                      {client
-                        ? `${client.firstName} ${client.lastName}`
-                        : "Inconnu"}
+                      {b.user.firstName} {b.user.lastName}
                     </p>
                     <p className="font-mono text-[0.6rem] uppercase tracking-[0.16em] text-cp-ink-soft">
-                      {client?.email}
+                      {b.user.email}
                     </p>
                   </Td>
                   <Td>
                     <p className="font-body text-sm leading-snug text-cp-ink">
-                      {b.startDate}
+                      {formatDate(b.startDate)}
                       <br />
-                      <span className="text-cp-ink-soft">→ {b.endDate}</span>
+                      <span className="text-cp-ink-soft">→ {formatDate(b.endDate)}</span>
                     </p>
                     <p className="mt-1 font-mono text-[0.6rem] uppercase tracking-[0.16em] text-cp-ink-soft">
-                      {b.nights} nuit{b.nights > 1 ? "s" : ""}
+                      {nights} nuit{nights > 1 ? "s" : ""}
                     </p>
                   </Td>
                   <Td>
@@ -147,12 +144,12 @@ export default function AdminBookingsListPage() {
                   </Td>
                   <Td className="text-right">
                     <p className="font-display text-2xl font-bold leading-none text-cp-ink">
-                      {b.total}€
+                      {Number(b.totalAmount).toLocaleString("fr-FR")}€
                     </p>
                   </Td>
                   <Td>
                     <Link
-                      href={`/admin/bookings/${b.reference}`}
+                      href={`/admin/bookings/${b.id}`}
                       className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.22em] text-cp-ink-soft hover:text-cp-paprika"
                     >
                       Ouvrir →

@@ -3,9 +3,9 @@ import { redirect } from "next/navigation";
 
 import { ClientHeader } from "@/components/client-header";
 import { LibraryStamp } from "@/components/library-stamp";
-import type { NotificationItem } from "@/components/notification-bell";
 import { Wordmark } from "@/components/wordmark";
 import { getCurrentUser, isAdmin } from "@/lib/auth";
+import { getNotificationsFor } from "@/lib/repository";
 
 /// Layout de l'administration : session valide + email admin requis.
 /// Sinon 403. Le ClientHeader est réutilisé en variant=admin (nav admin,
@@ -22,30 +22,7 @@ export default async function AdminLayout({
     return <Forbidden />;
   }
 
-  // Notifications admin = demandes en attente + questions client.
-  const notifications: NotificationItem[] = [
-    {
-      id: "an-1",
-      label: "Nouvelle demande N° 127 — Hugolin (Albert R.-G.) — 12 → 18 mai",
-      timeAgo: "il y a 1 h",
-      unread: true,
-      href: "/admin/bookings/127",
-    },
-    {
-      id: "an-2",
-      label: "Question posée à Henriette sur le séjour N° 124 — réponse en attente",
-      timeAgo: "il y a 3 j",
-      unread: true,
-      href: "/admin/bookings/124",
-    },
-    {
-      id: "an-3",
-      label: "Nouveau message de Henriette Berthier sur N° 121.",
-      timeAgo: "hier",
-      unread: false,
-      href: "/admin/bookings/121",
-    },
-  ];
+  const notifications = await getNotificationsFor(user.id);
 
   return (
     <>

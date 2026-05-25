@@ -3,16 +3,15 @@ import {
   pickCatIllustration,
 } from "@/components/cat-illustration";
 import { LibraryStamp } from "@/components/library-stamp";
+import { ageLabel, formatDate } from "@/lib/format";
+import { getCurrentResidents } from "@/lib/repository";
 import { cn } from "@/lib/utils";
-import { getCurrentResidents } from "@/lib/fixtures";
 
 /// « En séjour cette semaine » — mur des pensionnaires actuellement dans
-/// la maison. Pour chaque chat : illustration géométrique tirée du nom,
-/// nom Newsreader italique, propriétaire (prénom seulement, vie privée),
-/// dates du séjour. Filtre : bookings ACCEPTED dont la plage chevauche
-/// aujourd'hui. Données venant de `getCurrentResidents()`.
+/// la maison. Lit Prisma via `getCurrentResidents()` (bookings ACCEPTED
+/// dont la plage chevauche aujourd'hui), dédupliqué par chat.
 
-export function CurrentResidentsWall({
+export async function CurrentResidentsWall({
   variant = "full",
   className,
 }: {
@@ -23,7 +22,7 @@ export function CurrentResidentsWall({
   variant?: "full" | "compact";
   className?: string;
 }) {
-  const residents = getCurrentResidents();
+  const residents = await getCurrentResidents();
 
   if (residents.length === 0) {
     return (
@@ -85,11 +84,11 @@ export function CurrentResidentsWall({
                 </p>
                 {!isCompact && (
                   <p className="font-body text-xs text-cp-ink-soft">
-                    {cat.breed} · {cat.ageLabel}
+                    {cat.breed ?? "sans race"} · {ageLabel(cat.birthDate)}
                   </p>
                 )}
                 <p className="font-mono text-[0.6rem] font-semibold uppercase tracking-[0.12em] text-cp-paprika">
-                  Jusqu&apos;au {booking.endDate}
+                  Jusqu&apos;au {formatDate(booking.endDate)}
                 </p>
                 {owner && !isCompact && (
                   <p className="font-mono text-[0.6rem] uppercase tracking-[0.12em] text-cp-ink-soft">

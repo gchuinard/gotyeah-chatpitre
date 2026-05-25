@@ -4,13 +4,17 @@ import { CatCard } from "@/components/cat-card";
 import { LibraryStamp } from "@/components/library-stamp";
 import { RuleDivider } from "@/components/rule-divider";
 import { buttonVariants } from "@/components/ui/button";
-import { CURRENT_OWNER_ID, getCatsByOwner } from "@/lib/fixtures";
+import { getCurrentUser } from "@/lib/auth";
+import { getCatsByOwner, toCatCardProps } from "@/lib/repository";
 
 /// Liste de la troupe : grille de fiches CatCard, chaque carte clique
-/// vers l'édition. Maquette statique (fixtures).
+/// vers l'édition. Lecture Prisma via repository.
 
-export default function CatsListPage() {
-  const cats = getCatsByOwner(CURRENT_OWNER_ID);
+export default async function CatsListPage() {
+  const user = await getCurrentUser();
+  if (!user) return null;
+
+  const cats = await getCatsByOwner(user.id);
 
   return (
     <div className="mx-auto w-full max-w-7xl px-6 py-12 sm:px-10 sm:py-16">
@@ -62,12 +66,7 @@ export default function CatsListPage() {
                 className="group block outline-none focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-cp-paprika"
               >
                 <CatCard
-                  reference={cat.reference}
-                  name={cat.name}
-                  sex={cat.sex}
-                  breed={cat.breed}
-                  ageLabel={cat.ageLabel}
-                  criteria={cat.criteria}
+                  {...toCatCardProps(cat)}
                   className="transition-shadow group-hover:shadow-[6px_6px_0_0_var(--color-cp-ink)]"
                 />
               </Link>
@@ -81,7 +80,7 @@ export default function CatsListPage() {
 
 function EmptyTroop() {
   return (
-    <div className="flex flex-col items-start gap-6 border border-cp-ink/40 bg-cp-paper-deep/60 p-10 sm:p-14">
+    <div className="flex flex-col items-start gap-6 rounded-md border border-cp-ink/40 bg-cp-paper-deep/60 p-10 sm:p-14">
       <LibraryStamp>aucune fiche déclarée</LibraryStamp>
       <p className="font-display text-3xl italic leading-tight text-cp-ink">
         La troupe est encore vide.

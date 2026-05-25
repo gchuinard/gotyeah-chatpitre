@@ -2,17 +2,19 @@ import Link from "next/link";
 
 import { LibraryStamp } from "@/components/library-stamp";
 import { RuleDivider } from "@/components/rule-divider";
-import { CATS, CLIENTS } from "@/lib/fixtures";
+import { prisma } from "@/lib/db";
+import { displayRef, formatDate, getAllClients } from "@/lib/repository";
 
-/// Liste admin des comptes clients : table brutalist façon fiche
-/// bibliothèque, ordonnée par date d'inscription décroissante (les
-/// derniers arrivés d'abord, puis l'historique).
+/// Liste admin des comptes clients — Prisma, avec compteurs cats et bookings
+/// pour chaque ligne (sous-queries via _count).
 
-export default function AdminClientsListPage() {
-  // Tri stable : ordre des fixtures (déjà chronologique inversé).
-  const clients = CLIENTS;
-  const totalCats = CATS.length;
-  const avgCats = (totalCats / clients.length).toFixed(1);
+export default async function AdminClientsListPage() {
+  const [clients, totalCats] = await Promise.all([
+    getAllClients(),
+    prisma.cat.count(),
+  ]);
+  const avgCats =
+    clients.length > 0 ? (totalCats / clients.length).toFixed(1) : "0,0";
 
   return (
     <div className="mx-auto w-full max-w-7xl px-6 py-12 sm:px-10 sm:py-16">
@@ -46,7 +48,7 @@ export default function AdminClientsListPage() {
       {/* Stats compactes */}
       <section
         aria-label="Indicateurs comptes"
-        className="grid gap-px overflow-hidden border border-cp-ink bg-cp-ink sm:grid-cols-3"
+        className="grid gap-px overflow-hidden rounded-md border border-cp-ink bg-cp-ink sm:grid-cols-3"
       >
         <StatTile
           label="Comptes inscrits"
@@ -65,7 +67,7 @@ export default function AdminClientsListPage() {
         />
       </section>
 
-      <div className="mt-14 overflow-x-auto border border-cp-ink">
+      <div className="mt-14 overflow-x-auto rounded-md border border-cp-ink">
         <table className="w-full min-w-[60rem] border-collapse text-left">
           <thead className="bg-cp-paper-deep">
             <tr>
@@ -85,7 +87,7 @@ export default function AdminClientsListPage() {
               >
                 <Td>
                   <p className="font-mono text-sm font-bold uppercase tracking-[0.16em] text-cp-paprika">
-                    {c.id.replace("u-", "").padStart(3, "0")}
+                    {displayRef(c.id)}
                   </p>
                 </Td>
                 <Td>
@@ -110,7 +112,7 @@ export default function AdminClientsListPage() {
                 </Td>
                 <Td>
                   <p className="font-mono text-xs font-bold uppercase tracking-[0.14em] text-cp-ink">
-                    {c.createdAt}
+                    {formatDate(c.createdAt)}
                   </p>
                 </Td>
                 <Td className="text-center">
@@ -131,9 +133,8 @@ export default function AdminClientsListPage() {
 
       <p className="mt-8 max-w-2xl font-body text-sm text-cp-ink-soft">
         Le détail d&apos;une fiche client (historique complet des séjours,
-        rendez-vous, notes admin) sera ajouté quand le câblage Prisma sera
-        en place — pour l&apos;instant ces lignes servent à valider la mise
-        en page.
+        rendez-vous, notes admin) viendra plus tard — pour l&apos;instant
+        ces lignes donnent la vue d&apos;ensemble.
       </p>
     </div>
   );

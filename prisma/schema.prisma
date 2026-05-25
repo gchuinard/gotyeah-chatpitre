@@ -32,6 +32,7 @@ model User {
   bookings      Booking[]
   notifications Notification[]
   messages      BookingMessage[] // messages écrits par cet utilisateur
+  stayUpdates   StayUpdate[]     // entrées du carnet de séjour postées (admin)
 }
 
 // ---------------------------------------------------------------------------
@@ -80,6 +81,7 @@ model Cat {
   updatedAt DateTime @updatedAt
 
   bookingCats BookingCat[]
+  stayUpdates StayUpdate[]
 
   @@index([ownerId])
 }
@@ -121,9 +123,10 @@ model Booking {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  cats     BookingCat[]
-  messages BookingMessage[]
-  invoices Invoice[]
+  cats        BookingCat[]
+  messages    BookingMessage[]
+  invoices    Invoice[]
+  stayUpdates StayUpdate[]
 
   @@index([userId])
   @@index([status])
@@ -156,6 +159,51 @@ model BookingMessage {
 
   @@index([bookingId])
   @@index([authorId])
+}
+
+// ---------------------------------------------------------------------------
+// Carnet de séjour
+// ---------------------------------------------------------------------------
+
+enum StayUpdateImageVariant {
+  COBALT
+  PAPRIKA
+  CANARI
+  FEUILLE
+}
+
+enum StayUpdateImagePose {
+  SITTING
+  SLEEPING
+  STANDING
+  WATCHING
+}
+
+/// Entrée du carnet de séjour : la maison poste une note photo par jour
+/// pour chaque pensionnaire en séjour. Le client la voit sur la page
+/// détail de sa réservation. Tant que l'upload réel n'est pas en place,
+/// `imageVariant` + `imagePose` désignent l'illustration Charley Harper
+/// utilisée à la place de la photo.
+model StayUpdate {
+  id        String  @id @default(cuid())
+  bookingId String
+  booking   Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  catId String
+  cat   Cat    @relation(fields: [catId], references: [id], onDelete: Cascade)
+
+  authorId String
+  author   User   @relation(fields: [authorId], references: [id], onDelete: Restrict)
+
+  imageUrl     String? // futur upload réel
+  imageVariant StayUpdateImageVariant @default(COBALT)
+  imagePose    StayUpdateImagePose    @default(SITTING)
+  content      String
+
+  createdAt DateTime @default(now())
+
+  @@index([bookingId])
+  @@index([catId])
 }
 
 // ---------------------------------------------------------------------------
