@@ -2,7 +2,6 @@ import type { NextRequest } from "next/server";
 import { prisma } from "@/lib/db";
 import { handle, HttpError, json, parseJson, requireUser } from "@/lib/api";
 import { bookingCreateSchema } from "@/lib/validations";
-import { computeBookingPricing } from "@/lib/pricing";
 import { notifyAdmins } from "@/lib/notifications";
 
 /// GET /api/bookings — liste les réservations de l'utilisateur courant.
@@ -33,20 +32,14 @@ export function POST(req: NextRequest) {
       throw new HttpError(400, "Un ou plusieurs chats sélectionnés sont introuvables.");
     }
 
-    // Tarification calculée et figée au moment de la demande.
-    const pricing = await computeBookingPricing(data.startDate, data.endDate, cats.length);
-
+    // Pas de tarif à la création : la demande nait en PENDING sans devis.
+    // L'admin pose les montants au passage à ACCEPTED via PATCH.
     const booking = await prisma.booking.create({
       data: {
         userId: user.id,
         startDate: data.startDate,
         endDate: data.endDate,
         clientNotes: data.clientNotes ?? null,
-        pricePerFirstCat: pricing.pricePerFirstCat,
-        pricePerExtraCat: pricing.pricePerExtraCat,
-        depositPercentage: pricing.depositPercentage,
-        totalAmount: pricing.totalAmount,
-        depositAmount: pricing.depositAmount,
         cats: { create: cats.map((cat) => ({ catId: cat.id })) },
       },
       include: { cats: { include: { cat: true } } },

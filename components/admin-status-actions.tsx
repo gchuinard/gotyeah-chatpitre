@@ -6,16 +6,16 @@ import { useRouter } from "next/navigation";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-/// Boutons de décision admin pour un séjour PENDING ou QUESTION_ASKED.
-/// Trois actions : Accepter, Poser une question, Refuser. Chacune envoie
-/// un PATCH /api/admin/bookings/[id] avec le nouveau statut, puis refresh.
+/// Actions « sans devis » pour un séjour PENDING ou QUESTION_ASKED :
+/// Poser une question OU Refuser. L'acceptation se fait via le QuoteForm
+/// (qui pose le tarif en même temps).
 
 export function AdminStatusActions({ bookingId }: { bookingId: string }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
-  function applyStatus(status: "ACCEPTED" | "QUESTION_ASKED" | "REJECTED") {
+  function applyStatus(status: "QUESTION_ASKED" | "REJECTED") {
     setError(null);
     startTransition(async () => {
       const res = await fetch(`/api/admin/bookings/${bookingId}`, {
@@ -33,25 +33,11 @@ export function AdminStatusActions({ bookingId }: { bookingId: string }) {
   }
 
   return (
-    <section className="mt-14 rounded-md border border-cp-ink bg-cp-paper-deep/60 p-6 sm:p-8">
-      <p className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.22em] text-cp-paprika">
-        Décision à prendre
+    <section className="mt-8 rounded-md border border-cp-ink/40 bg-cp-paper-deep/60 p-5 sm:p-6">
+      <p className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.22em] text-cp-ink-soft">
+        Autres réponses
       </p>
-      <p className="mt-3 font-display text-2xl italic leading-snug text-cp-ink sm:text-3xl">
-        Quelle suite donnez-vous ?
-      </p>
-      <div className="mt-6 flex flex-wrap items-center gap-3">
-        <button
-          type="button"
-          onClick={() => applyStatus("ACCEPTED")}
-          disabled={pending}
-          className={cn(
-            buttonVariants({ size: "default" }),
-            pending && "opacity-60",
-          )}
-        >
-          Accepter →
-        </button>
+      <div className="mt-4 flex flex-wrap items-center gap-3">
         <button
           type="button"
           onClick={() => applyStatus("QUESTION_ASKED")}
