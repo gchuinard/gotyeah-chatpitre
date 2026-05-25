@@ -5,8 +5,9 @@ import {
   Text,
   View,
 } from "@react-pdf/renderer";
+import type { Booking, Cat, User } from "@prisma/client";
 
-import type { FixtureBooking, FixtureCat, FixtureClient } from "@/lib/fixtures";
+import { displayRef, formatDate, nightsBetween } from "@/lib/format";
 
 // Couleurs du DA — en valeurs absolues parce que @react-pdf/renderer ne
 // résout pas les CSS custom properties. On reste fidèle aux jewel-tones
@@ -278,10 +279,10 @@ const styles = StyleSheet.create({
 });
 
 export type InvoicePdfData = {
-  booking: FixtureBooking;
-  client: Pick<FixtureClient, "firstName" | "lastName" | "email" | "phone">;
-  cats: FixtureCat[];
-  /** Numéro de facture, par défaut dérivé de la référence du séjour. */
+  booking: Booking;
+  client: Pick<User, "firstName" | "lastName" | "email" | "phone">;
+  cats: Cat[];
+  /** Numéro de facture, par défaut dérivé de l'id du séjour. */
   invoiceNumber?: string;
   /** Date d'émission de la facture (« 23 mai 2026 »). */
   issuedAt?: string;
@@ -301,25 +302,36 @@ export function InvoicePdf({
   invoiceNumber,
   issuedAt,
 }: InvoicePdfData) {
-  const ref = invoiceNumber ?? `2026-${booking.reference.padStart(4, "0")}`;
+  const shortRef = displayRef(booking.id);
+  const ref = invoiceNumber ?? `2026-${shortRef}`;
   const issued = issuedAt ?? new Date().toLocaleDateString("fr-FR", {
     day: "2-digit",
     month: "long",
     year: "numeric",
   });
-  const acompte = Math.round(booking.total * 0.3);
-  const solde = booking.total - acompte;
+  const nights = nightsBetween(booking.startDate, booking.endDate);
+  const total = Number(booking.totalAmount);
+  const acompte = Number(booking.depositAmount);
+  const solde = total - acompte;
+  // Tarif par nuit reconstitué : 1er chat + extras (cohérent avec le calcul
+  // figé à la création du booking, cf. lib/pricing.ts).
+  const extras = Math.max(0, cats.length - 1);
+  const pricePerNight =
+    Number(booking.pricePerFirstCat) +
+    extras * Number(booking.pricePerExtraCat);
   const designation =
     cats.length === 1
       ? `Séjour d'un chat`
       : `Séjour de ${cats.length} chats du même foyer`;
-  const catsLabel = cats.map((c) => `${c.name} (${c.breed})`).join(", ");
+  const catsLabel = cats
+    .map((c) => (c.breed ? `${c.name} (${c.breed})` : c.name))
+    .join(", ");
 
   return (
     <Document
       title={`Facture ${ref} — Le Chat-Pitre`}
       author="Le Chat-Pitre"
-      subject={`Facture pour le séjour N° ${booking.reference}`}
+      subject={`Facture pour le séjour N° ${shortRef}`}
     >
       <Page size="A4" style={styles.page}>
         {/* HEADER */}
@@ -369,7 +381,7 @@ export function InvoicePdf({
         <View style={styles.objet}>
           <Text style={styles.objetLabel}>OBJET DU SÉJOUR</Text>
           <Text style={styles.objetTitle}>
-            Du {booking.startDate} au {booking.endDate}
+            Du {formatDate(booking.startDate)} au {formatDate(booking.endDate)}
           </Text>
           <Text style={styles.objetCats}>{catsLabel}</Text>
         </View>
@@ -396,17 +408,17 @@ export function InvoicePdf({
                 Repas, litière, ménage quotidien et observation incluse.
                 Carnet de séjour photo+note disponible en ligne pendant
                 toute la durée.
-                {booking.notes ? ` — ${booking.notes}` : ""}
+                {booking.clientNotes ? ` — ${booking.clientNotes}` : ""}
               </Text>
             </View>
             <Text style={[styles.amountText, styles.colQty]}>
-              {booking.nights}
+              {nights}
             </Text>
             <Text style={[styles.amountMono, styles.colUnit]}>
-              {formatAmount(booking.pricePerNight)}
+              {formatAmount(pricePerNight)}
             </Text>
             <Text style={[styles.amountMono, styles.colTotal]}>
-              {formatAmount(booking.total)}
+              {formatAmount(total)}
             </Text>
           </View>
         </View>
@@ -417,7 +429,7 @@ export function InvoicePdf({
             <View style={styles.totalRow}>
               <Text style={styles.totalLabel}>Total HT</Text>
               <Text style={styles.totalValue}>
-                {formatAmount(booking.total)}
+                {formatAmount(total)}
               </Text>
             </View>
             <View style={styles.totalRow}>
@@ -430,12 +442,14 @@ export function InvoicePdf({
             <View style={styles.totalTTC}>
               <Text style={styles.totalTTCLabel}>Total TTC</Text>
               <Text style={styles.totalTTCValue}>
-                {formatAmount(booking.total)}
+                {formatAmount(total)}
               </Text>
             </View>
 
             <View style={styles.acompteRow}>
-              <Text style={styles.totalLabel}>Acompte 30 % (à la réservation)</Text>
+              <Text style={styles.totalLabel}>
+                Acompte {booking.depositPercentage} % (à la réservation)
+              </Text>
               <Text style={styles.totalValue}>
                 − {formatAmount(acompte)}
               </Text>
