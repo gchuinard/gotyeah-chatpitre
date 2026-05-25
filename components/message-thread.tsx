@@ -1,16 +1,24 @@
 import { cn } from "@/lib/utils";
-import type { FixtureMessage } from "@/lib/fixtures";
 
 /// Fil de discussion entre le client et la maison. Pas de bulles
 /// arrondies — chaque message est un bloc imprimé avec en-tête mono caps
 /// (auteur + horodatage) et corps en body. Les messages de la maison
 /// sont en encre pleine (paper text) pour les distinguer.
 
+export type ThreadMessage = {
+  id: string;
+  fromAdmin: boolean;
+  authorLabel: string;
+  body: string;
+  /** Déjà formaté pour l'affichage (ex. « 23 mai · 14h32 »). */
+  sentAt: string;
+};
+
 export function MessageThread({
   messages,
   emptyLabel = "Aucun message échangé pour l'instant.",
 }: {
-  messages: FixtureMessage[];
+  messages: ThreadMessage[];
   emptyLabel?: string;
 }) {
   if (messages.length === 0) {
@@ -32,7 +40,7 @@ export function MessageThread({
   );
 }
 
-export function MessageBubble({ message }: { message: FixtureMessage }) {
+export function MessageBubble({ message }: { message: ThreadMessage }) {
   const fromAdmin = message.fromAdmin;
   return (
     <article

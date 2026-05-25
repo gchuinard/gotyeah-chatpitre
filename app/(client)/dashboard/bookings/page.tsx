@@ -4,22 +4,29 @@ import { BookingCard } from "@/components/booking-card";
 import { LibraryStamp } from "@/components/library-stamp";
 import { RuleDivider } from "@/components/rule-divider";
 import { buttonVariants } from "@/components/ui/button";
+import { getCurrentUser } from "@/lib/auth";
 import {
-  CURRENT_OWNER_ID,
+  displayRef,
+  formatDate,
   getBookingsByOwner,
-  getCat,
-} from "@/lib/fixtures";
+  nightsBetween,
+} from "@/lib/repository";
 
 /// Liste des séjours du client : tous statuts confondus, ordonnés par
 /// statut puis date. Sépare visuellement « en cours » et « passés ».
 
-export default function BookingsListPage() {
-  const all = getBookingsByOwner(CURRENT_OWNER_ID);
+const CLOSED_STATUSES = ["COMPLETED", "CANCELLED", "REJECTED"] as const;
+
+export default async function BookingsListPage() {
+  const user = await getCurrentUser();
+  if (!user) return null;
+
+  const all = await getBookingsByOwner(user.id);
   const active = all.filter(
-    (b) => !["COMPLETED", "CANCELLED", "REJECTED"].includes(b.status),
+    (b) => !CLOSED_STATUSES.includes(b.status as (typeof CLOSED_STATUSES)[number]),
   );
   const closed = all.filter((b) =>
-    ["COMPLETED", "CANCELLED", "REJECTED"].includes(b.status),
+    CLOSED_STATUSES.includes(b.status as (typeof CLOSED_STATUSES)[number]),
   );
 
   return (
@@ -77,18 +84,16 @@ export default function BookingsListPage() {
             {active.map((b) => (
               <li key={b.id}>
                 <BookingCard
-                  reference={b.reference}
+                  reference={displayRef(b.id)}
                   status={b.status}
-                  startDate={b.startDate}
-                  endDate={b.endDate}
-                  nights={b.nights}
-                  catNames={b.catIds
-                    .map((id) => getCat(id)?.name)
-                    .filter((n): n is string => Boolean(n))}
-                  total={b.total}
-                  notes={b.notes}
+                  startDate={formatDate(b.startDate)}
+                  endDate={formatDate(b.endDate)}
+                  nights={nightsBetween(b.startDate, b.endDate)}
+                  catNames={b.cats.map((link) => link.cat.name)}
+                  total={Number(b.totalAmount)}
+                  notes={b.clientNotes ?? undefined}
                   messageCount={b.messages.length}
-                  href={`/dashboard/bookings/${b.reference}`}
+                  href={`/dashboard/bookings/${b.id}`}
                 />
               </li>
             ))}
@@ -115,17 +120,15 @@ export default function BookingsListPage() {
             {closed.map((b) => (
               <li key={b.id}>
                 <BookingCard
-                  reference={b.reference}
+                  reference={displayRef(b.id)}
                   status={b.status}
-                  startDate={b.startDate}
-                  endDate={b.endDate}
-                  nights={b.nights}
-                  catNames={b.catIds
-                    .map((id) => getCat(id)?.name)
-                    .filter((n): n is string => Boolean(n))}
-                  total={b.total}
+                  startDate={formatDate(b.startDate)}
+                  endDate={formatDate(b.endDate)}
+                  nights={nightsBetween(b.startDate, b.endDate)}
+                  catNames={b.cats.map((link) => link.cat.name)}
+                  total={Number(b.totalAmount)}
                   messageCount={b.messages.length}
-                  href={`/dashboard/bookings/${b.reference}`}
+                  href={`/dashboard/bookings/${b.id}`}
                 />
               </li>
             ))}
