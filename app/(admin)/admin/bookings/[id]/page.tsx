@@ -5,12 +5,14 @@ import { AdminStatusActions } from "@/components/admin-status-actions";
 import { BookingStatusBadge } from "@/components/booking-status-badge";
 import { ConversationView } from "@/components/conversation-view";
 import { LibraryStamp } from "@/components/library-stamp";
+import { QuoteForm } from "@/components/quote-form";
 import { RuleDivider } from "@/components/rule-divider";
 import { RuledBox } from "@/components/ruled-box";
 import { SectionHeading } from "@/components/section-heading";
 import { StayJournal } from "@/components/stay-journal";
 import { buttonVariants } from "@/components/ui/button";
 import { getCurrentUser, isAdmin } from "@/lib/auth";
+import { computeBookingPricing } from "@/lib/pricing";
 import {
   ageLabel,
   displayRef,
@@ -38,6 +40,13 @@ export default async function AdminBookingDetailPage({
   const client = booking.user;
   const nights = nightsBetween(booking.startDate, booking.endDate);
   const ref = displayRef(booking.id);
+  const awaitingQuote = ["PENDING", "QUESTION_ASKED"].includes(booking.status);
+  const hasQuote = booking.totalAmount !== null;
+  // Valeurs suggérées (lues dans Setting via computeBookingPricing) — passées
+  // au QuoteForm pour pré-remplir les champs d'un nouveau devis.
+  const suggested = awaitingQuote
+    ? await computeBookingPricing(booking.startDate, booking.endDate, cats.length)
+    : null;
 
   const messages = booking.messages.map((m) => ({
     id: m.id,
@@ -89,7 +98,7 @@ export default async function AdminBookingDetailPage({
 
       <RuleDivider className="my-12" />
 
-      {/* Récap client + tarif */}
+      {/* Récap client + (devis ou tarif posé) */}
       <section className="grid gap-4 lg:grid-cols-3">
         <DetailTile label="Client">
           <p className="font-display text-2xl italic leading-tight text-cp-ink">
@@ -105,22 +114,40 @@ export default async function AdminBookingDetailPage({
             )}
           </p>
         </DetailTile>
-        <DetailTile label="Tarif total">
-          <p className="font-display text-4xl font-bold leading-none text-cp-ink sm:text-5xl">
-            {Number(booking.totalAmount).toLocaleString("fr-FR")}€
-          </p>
-          <p className="font-mono text-[0.6rem] uppercase tracking-[0.16em] text-cp-ink-soft">
-            {Number(booking.pricePerFirstCat)}€ + {Number(booking.pricePerExtraCat)}€ × {cats.length - 1} · {nights} nuits
-          </p>
-        </DetailTile>
-        <DetailTile label={`Acompte ${booking.depositPercentage} %`}>
-          <p className="font-display text-4xl font-bold leading-none text-cp-ink sm:text-5xl">
-            {Number(booking.depositAmount).toLocaleString("fr-FR")}€
-          </p>
-          <p className="font-mono text-[0.6rem] uppercase tracking-[0.16em] text-cp-ink-soft">
-            À encaisser à la réservation
-          </p>
-        </DetailTile>
+        {hasQuote ? (
+          <>
+            <DetailTile label="Tarif total">
+              <p className="font-display text-4xl font-bold leading-none text-cp-ink sm:text-5xl">
+                {Number(booking.totalAmount).toLocaleString("fr-FR")}€
+              </p>
+              <p className="font-mono text-[0.6rem] uppercase tracking-[0.16em] text-cp-ink-soft">
+                {Number(booking.pricePerFirstCat)}€ + {Number(booking.pricePerExtraCat)}€ × {cats.length - 1} · {nights} nuits
+                {booking.extraAmount !== null && Number(booking.extraAmount) > 0 && (
+                  <> · +{Number(booking.extraAmount).toLocaleString("fr-FR")}€ de suppléments</>
+                )}
+              </p>
+            </DetailTile>
+            <DetailTile label={`Acompte ${booking.depositPercentage} %`}>
+              <p className="font-display text-4xl font-bold leading-none text-cp-ink sm:text-5xl">
+                {Number(booking.depositAmount).toLocaleString("fr-FR")}€
+              </p>
+              <p className="font-mono text-[0.6rem] uppercase tracking-[0.16em] text-cp-ink-soft">
+                À encaisser à la réservation
+              </p>
+            </DetailTile>
+          </>
+        ) : (
+          <DetailTile label="Devis">
+            <p className="font-display text-2xl italic leading-tight text-cp-cobalt">
+              {awaitingQuote ? "À établir ci-dessous" : "Non chiffré"}
+            </p>
+            <p className="font-mono text-[0.6rem] uppercase tracking-[0.16em] text-cp-ink-soft">
+              {awaitingQuote
+                ? "Posez le tarif avant d'accepter"
+                : "Aucun tarif enregistré"}
+            </p>
+          </DetailTile>
+        )}
       </section>
 
       {/* Pensionnaires détaillés */}
@@ -177,29 +204,57 @@ export default async function AdminBookingDetailPage({
         </RuledBox>
       )}
 
-      {/* Facture PDF */}
-      <aside className="mt-10 flex flex-wrap items-center justify-between gap-4 rounded-md border border-cp-cobalt bg-cp-paper-deep p-5 sm:p-6">
-        <div>
-          <p className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.18em] text-cp-cobalt">
-            Facture du séjour
-          </p>
-          <p className="mt-1 font-display text-xl italic text-cp-ink">
-            Aperçu de la facture PDF envoyée au client.
-          </p>
-        </div>
-        <a
-          href={`/api/invoices/${booking.id}/pdf`}
-          target="_blank"
-          rel="noopener"
-          className="inline-flex items-center gap-2 rounded-md border border-cp-cobalt bg-cp-cobalt px-5 py-2.5 font-body text-sm font-semibold text-cp-paper transition-colors hover:bg-cp-cobalt-deep"
-        >
-          Ouvrir la facture PDF ↓
-        </a>
-      </aside>
+      {/* Facture PDF — uniquement quand le devis est posé. */}
+      {hasQuote && (
+        <aside className="mt-10 flex flex-wrap items-center justify-between gap-4 rounded-md border border-cp-cobalt bg-cp-paper-deep p-5 sm:p-6">
+          <div>
+            <p className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.18em] text-cp-cobalt">
+              Facture du séjour
+            </p>
+            <p className="mt-1 font-display text-xl italic text-cp-ink">
+              Aperçu de la facture PDF envoyée au client.
+            </p>
+          </div>
+          <a
+            href={`/api/invoices/${booking.id}/pdf`}
+            target="_blank"
+            rel="noopener"
+            className="inline-flex items-center gap-2 rounded-md border border-cp-cobalt bg-cp-cobalt px-5 py-2.5 font-body text-sm font-semibold text-cp-paper transition-colors hover:bg-cp-cobalt-deep"
+          >
+            Ouvrir la facture PDF ↓
+          </a>
+        </aside>
+      )}
 
-      {/* Actions de statut — réelles, PATCH /api/admin/bookings/[id] */}
-      {["PENDING", "QUESTION_ASKED"].includes(booking.status) && (
-        <AdminStatusActions bookingId={booking.id} />
+      {/* Devis + actions — uniquement tant que PENDING ou QUESTION_ASKED. */}
+      {awaitingQuote && suggested && (
+        <>
+          <QuoteForm
+            bookingId={booking.id}
+            nights={nights}
+            catsCount={cats.length}
+            current={{
+              pricePerFirstCat:
+                booking.pricePerFirstCat === null
+                  ? null
+                  : Number(booking.pricePerFirstCat),
+              pricePerExtraCat:
+                booking.pricePerExtraCat === null
+                  ? null
+                  : Number(booking.pricePerExtraCat),
+              depositPercentage: booking.depositPercentage,
+              extraNotes: booking.extraNotes,
+              extraAmount:
+                booking.extraAmount === null ? null : Number(booking.extraAmount),
+            }}
+            suggested={{
+              pricePerFirstCat: Number(suggested.pricePerFirstCat),
+              pricePerExtraCat: Number(suggested.pricePerExtraCat),
+              depositPercentage: suggested.depositPercentage,
+            }}
+          />
+          <AdminStatusActions bookingId={booking.id} />
+        </>
       )}
 
       <RuleDivider className="my-16" label="Carnet de séjour" tone="cobalt" />

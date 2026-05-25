@@ -74,6 +74,18 @@ export const adminBookingUpdateSchema = z.object({
     .enum(["PENDING", "QUESTION_ASKED", "ACCEPTED", "REJECTED", "CANCELLED", "COMPLETED"])
     .optional(),
   adminNotes: z.string().trim().optional(),
+  // Devis posé par l'admin. totalAmount et depositAmount sont recalculés
+  // côté serveur — pas acceptés depuis le client.
+  pricePerFirstCat: z.coerce.number().nonnegative("Tarif négatif impossible.").optional(),
+  pricePerExtraCat: z.coerce.number().nonnegative("Tarif négatif impossible.").optional(),
+  depositPercentage: z.coerce
+    .number()
+    .int("L'acompte doit être un entier (pourcentage).")
+    .min(0)
+    .max(100)
+    .optional(),
+  extraNotes: z.string().trim().optional(),
+  extraAmount: z.coerce.number().nonnegative("Suppléments négatifs impossibles.").optional(),
 });
 
 // --- Utilitaire -------------------------------------------------------------

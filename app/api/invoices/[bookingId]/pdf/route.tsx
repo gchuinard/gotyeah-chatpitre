@@ -21,9 +21,26 @@ export async function GET(
   }
 
   const { bookingId } = await params;
-  const booking = await getBookingFor(bookingId, user.id, isAdmin(user));
+  const admin = isAdmin(user);
+  const booking = await getBookingFor(bookingId, user.id, admin);
   if (!booking) {
     return NextResponse.json({ error: "Séjour introuvable" }, { status: 404 });
+  }
+
+  // La facture n'existe qu'à partir du moment où le devis est posé. Côté
+  // client : il faut aussi que le séjour soit accepté/terminé (un brouillon
+  // tarifé pendant que le statut est encore PENDING reste invisible).
+  if (booking.totalAmount === null) {
+    return NextResponse.json(
+      { error: "Aucun devis posé sur ce séjour." },
+      { status: 409 },
+    );
+  }
+  if (!admin && !["ACCEPTED", "COMPLETED"].includes(booking.status)) {
+    return NextResponse.json(
+      { error: "La facture sera disponible une fois le devis accepté." },
+      { status: 409 },
+    );
   }
 
   const client = booking.user;

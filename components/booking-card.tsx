@@ -18,7 +18,8 @@ export type BookingCardProps = {
   endDate: string;
   nights: number;
   catNames: string[];
-  total: number;
+  /** `null` tant que le devis n'a pas été posé par la maison. */
+  total: number | null;
   ownerLabel?: string; // pour l'admin
   href: string;
   messageCount?: number;
@@ -80,10 +81,10 @@ export function BookingCard({
       <footer className="flex items-end justify-between gap-3 border-t border-cp-ink px-5 py-3">
         <div className="flex flex-col gap-0.5">
           <span className="font-mono text-[0.6rem] font-bold uppercase tracking-[0.18em] text-cp-paprika">
-            Total
+            {total === null ? "Devis" : "Total"}
           </span>
           <span className="font-display text-2xl font-bold leading-none tracking-tight text-cp-ink">
-            {total}€
+            {total === null ? "—" : `${total}€`}
           </span>
         </div>
         <div className="flex flex-col items-end gap-1">

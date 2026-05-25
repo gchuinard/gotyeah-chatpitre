@@ -36,6 +36,11 @@ export default async function BookingDetailPage({
   const nights = nightsBetween(booking.startDate, booking.endDate);
   const ref = displayRef(booking.id);
 
+  // Le devis est posé par la maison lors du passage à ACCEPTED. Tant que
+  // PENDING ou QUESTION_ASKED, on cache les chiffres et la facture PDF.
+  const awaitingQuote = ["PENDING", "QUESTION_ASKED"].includes(booking.status);
+  const hasQuote = !awaitingQuote && booking.totalAmount !== null;
+
   // Mappe les messages Prisma vers le format attendu par ConversationView.
   const messages = booking.messages.map((m) => ({
     id: m.id,
@@ -91,24 +96,61 @@ export default async function BookingDetailPage({
 
       <RuleDivider className="my-12" />
 
-      {/* Récap chiffres */}
-      <section className="grid gap-4 lg:grid-cols-3">
-        <DetailTile
-          label="Tarif total"
-          value={`${Number(booking.totalAmount).toLocaleString("fr-FR")}€`}
-          gloss={`${Number(booking.pricePerFirstCat)}€ + ${Number(booking.pricePerExtraCat)}€ × ${cats.length - 1} · ${nights} nuits`}
-        />
-        <DetailTile
-          label="Pensionnaires"
-          value={cats.length.toString().padStart(2, "0")}
-          gloss={cats.map((c) => c.name).join(" · ")}
-        />
-        <DetailTile
-          label="Acompte"
-          value={`${Number(booking.depositAmount).toLocaleString("fr-FR")}€`}
-          gloss={`${booking.depositPercentage} % à la réservation`}
-        />
-      </section>
+      {awaitingQuote ? (
+        <aside className="rounded-md border border-cp-cobalt bg-cp-paper-deep p-6 sm:p-8">
+          <p className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.18em] text-cp-cobalt">
+            Devis en cours d&apos;évaluation
+          </p>
+          <p className="mt-3 font-display text-2xl italic leading-snug text-cp-ink sm:text-3xl">
+            La maison étudie votre demande et vous reviendra avec un tarif
+            personnalisé sous 48 h.
+          </p>
+          <p className="mt-3 font-body text-sm text-cp-ink-soft">
+            Les nuitées, l&apos;éventuel coût de soins ou nourriture
+            particulière et l&apos;acompte vous seront communiqués ici dès
+            que le devis sera prêt.
+          </p>
+        </aside>
+      ) : (
+        hasQuote && (
+          <>
+            {/* Récap chiffres */}
+            <section className="grid gap-4 lg:grid-cols-3">
+              <DetailTile
+                label="Tarif total"
+                value={`${Number(booking.totalAmount).toLocaleString("fr-FR")}€`}
+                gloss={`${Number(booking.pricePerFirstCat)}€ + ${Number(booking.pricePerExtraCat)}€ × ${cats.length - 1} · ${nights} nuits`}
+              />
+              <DetailTile
+                label="Pensionnaires"
+                value={cats.length.toString().padStart(2, "0")}
+                gloss={cats.map((c) => c.name).join(" · ")}
+              />
+              <DetailTile
+                label="Acompte"
+                value={`${Number(booking.depositAmount).toLocaleString("fr-FR")}€`}
+                gloss={`${booking.depositPercentage} % à la réservation`}
+              />
+            </section>
+
+            {booking.extraNotes && (
+              <RuledBox variant="cobalt" className="mt-6">
+                <p className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.22em] text-cp-cobalt">
+                  Suppléments inclus
+                </p>
+                <p className="mt-3 font-body text-base leading-relaxed text-cp-ink">
+                  {booking.extraNotes}
+                  {booking.extraAmount !== null && (
+                    <span className="ml-2 font-mono text-sm font-bold text-cp-paprika">
+                      (+{Number(booking.extraAmount).toLocaleString("fr-FR")}€)
+                    </span>
+                  )}
+                </p>
+              </RuledBox>
+            )}
+          </>
+        )
+      )}
 
       {booking.clientNotes && (
         <RuledBox variant="deep" className="mt-10">
@@ -121,25 +163,27 @@ export default async function BookingDetailPage({
         </RuledBox>
       )}
 
-      {/* Facture PDF — toujours téléchargeable */}
-      <aside className="mt-10 flex flex-wrap items-center justify-between gap-4 rounded-md border border-cp-cobalt bg-cp-cobalt p-5 text-cp-paper sm:p-6">
-        <div>
-          <p className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.18em] text-cp-canari">
-            Facture du séjour
-          </p>
-          <p className="mt-1 font-display text-xl italic text-cp-paper">
-            Téléchargez votre justificatif au format PDF.
-          </p>
-        </div>
-        <a
-          href={`/api/invoices/${booking.id}/pdf`}
-          target="_blank"
-          rel="noopener"
-          className="inline-flex items-center gap-2 rounded-md border border-cp-canari bg-cp-canari px-5 py-2.5 font-body text-sm font-semibold text-cp-ink transition-colors hover:bg-cp-canari-deep"
-        >
-          Télécharger la facture PDF ↓
-        </a>
-      </aside>
+      {/* Facture PDF — uniquement quand le devis est posé. */}
+      {hasQuote && (
+        <aside className="mt-10 flex flex-wrap items-center justify-between gap-4 rounded-md border border-cp-cobalt bg-cp-cobalt p-5 text-cp-paper sm:p-6">
+          <div>
+            <p className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.18em] text-cp-canari">
+              Facture du séjour
+            </p>
+            <p className="mt-1 font-display text-xl italic text-cp-paper">
+              Téléchargez votre justificatif au format PDF.
+            </p>
+          </div>
+          <a
+            href={`/api/invoices/${booking.id}/pdf`}
+            target="_blank"
+            rel="noopener"
+            className="inline-flex items-center gap-2 rounded-md border border-cp-canari bg-cp-canari px-5 py-2.5 font-body text-sm font-semibold text-cp-ink transition-colors hover:bg-cp-canari-deep"
+          >
+            Télécharger la facture PDF ↓
+          </a>
+        </aside>
+      )}
 
       <RuleDivider className="my-16" label="Carnet de séjour" tone="cobalt" />
 

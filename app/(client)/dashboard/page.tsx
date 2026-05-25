@@ -113,15 +113,28 @@ export default async function DashboardPage() {
                   ))}
                 </ul>
               </DetailField>
-              <DetailField label="Tarif">
-                <p className="font-display text-3xl font-bold leading-none text-cp-ink">
-                  {upcoming.totalAmount.toString()}€
-                </p>
-                <p className="mt-1 font-mono text-[0.6rem] uppercase tracking-[0.18em] text-cp-ink-soft">
-                  {upcoming.pricePerFirstCat.toString()}€ + {upcoming.pricePerExtraCat.toString()}€ × {upcoming.cats.length - 1} ·{" "}
-                  {nightsBetween(upcoming.startDate, upcoming.endDate)} nuits
-                </p>
-              </DetailField>
+              {upcoming.totalAmount !== null &&
+              upcoming.pricePerFirstCat !== null &&
+              upcoming.pricePerExtraCat !== null ? (
+                <DetailField label="Tarif">
+                  <p className="font-display text-3xl font-bold leading-none text-cp-ink">
+                    {upcoming.totalAmount.toString()}€
+                  </p>
+                  <p className="mt-1 font-mono text-[0.6rem] uppercase tracking-[0.18em] text-cp-ink-soft">
+                    {upcoming.pricePerFirstCat.toString()}€ + {upcoming.pricePerExtraCat.toString()}€ × {upcoming.cats.length - 1} ·{" "}
+                    {nightsBetween(upcoming.startDate, upcoming.endDate)} nuits
+                  </p>
+                </DetailField>
+              ) : (
+                <DetailField label="Devis">
+                  <p className="font-display text-2xl italic leading-tight text-cp-cobalt">
+                    En cours d&apos;évaluation
+                  </p>
+                  <p className="mt-1 font-mono text-[0.6rem] uppercase tracking-[0.18em] text-cp-ink-soft">
+                    Réponse de la maison sous 48 h
+                  </p>
+                </DetailField>
+              )}
               <DetailField label="Note de séjour">
                 <p className="font-body text-sm leading-relaxed text-cp-ink">
                   {upcoming.clientNotes ?? "Aucune note ajoutée."}

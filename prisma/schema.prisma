@@ -112,13 +112,18 @@ model Booking {
   clientNotes String? // notes du client à la demande
   adminNotes  String? // notes internes de l'admin
 
-  // Tarification figée au moment de la demande. Les tarifs « vivants » sont
-  // dans la table Setting et peuvent évoluer sans impacter les résas passées.
-  pricePerFirstCat  Decimal @db.Decimal(10, 2)
-  pricePerExtraCat  Decimal @db.Decimal(10, 2)
-  depositPercentage Int     @default(20)
-  totalAmount       Decimal @db.Decimal(10, 2) // nuitées * (1er chat + extras)
-  depositAmount     Decimal @db.Decimal(10, 2) // depositPercentage % du total
+  // Tarification posée par l'admin au moment du devis (passage à ACCEPTED).
+  // Reste null tant que la demande est PENDING / QUESTION_ASKED.
+  pricePerFirstCat  Decimal? @db.Decimal(10, 2)
+  pricePerExtraCat  Decimal? @db.Decimal(10, 2)
+  depositPercentage Int      @default(20)
+  totalAmount       Decimal? @db.Decimal(10, 2) // nuitées × (1er chat + extras) + suppléments
+  depositAmount     Decimal? @db.Decimal(10, 2) // depositPercentage % du total
+
+  // Suppléments chiffrés par l'admin (nourriture spéciale, soins, visite
+  // véto…). Libellé libre + montant unique cumulé.
+  extraNotes  String?
+  extraAmount Decimal? @db.Decimal(10, 2)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

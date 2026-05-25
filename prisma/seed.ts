@@ -340,6 +340,8 @@ async function main() {
       | "COMPLETED";
     clientNotes?: string;
     adminNotes?: string;
+    /** Conditions particulières chiffrées par l'admin (devis posé). */
+    extras?: { notes: string; amount: number };
   };
 
   // Date de référence pour distinguer passé / en cours / futur : on prend
@@ -416,6 +418,10 @@ async function main() {
       clientNotes:
         "Sidonie en déplacement, Pompon et Comtesse partagent la chambre n° 02.",
       adminNotes: "Chambre n° 02 — pension classique, brossage quotidien Pompon.",
+      extras: {
+        notes: "Brossage quotidien long poil pour Pompon (15 min/jour).",
+        amount: 18,
+      },
     },
     {
       ref: "131",
@@ -470,14 +476,25 @@ async function main() {
 
   const bookingByRef = new Map<string, { id: string; createdAt: Date }>();
 
+  // Devis posé uniquement quand le séjour a été accepté/effectué (ou s'il
+  // a été tarifé puis annulé). Les statuts en attente (PENDING/
+  // QUESTION_ASKED) et les refus naissent sans tarif.
+  const UNPRICED_STATUSES = new Set(["PENDING", "QUESTION_ASKED", "REJECTED"]);
+
   for (const b of bookingsSeed) {
     const price = pricingFor(b.catIds.length, b.start, b.end);
+    const isPriced = !UNPRICED_STATUSES.has(b.status);
     // createdAt : pour les passés, on antidate au moins une semaine avant
     // le début du séjour ; pour les futurs, on prend une date récente.
     const createdAt =
       b.start.getTime() < today.getTime()
         ? new Date(b.start.getTime() - 30 * 86400000)
         : new Date(today.getTime() - 3 * 86400000);
+
+    // Si extras : ils s'ajoutent au total et impactent l'acompte.
+    const extrasAmount = isPriced ? (b.extras?.amount ?? 0) : 0;
+    const total = isPriced ? price.total + extrasAmount : null;
+    const deposit = total === null ? null : Math.round(total * 0.3);
 
     const booking = await prisma.booking.create({
       data: {
@@ -487,11 +504,13 @@ async function main() {
         status: b.status,
         clientNotes: b.clientNotes,
         adminNotes: b.adminNotes,
-        pricePerFirstCat: price.perFirst,
-        pricePerExtraCat: price.perExtra,
+        pricePerFirstCat: isPriced ? price.perFirst : null,
+        pricePerExtraCat: isPriced ? price.perExtra : null,
         depositPercentage: 30,
-        totalAmount: price.total,
-        depositAmount: price.deposit,
+        totalAmount: total,
+        depositAmount: deposit,
+        extraNotes: isPriced ? (b.extras?.notes ?? null) : null,
+        extraAmount: isPriced && b.extras ? b.extras.amount : null,
         createdAt,
         cats: { create: b.catIds.map((catId) => ({ catId })) },
       },

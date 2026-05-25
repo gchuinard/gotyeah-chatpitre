@@ -90,7 +90,7 @@ export default async function BookingsListPage() {
                   endDate={formatDate(b.endDate)}
                   nights={nightsBetween(b.startDate, b.endDate)}
                   catNames={b.cats.map((link) => link.cat.name)}
-                  total={Number(b.totalAmount)}
+                  total={b.totalAmount === null ? null : Number(b.totalAmount)}
                   notes={b.clientNotes ?? undefined}
                   messageCount={b.messages.length}
                   href={`/dashboard/bookings/${b.id}`}
@@ -126,7 +126,7 @@ export default async function BookingsListPage() {
                   endDate={formatDate(b.endDate)}
                   nights={nightsBetween(b.startDate, b.endDate)}
                   catNames={b.cats.map((link) => link.cat.name)}
-                  total={Number(b.totalAmount)}
+                  total={b.totalAmount === null ? null : Number(b.totalAmount)}
                   messageCount={b.messages.length}
                   href={`/dashboard/bookings/${b.id}`}
                 />

@@ -143,9 +143,15 @@ export default async function AdminBookingsListPage() {
                     </p>
                   </Td>
                   <Td className="text-right">
-                    <p className="font-display text-2xl font-bold leading-none text-cp-ink">
-                      {Number(b.totalAmount).toLocaleString("fr-FR")}€
-                    </p>
+                    {b.totalAmount === null ? (
+                      <p className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.18em] text-cp-cobalt">
+                        Sur devis
+                      </p>
+                    ) : (
+                      <p className="font-display text-2xl font-bold leading-none text-cp-ink">
+                        {Number(b.totalAmount).toLocaleString("fr-FR")}€
+                      </p>
+                    )}
                   </Td>
                   <Td>
                     <Link
