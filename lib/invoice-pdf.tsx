@@ -5,7 +5,7 @@ import {
   Text,
   View,
 } from "@react-pdf/renderer";
-import type { Booking, Cat, User } from "@prisma/client";
+import type { Booking, BookingExtra, Cat, User } from "@prisma/client";
 
 import { displayRef, formatDate, nightsBetween } from "@/lib/format";
 
@@ -279,7 +279,7 @@ const styles = StyleSheet.create({
 });
 
 export type InvoicePdfData = {
-  booking: Booking;
+  booking: Booking & { extras: BookingExtra[] };
   client: Pick<User, "firstName" | "lastName" | "email" | "phone">;
   cats: Cat[];
   /** Numéro de facture, par défaut dérivé de l'id du séjour. */
@@ -315,13 +315,11 @@ export function InvoicePdf({
   const solde = total - acompte;
   // Tarif par nuit reconstitué : 1er chat + extras (cohérent avec le calcul
   // figé au moment où l'admin pose le devis, cf. lib/pricing.ts).
-  const extras = Math.max(0, cats.length - 1);
+  const extraCats = Math.max(0, cats.length - 1);
   const pricePerNight =
     Number(booking.pricePerFirstCat ?? 0) +
-    extras * Number(booking.pricePerExtraCat ?? 0);
+    extraCats * Number(booking.pricePerExtraCat ?? 0);
   const nightsSubtotal = pricePerNight * nights;
-  const extraAmount = Number(booking.extraAmount ?? 0);
-  const hasExtras = extraAmount > 0;
   const designation =
     cats.length === 1
       ? `Séjour d'un chat`
@@ -425,23 +423,21 @@ export function InvoicePdf({
             </Text>
           </View>
 
-          {hasExtras && (
-            <View style={styles.tableRow}>
+          {booking.extras.map((extra) => (
+            <View key={extra.id} style={styles.tableRow}>
               <View style={styles.colDesignation}>
-                <Text style={styles.designationTitle}>
-                  Suppléments
-                </Text>
+                <Text style={styles.designationTitle}>{extra.label}</Text>
                 <Text style={styles.designationGloss}>
-                  {booking.extraNotes ?? "Conditions particulières chiffrées par la maison."}
+                  Supplément posé par la maison sur le devis.
                 </Text>
               </View>
               <Text style={[styles.amountText, styles.colQty]}>—</Text>
               <Text style={[styles.amountMono, styles.colUnit]}>—</Text>
               <Text style={[styles.amountMono, styles.colTotal]}>
-                {formatAmount(extraAmount)}
+                {formatAmount(Number(extra.amount))}
               </Text>
             </View>
-          )}
+          ))}
         </View>
 
         {/* TOTAUX */}

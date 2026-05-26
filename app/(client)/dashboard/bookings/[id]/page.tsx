@@ -133,19 +133,26 @@ export default async function BookingDetailPage({
               />
             </section>
 
-            {booking.extraNotes && (
+            {booking.extras.length > 0 && (
               <RuledBox variant="cobalt" className="mt-6">
                 <p className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.22em] text-cp-cobalt">
                   Suppléments inclus
                 </p>
-                <p className="mt-3 font-body text-base leading-relaxed text-cp-ink">
-                  {booking.extraNotes}
-                  {booking.extraAmount !== null && (
-                    <span className="ml-2 font-mono text-sm font-bold text-cp-paprika">
-                      (+{Number(booking.extraAmount).toLocaleString("fr-FR")}€)
-                    </span>
-                  )}
-                </p>
+                <ul className="mt-3 divide-y divide-cp-cobalt/30">
+                  {booking.extras.map((extra) => (
+                    <li
+                      key={extra.id}
+                      className="flex items-baseline justify-between gap-3 py-2 first:pt-0 last:pb-0"
+                    >
+                      <span className="font-body text-base leading-relaxed text-cp-ink">
+                        {extra.label}
+                      </span>
+                      <span className="font-mono text-sm font-bold whitespace-nowrap text-cp-paprika">
+                        +{Number(extra.amount).toLocaleString("fr-FR")}€
+                      </span>
+                    </li>
+                  ))}
+                </ul>
               </RuledBox>
             )}
           </>
