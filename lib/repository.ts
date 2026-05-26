@@ -1,5 +1,6 @@
 import type {
   Booking,
+  BookingExtra,
   BookingMessage,
   BookingStatus,
   Cat,
@@ -58,12 +59,14 @@ export function toCatCardProps(cat: Cat): CatCardProps {
 
 export type BookingWithRelations = Booking & {
   cats: { cat: Cat }[];
+  extras: BookingExtra[];
   user: User;
   messages: (BookingMessage & { author: { firstName: string; lastName: string } })[];
 };
 
 const BOOKING_INCLUDE = {
   cats: { include: { cat: true } },
+  extras: { orderBy: { sortOrder: "asc" } },
   user: true,
   messages: {
     include: { author: { select: { firstName: true, lastName: true } } },

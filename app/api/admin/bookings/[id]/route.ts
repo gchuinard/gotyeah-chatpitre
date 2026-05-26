@@ -34,6 +34,10 @@ const STATUS_NOTIFICATION: Partial<
 /// le devis (tarifs et suppléments) d'une réservation. totalAmount et
 /// depositAmount sont recalculés serveur — jamais saisis par le client.
 /// Refuse de passer à ACCEPTED sans tarif valide.
+///
+/// Les `extras` sont remplacés intégralement : si l'array est fourni, les
+/// lignes BookingExtra existantes sont supprimées et celles passées sont
+/// recréées dans la foulée (transaction).
 export function PATCH(req: NextRequest, { params }: RouteContext) {
   return handle(async () => {
     await requireAdmin();
@@ -41,7 +45,10 @@ export function PATCH(req: NextRequest, { params }: RouteContext) {
 
     const booking = await prisma.booking.findUnique({
       where: { id },
-      include: { cats: { select: { catId: true } } },
+      include: {
+        cats: { select: { catId: true } },
+        extras: true,
+      },
     });
     if (!booking) throw new HttpError(404, "Réservation introuvable.");
 
@@ -58,12 +65,19 @@ export function PATCH(req: NextRequest, { params }: RouteContext) {
         : booking.pricePerExtraCat;
     const depositPercentage =
       data.depositPercentage ?? booking.depositPercentage;
-    const extraAmount =
-      data.extraAmount !== undefined
-        ? new Prisma.Decimal(data.extraAmount)
-        : booking.extraAmount;
-    const extraNotes =
-      data.extraNotes !== undefined ? data.extraNotes || null : booking.extraNotes;
+
+    // Suppléments finaux : ceux fournis si présents, sinon les existants.
+    const finalExtras =
+      data.extras !== undefined
+        ? data.extras.map((e) => ({
+            label: e.label,
+            amount: new Prisma.Decimal(e.amount),
+          }))
+        : booking.extras.map((e) => ({ label: e.label, amount: e.amount }));
+    const extrasTotal = finalExtras.reduce(
+      (sum, e) => sum.plus(e.amount),
+      new Prisma.Decimal(0),
+    );
 
     // Si on a les deux tarifs unitaires, on recalcule total + acompte.
     let totalAmount = booking.totalAmount;
@@ -73,7 +87,6 @@ export function PATCH(req: NextRequest, { params }: RouteContext) {
       const extras = Math.max(0, booking.cats.length - 1);
       const perNight = pricePerFirstCat.plus(pricePerExtraCat.times(extras));
       const nightsTotal = perNight.times(nights);
-      const extrasTotal = extraAmount ?? new Prisma.Decimal(0);
       totalAmount = nightsTotal.plus(extrasTotal).toDecimalPlaces(2);
       depositAmount = totalAmount
         .times(depositPercentage)
@@ -97,13 +110,24 @@ export function PATCH(req: NextRequest, { params }: RouteContext) {
       depositPercentage,
       totalAmount,
       depositAmount,
-      extraNotes,
-      extraAmount,
     };
 
-    const updated = await prisma.booking.update({
-      where: { id },
-      data: updateData,
+    // Update booking + remplace les extras dans une transaction si demandé.
+    const updated = await prisma.$transaction(async (tx) => {
+      if (data.extras !== undefined) {
+        await tx.bookingExtra.deleteMany({ where: { bookingId: id } });
+        if (data.extras.length > 0) {
+          await tx.bookingExtra.createMany({
+            data: data.extras.map((e, idx) => ({
+              bookingId: id,
+              label: e.label,
+              amount: new Prisma.Decimal(e.amount),
+              sortOrder: idx * 10,
+            })),
+          });
+        }
+      }
+      return tx.booking.update({ where: { id }, data: updateData });
     });
 
     // Notifie le client si le statut a effectivement changé.

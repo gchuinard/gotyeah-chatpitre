@@ -69,6 +69,14 @@ export const bookingMessageSchema = z.object({
 
 // --- Admin ------------------------------------------------------------------
 
+/// Une ligne de supplément posée sur le devis. Label libre + montant total.
+export const bookingExtraInputSchema = z.object({
+  label: z.string().trim().min(1, "Le libellé d'un supplément est requis."),
+  amount: z.coerce
+    .number()
+    .nonnegative("Suppléments négatifs impossibles."),
+});
+
 export const adminBookingUpdateSchema = z.object({
   status: z
     .enum(["PENDING", "QUESTION_ASKED", "ACCEPTED", "REJECTED", "CANCELLED", "COMPLETED"])
@@ -84,9 +92,22 @@ export const adminBookingUpdateSchema = z.object({
     .min(0)
     .max(100)
     .optional(),
-  extraNotes: z.string().trim().optional(),
-  extraAmount: z.coerce.number().nonnegative("Suppléments négatifs impossibles.").optional(),
+  // Lignes de suppléments — quand le champ est fourni, il remplace
+  // intégralement les lignes existantes (un array vide vide les suppléments).
+  extras: z.array(bookingExtraInputSchema).optional(),
 });
+
+// --- Catalogue de presets de suppléments (admin) ---------------------------
+
+export const extraPresetCreateSchema = z.object({
+  label: z.string().trim().min(1, "Le libellé est requis."),
+  defaultAmount: z.coerce
+    .number()
+    .nonnegative("Le prix par défaut ne peut pas être négatif."),
+  sortOrder: z.coerce.number().int().optional(),
+});
+
+export const extraPresetUpdateSchema = extraPresetCreateSchema.partial();
 
 // --- Utilitaire -------------------------------------------------------------
 
