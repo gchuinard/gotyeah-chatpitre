@@ -12,6 +12,7 @@ import { SectionHeading } from "@/components/section-heading";
 import { StayJournal } from "@/components/stay-journal";
 import { buttonVariants } from "@/components/ui/button";
 import { getCurrentUser, isAdmin } from "@/lib/auth";
+import { prisma } from "@/lib/db";
 import { computeBookingPricing } from "@/lib/pricing";
 import {
   ageLabel,
@@ -42,11 +43,19 @@ export default async function AdminBookingDetailPage({
   const ref = displayRef(booking.id);
   const awaitingQuote = ["PENDING", "QUESTION_ASKED"].includes(booking.status);
   const hasQuote = booking.totalAmount !== null;
-  // Valeurs suggérées (lues dans Setting via computeBookingPricing) — passées
-  // au QuoteForm pour pré-remplir les champs d'un nouveau devis.
-  const suggested = awaitingQuote
-    ? await computeBookingPricing(booking.startDate, booking.endDate, cats.length)
-    : null;
+  const extrasTotal = booking.extras.reduce(
+    (sum, e) => sum + Number(e.amount),
+    0,
+  );
+  // Valeurs suggérées (lues dans Setting via computeBookingPricing) +
+  // catalogue de presets — passés au QuoteForm pour pré-remplir un nouveau
+  // devis et alimenter le sélecteur de suppléments.
+  const [suggested, presets] = awaitingQuote
+    ? await Promise.all([
+        computeBookingPricing(booking.startDate, booking.endDate, cats.length),
+        prisma.extraPreset.findMany({ orderBy: { sortOrder: "asc" } }),
+      ])
+    : [null, []];
 
   const messages = booking.messages.map((m) => ({
     id: m.id,
@@ -122,8 +131,8 @@ export default async function AdminBookingDetailPage({
               </p>
               <p className="font-mono text-[0.6rem] uppercase tracking-[0.16em] text-cp-ink-soft">
                 {Number(booking.pricePerFirstCat)}€ + {Number(booking.pricePerExtraCat)}€ × {cats.length - 1} · {nights} nuits
-                {booking.extraAmount !== null && Number(booking.extraAmount) > 0 && (
-                  <> · +{Number(booking.extraAmount).toLocaleString("fr-FR")}€ de suppléments</>
+                {extrasTotal > 0 && (
+                  <> · +{extrasTotal.toLocaleString("fr-FR")}€ de suppléments</>
                 )}
               </p>
             </DetailTile>
@@ -243,15 +252,21 @@ export default async function AdminBookingDetailPage({
                   ? null
                   : Number(booking.pricePerExtraCat),
               depositPercentage: booking.depositPercentage,
-              extraNotes: booking.extraNotes,
-              extraAmount:
-                booking.extraAmount === null ? null : Number(booking.extraAmount),
+              extras: booking.extras.map((e) => ({
+                label: e.label,
+                amount: Number(e.amount),
+              })),
             }}
             suggested={{
               pricePerFirstCat: Number(suggested.pricePerFirstCat),
               pricePerExtraCat: Number(suggested.pricePerExtraCat),
               depositPercentage: suggested.depositPercentage,
             }}
+            presets={presets.map((p) => ({
+              id: p.id,
+              label: p.label,
+              defaultAmount: Number(p.defaultAmount),
+            }))}
           />
           <AdminStatusActions bookingId={booking.id} />
         </>

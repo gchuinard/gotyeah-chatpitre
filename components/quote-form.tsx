@@ -1,40 +1,83 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useId, useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 
 import { Field } from "@/components/field";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 
-/// Formulaire de devis admin. L'admin saisit les tarifs unitaires,
-/// l'éventuel supplément (libellé + montant) et le pourcentage d'acompte ;
-/// le total et l'acompte sont calculés en live. Deux actions :
-/// — « Enregistrer le brouillon » : PATCH les tarifs sans changer le statut
-///   (utile pour préparer le devis avant d'accepter).
-/// — « Envoyer et accepter » : PATCH les tarifs + status=ACCEPTED, ce qui
-///   notifie le client et rend visible le devis + la facture côté client.
+/// Formulaire de devis admin. L'admin saisit les tarifs unitaires, le
+/// pourcentage d'acompte et les éventuelles lignes de suppléments — chaque
+/// ligne est soit un préset du catalogue (label + prix par défaut pré-
+/// remplis), soit « Autre » (libellé libre). Le total et l'acompte sont
+/// calculés en live.
+/// Deux actions :
+/// — « Enregistrer le brouillon » : PATCH sans changer le statut.
+/// — « Envoyer le devis et accepter » : PATCH + status=ACCEPTED.
+
+export type QuoteFormPreset = {
+  id: string;
+  label: string;
+  defaultAmount: number;
+};
+
+export type QuoteFormExtra = {
+  label: string;
+  amount: number;
+};
 
 type QuoteFormProps = {
   bookingId: string;
   nights: number;
   catsCount: number;
-  /** Valeurs courantes (peuvent être null si pas encore tarifé). */
   current: {
     pricePerFirstCat: number | null;
     pricePerExtraCat: number | null;
     depositPercentage: number;
-    extraNotes: string | null;
-    extraAmount: number | null;
+    extras: QuoteFormExtra[];
   };
-  /** Valeurs suggérées (depuis lib/pricing, à la création du formulaire). */
   suggested: {
     pricePerFirstCat: number;
     pricePerExtraCat: number;
     depositPercentage: number;
   };
+  presets: QuoteFormPreset[];
 };
+
+const OTHER_VALUE = "__other__";
+
+type Line = {
+  /** Identifiant local stable (clé React). */
+  key: string;
+  /** id du préset choisi, "" si aucun, OTHER_VALUE si Autre. */
+  presetId: string;
+  label: string;
+  amount: string;
+};
+
+let lineCounter = 0;
+function nextKey(): string {
+  lineCounter += 1;
+  return `line-${lineCounter}`;
+}
+
+/// Convertit les extras déjà enregistrés en `Line[]`. Si le label correspond
+/// exactement à un préset, on lie ; sinon c'est une ligne « Autre ».
+function linesFromExtras(
+  extras: QuoteFormExtra[],
+  presets: QuoteFormPreset[],
+): Line[] {
+  return extras.map((e) => {
+    const match = presets.find((p) => p.label === e.label);
+    return {
+      key: nextKey(),
+      presetId: match ? match.id : OTHER_VALUE,
+      label: e.label,
+      amount: String(e.amount),
+    };
+  });
+}
 
 export function QuoteForm({
   bookingId,
@@ -42,6 +85,7 @@ export function QuoteForm({
   catsCount,
   current,
   suggested,
+  presets,
 }: QuoteFormProps) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -56,37 +100,79 @@ export function QuoteForm({
   const [depositPercentage, setDepositPercentage] = useState<string>(
     String(current.depositPercentage || suggested.depositPercentage),
   );
-  const [extraNotes, setExtraNotes] = useState<string>(current.extraNotes ?? "");
-  const [extraAmount, setExtraAmount] = useState<string>(
-    current.extraAmount === null ? "0" : String(current.extraAmount),
+  const [lines, setLines] = useState<Line[]>(() =>
+    linesFromExtras(current.extras, presets),
   );
 
-  const { total, deposit, perNight, extras } = useMemo(() => {
+  const extras = useMemo(() => Math.max(0, catsCount - 1), [catsCount]);
+
+  const { total, deposit, perNight, extrasTotal } = useMemo(() => {
     const first = Number(pricePerFirstCat) || 0;
     const extra = Number(pricePerExtraCat) || 0;
-    const extrasCount = Math.max(0, catsCount - 1);
-    const extrasAmount = Number(extraAmount) || 0;
-    const perNightCalc = first + extrasCount * extra;
-    const totalCalc = perNightCalc * nights + extrasAmount;
+    const perNightCalc = first + extras * extra;
+    const extrasSum = lines.reduce((sum, l) => sum + (Number(l.amount) || 0), 0);
+    const totalCalc = perNightCalc * nights + extrasSum;
     const depositPct = Number(depositPercentage) || 0;
     const depositCalc = Math.round(totalCalc * depositPct) / 100;
     return {
       perNight: perNightCalc,
-      extras: extrasCount,
+      extrasTotal: extrasSum,
       total: totalCalc,
       deposit: depositCalc,
     };
-  }, [
-    pricePerFirstCat,
-    pricePerExtraCat,
-    extraAmount,
-    depositPercentage,
-    catsCount,
-    nights,
-  ]);
+  }, [pricePerFirstCat, pricePerExtraCat, depositPercentage, nights, extras, lines]);
 
-  function submit(opts: { withAccept: boolean }) {
+  function addLine(): void {
+    setLines((prev) => [
+      ...prev,
+      { key: nextKey(), presetId: "", label: "", amount: "0" },
+    ]);
+  }
+
+  function removeLine(key: string): void {
+    setLines((prev) => prev.filter((l) => l.key !== key));
+  }
+
+  function changePreset(key: string, presetId: string): void {
+    setLines((prev) =>
+      prev.map((l) => {
+        if (l.key !== key) return l;
+        if (presetId === OTHER_VALUE) {
+          return { ...l, presetId: OTHER_VALUE, label: "", amount: "0" };
+        }
+        if (presetId === "") {
+          return { ...l, presetId: "", label: "", amount: "0" };
+        }
+        const preset = presets.find((p) => p.id === presetId);
+        if (!preset) return l;
+        return {
+          ...l,
+          presetId,
+          label: preset.label,
+          amount: String(preset.defaultAmount),
+        };
+      }),
+    );
+  }
+
+  function changeLineLabel(key: string, label: string): void {
+    setLines((prev) => prev.map((l) => (l.key === key ? { ...l, label } : l)));
+  }
+
+  function changeLineAmount(key: string, amount: string): void {
+    setLines((prev) => prev.map((l) => (l.key === key ? { ...l, amount } : l)));
+  }
+
+  function submit(opts: { withAccept: boolean }): void {
     setError(null);
+    // Filtre les lignes vides (label vide après trim → on les ignore).
+    const cleanExtras = lines
+      .map((l) => ({
+        label: l.label.trim(),
+        amount: Number(l.amount) || 0,
+      }))
+      .filter((e) => e.label.length > 0);
+
     startTransition(async () => {
       const res = await fetch(`/api/admin/bookings/${bookingId}`, {
         method: "PATCH",
@@ -95,8 +181,7 @@ export function QuoteForm({
           pricePerFirstCat: Number(pricePerFirstCat),
           pricePerExtraCat: Number(pricePerExtraCat),
           depositPercentage: Number(depositPercentage),
-          extraNotes: extraNotes.trim() || undefined,
-          extraAmount: Number(extraAmount) || 0,
+          extras: cleanExtras,
           ...(opts.withAccept ? { status: "ACCEPTED" } : {}),
         }),
       });
@@ -164,39 +249,44 @@ export function QuoteForm({
             onChange={(e) => setDepositPercentage(e.target.value)}
           />
         </Field>
-        <Field label="Suppléments (€)" htmlFor="quote-extras-amount">
-          <Input
-            id="quote-extras-amount"
-            name="extraAmount"
-            type="number"
-            min={0}
-            step="0.01"
-            inputMode="decimal"
-            value={extraAmount}
-            onChange={(e) => setExtraAmount(e.target.value)}
-          />
-        </Field>
       </div>
 
-      <div className="mt-5">
-        <Field
-          label="Libellé des suppléments"
-          htmlFor="quote-extras-notes"
-          hint="Décrit ce que comprend le montant ci-dessus (nourriture spéciale, visite véto, soins…)."
-        >
-          <Textarea
-            id="quote-extras-notes"
-            name="extraNotes"
-            rows={3}
-            value={extraNotes}
-            onChange={(e) => setExtraNotes(e.target.value)}
-            placeholder="Ex. : régime hypoallergénique fourni + brossage quotidien long poil."
-          />
-        </Field>
+      {/* Lignes de suppléments — ajout/suppression dynamique */}
+      <div className="mt-8">
+        <div className="flex flex-wrap items-baseline justify-between gap-2 border-b border-cp-ink pb-2">
+          <p className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.22em] text-cp-cobalt">
+            Suppléments du séjour
+          </p>
+          <p className="font-mono text-[0.6rem] uppercase tracking-[0.18em] text-cp-ink-soft">
+            {lines.length === 0
+              ? "Aucun supplément — ajoutez-en si besoin."
+              : `${lines.length} ligne${lines.length > 1 ? "s" : ""} · ${extrasTotal.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}€`}
+          </p>
+        </div>
+
+        <ul className="mt-4 space-y-3">
+          {lines.map((line) => (
+            <ExtraLineRow
+              key={line.key}
+              line={line}
+              presets={presets}
+              onPresetChange={(v) => changePreset(line.key, v)}
+              onLabelChange={(v) => changeLineLabel(line.key, v)}
+              onAmountChange={(v) => changeLineAmount(line.key, v)}
+              onRemove={() => removeLine(line.key)}
+            />
+          ))}
+        </ul>
+
+        <div className="mt-4">
+          <Button type="button" variant="outline" size="sm" onClick={addLine}>
+            + Ajouter un supplément
+          </Button>
+        </div>
       </div>
 
       {/* Récap calculé */}
-      <div className="mt-6 grid gap-3 rounded-md border border-cp-cobalt bg-cp-paper-deep p-5 sm:grid-cols-3">
+      <div className="mt-8 grid gap-3 rounded-md border border-cp-cobalt bg-cp-paper-deep p-5 sm:grid-cols-3">
         <Summary
           label={`${nights} nuit${nights > 1 ? "s" : ""}`}
           value={`${perNight.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}€/nuit`}
@@ -241,6 +331,76 @@ export function QuoteForm({
         </Button>
       </div>
     </section>
+  );
+}
+
+function ExtraLineRow({
+  line,
+  presets,
+  onPresetChange,
+  onLabelChange,
+  onAmountChange,
+  onRemove,
+}: {
+  line: Line;
+  presets: QuoteFormPreset[];
+  onPresetChange: (v: string) => void;
+  onLabelChange: (v: string) => void;
+  onAmountChange: (v: string) => void;
+  onRemove: () => void;
+}) {
+  const selectId = useId();
+  const isOther = line.presetId === OTHER_VALUE;
+  return (
+    <li className="grid gap-2 sm:grid-cols-[minmax(0,2fr)_minmax(0,1fr)_auto] sm:items-start">
+      <div className="space-y-2">
+        <select
+          id={selectId}
+          aria-label="Choix du supplément"
+          value={line.presetId}
+          onChange={(e) => onPresetChange(e.target.value)}
+          className="h-11 w-full min-w-0 rounded-md border border-cp-ink bg-cp-paper px-3 py-2 font-body text-base text-cp-ink transition-colors outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[3px] focus-visible:outline-cp-paprika md:text-sm"
+        >
+          <option value="">— Choisir un supplément —</option>
+          {presets.map((p) => (
+            <option key={p.id} value={p.id}>
+              {p.label} ({p.defaultAmount}€)
+            </option>
+          ))}
+          <option value={OTHER_VALUE}>Autre (à préciser)</option>
+        </select>
+        {isOther && (
+          <Input
+            type="text"
+            placeholder="Préciser le libellé du supplément"
+            aria-label="Libellé du supplément"
+            value={line.label}
+            onChange={(e) => onLabelChange(e.target.value)}
+          />
+        )}
+      </div>
+
+      <div>
+        <Input
+          type="number"
+          min={0}
+          step="0.01"
+          inputMode="decimal"
+          aria-label="Montant du supplément en euros"
+          value={line.amount}
+          onChange={(e) => onAmountChange(e.target.value)}
+        />
+      </div>
+
+      <button
+        type="button"
+        onClick={onRemove}
+        aria-label="Supprimer cette ligne"
+        className="inline-flex h-11 w-11 items-center justify-center self-start rounded-md border border-cp-ink bg-cp-paper text-cp-ink transition-colors hover:bg-cp-paprika hover:text-cp-paper"
+      >
+        <span aria-hidden className="text-lg leading-none">×</span>
+      </button>
+    </li>
   );
 }
 
