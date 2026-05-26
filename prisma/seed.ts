@@ -54,6 +54,28 @@ async function main() {
   }
   console.log(`✔ ${settings.length} réglages (tarifs) en place`);
 
+  // 1bis. CATALOGUE DE PRESETS DE SUPPLÉMENTS -------------------------------
+  // Liste de départ — l'admin peut l'éditer depuis /admin/extras.
+  // Idempotent : on ne touche pas aux presets existants (l'admin a pu les
+  // renommer ou changer leur prix), on crée seulement ceux qui manquent.
+  const presetCount = await prisma.extraPreset.count();
+  if (presetCount === 0) {
+    const presets = [
+      { label: "Croquettes fournies par le client", defaultAmount: "0", sortOrder: 10 },
+      { label: "Croquettes spéciales fournies par la maison", defaultAmount: "5", sortOrder: 20 },
+      { label: "Brossage quotidien long poil", defaultAmount: "25", sortOrder: 30 },
+      { label: "Administration de médicament", defaultAmount: "15", sortOrder: 40 },
+      { label: "Visite vétérinaire", defaultAmount: "30", sortOrder: 50 },
+      { label: "Pension chaton (< 6 mois)", defaultAmount: "10", sortOrder: 60 },
+    ];
+    for (const p of presets) {
+      await prisma.extraPreset.create({ data: p });
+    }
+    console.log(`✔ ${presets.length} presets de suppléments créés`);
+  } else {
+    console.log(`✔ ${presetCount} presets de suppléments déjà en base (préservés)`);
+  }
+
   // 2. NETTOYAGE des données démo existantes -------------------------------
   const existingUsers = await prisma.user.findMany({
     where: { email: { in: DEMO_EMAILS } },
@@ -340,8 +362,8 @@ async function main() {
       | "COMPLETED";
     clientNotes?: string;
     adminNotes?: string;
-    /** Conditions particulières chiffrées par l'admin (devis posé). */
-    extras?: { notes: string; amount: number };
+    /** Lignes de suppléments chiffrées par l'admin (devis posé). */
+    extras?: { label: string; amount: number }[];
   };
 
   // Date de référence pour distinguer passé / en cours / futur : on prend
@@ -418,10 +440,9 @@ async function main() {
       clientNotes:
         "Sidonie en déplacement, Pompon et Comtesse partagent la chambre n° 02.",
       adminNotes: "Chambre n° 02 — pension classique, brossage quotidien Pompon.",
-      extras: {
-        notes: "Brossage quotidien long poil pour Pompon (15 min/jour).",
-        amount: 18,
-      },
+      extras: [
+        { label: "Brossage quotidien long poil (Pompon)", amount: 18 },
+      ],
     },
     {
       ref: "131",
@@ -492,8 +513,9 @@ async function main() {
         : new Date(today.getTime() - 3 * 86400000);
 
     // Si extras : ils s'ajoutent au total et impactent l'acompte.
-    const extrasAmount = isPriced ? (b.extras?.amount ?? 0) : 0;
-    const total = isPriced ? price.total + extrasAmount : null;
+    const extras = isPriced ? (b.extras ?? []) : [];
+    const extrasTotal = extras.reduce((sum, e) => sum + e.amount, 0);
+    const total = isPriced ? price.total + extrasTotal : null;
     const deposit = total === null ? null : Math.round(total * 0.3);
 
     const booking = await prisma.booking.create({
@@ -509,10 +531,15 @@ async function main() {
         depositPercentage: 30,
         totalAmount: total,
         depositAmount: deposit,
-        extraNotes: isPriced ? (b.extras?.notes ?? null) : null,
-        extraAmount: isPriced && b.extras ? b.extras.amount : null,
         createdAt,
         cats: { create: b.catIds.map((catId) => ({ catId })) },
+        extras: {
+          create: extras.map((e, idx) => ({
+            label: e.label,
+            amount: e.amount,
+            sortOrder: idx * 10,
+          })),
+        },
       },
     });
     bookingByRef.set(b.ref, { id: booking.id, createdAt: booking.createdAt });

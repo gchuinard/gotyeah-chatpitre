@@ -120,15 +120,11 @@ model Booking {
   totalAmount       Decimal? @db.Decimal(10, 2) // nuitées × (1er chat + extras) + suppléments
   depositAmount     Decimal? @db.Decimal(10, 2) // depositPercentage % du total
 
-  // Suppléments chiffrés par l'admin (nourriture spéciale, soins, visite
-  // véto…). Libellé libre + montant unique cumulé.
-  extraNotes  String?
-  extraAmount Decimal? @db.Decimal(10, 2)
-
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   cats        BookingCat[]
+  extras      BookingExtra[]
   messages    BookingMessage[]
   invoices    Invoice[]
   stayUpdates StayUpdate[]
@@ -146,6 +142,36 @@ model BookingCat {
 
   @@id([bookingId, catId])
   @@index([catId])
+}
+
+/// Ligne de supplément chiffrée par l'admin sur un devis (nourriture spéciale,
+/// brossage, soins, visite véto…). Snapshot : `label` et `amount` sont figés
+/// au moment où l'admin pose la ligne, indépendamment du catalogue.
+model BookingExtra {
+  id        String  @id @default(cuid())
+  bookingId String
+  booking   Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  label     String
+  amount    Decimal @db.Decimal(10, 2)
+  sortOrder Int     @default(0)
+
+  createdAt DateTime @default(now())
+
+  @@index([bookingId])
+}
+
+/// Préset du catalogue de suppléments — édité côté admin. Sert à pré-remplir
+/// les lignes BookingExtra dans le formulaire de devis. Une modification du
+/// préset n'altère pas les devis déjà posés.
+model ExtraPreset {
+  id            String  @id @default(cuid())
+  label         String
+  defaultAmount Decimal @db.Decimal(10, 2)
+  sortOrder     Int     @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 /// Message du fil de discussion d'une réservation.
