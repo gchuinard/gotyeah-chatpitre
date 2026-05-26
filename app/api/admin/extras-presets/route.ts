@@ -36,6 +36,6 @@ export function POST(req: NextRequest) {
         sortOrder: data.sortOrder ?? sortOrder + 10,
       },
     });
-    return json({ preset }, { status: 201 });
+    return json({ preset }, 201);
   });
 }
