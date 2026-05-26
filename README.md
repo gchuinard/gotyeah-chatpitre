@@ -199,8 +199,12 @@ Les routes échangent du JSON ; les routes protégées exigent le cookie de sess
 | `GET` · `POST /api/bookings` | Liste · création des réservations |
 | `GET /api/bookings/[id]` | Détail d'une réservation |
 | `POST /api/bookings/[id]/messages` | Poster un message sur une réservation |
+| `GET /api/invoices/[bookingId]/pdf` | Facture PDF d'une réservation acceptée |
 | `GET /api/admin/bookings` | Toutes les réservations (admin) |
-| `PATCH /api/admin/bookings/[id]` | Changer le statut / les notes admin (admin) |
+| `PATCH /api/admin/bookings/[id]` | Devis (tarifs, acompte, suppléments) · statut · notes admin |
+| `POST /api/admin/bookings/[id]/stay-updates` | Ajouter une note au carnet de séjour (admin) |
+| `GET` · `POST /api/admin/extras-presets` | Liste · création d'un préset de supplément (admin) |
+| `PATCH` · `DELETE /api/admin/extras-presets/[id]` | Mise à jour · suppression d'un préset (admin) |
 | `GET /api/notifications` | Mes notifications |
 | `PATCH /api/notifications/[id]/read` | Marquer une notification comme lue |
 
@@ -209,10 +213,15 @@ Les mutations pertinentes créent automatiquement les notifications
 
 ## Modèle de données
 
-8 modèles Prisma : `User`, `Cat`, `Booking`, `BookingCat` (table de liaison),
-`BookingMessage`, `Notification`, `Invoice`, `Setting`. Les montants sont en
-`Decimal(10,2)`. Les tarifs (prix par chat, pourcentage d'acompte) sont stockés
-dans `Setting` et donc modifiables sans redéploiement.
+11 modèles Prisma : `User`, `Cat`, `Booking`, `BookingCat` (table de liaison),
+`BookingExtra` (lignes de suppléments d'un devis), `ExtraPreset` (catalogue
+éditable des suppléments proposés au formulaire de devis), `BookingMessage`,
+`StayUpdate` (carnet de séjour : note photo+texte quotidienne),
+`Notification`, `Invoice`, `Setting`. Les montants sont en `Decimal(10,2)`.
+Les tarifs par défaut (prix par chat, pourcentage d'acompte) sont stockés
+dans `Setting` et donc modifiables sans redéploiement ; le devis effectif
+(`pricePerFirstCat`, `pricePerExtraCat`, `depositPercentage`, suppléments)
+est posé par l'admin sur chaque séjour individuellement.
 
 ## Production
 
