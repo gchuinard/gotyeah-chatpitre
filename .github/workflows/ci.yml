@@ -30,8 +30,8 @@ jobs:
       # Secret factice (>= 32 c) pour satisfaire la config d'auth au build.
       AUTH_SECRET: "ci-placeholder-secret-0123456789-abcdefghijkl"
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: "24"
           cache: "npm"
