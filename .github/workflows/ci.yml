@@ -39,7 +39,8 @@ jobs:
         run: npm ci
       - name: Prisma generate
         run: npx prisma generate
-      - name: Prisma db push (schéma sur la base éphémère CI)
-        run: npx prisma db push --skip-generate
+      # Build Next paresseux (client Prisma instancié à la demande) : pas de
+      # requête DB au build, donc pas besoin de pousser le schéma. Le service
+      # Postgres rend juste DATABASE_URL joignable au cas où.
       - name: Build (lint + typecheck inclus via next build)
         run: npm run build
