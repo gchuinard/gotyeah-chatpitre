@@ -41,6 +41,9 @@ export default async function BookingDetailPage({
   // PENDING ou QUESTION_ASKED, on cache les chiffres et la facture PDF.
   const awaitingQuote = ["PENDING", "QUESTION_ASKED"].includes(booking.status);
   const hasQuote = !awaitingQuote && booking.totalAmount !== null;
+  // Le carnet de séjour n'a de sens qu'une fois le séjour validé : on le
+  // cache tant que la demande n'est pas acceptée (ou terminée).
+  const showJournal = ["ACCEPTED", "COMPLETED"].includes(booking.status);
 
   // Mappe les messages Prisma vers le format attendu par ConversationView.
   const messages = booking.messages.map((m) => ({
@@ -245,26 +248,29 @@ export default async function BookingDetailPage({
         </aside>
       )}
 
-      <RuleDivider className="my-16" label="Carnet de séjour" tone="cobalt" />
+      {/* Carnet de séjour — masqué tant que le séjour n'est pas validé. */}
+      {showJournal && (
+        <>
+          <RuleDivider className="my-16" label="Carnet de séjour" tone="cobalt" />
+          <section aria-labelledby="journal-title" className="space-y-8">
+            <SectionHeading
+              number="01"
+              title="Carnet de séjour"
+              kicker="Une note photo quotidienne pendant que votre chat est avec nous."
+              tone="cobalt"
+            />
 
-      {/* Carnet de séjour — entrées Prisma */}
-      <section aria-labelledby="journal-title" className="space-y-8">
-        <SectionHeading
-          number="01"
-          title="Carnet de séjour"
-          kicker="Une note photo quotidienne pendant que votre chat est avec nous."
-          tone="cobalt"
-        />
-
-        <StayJournal bookingId={booking.id} />
-      </section>
+            <StayJournal bookingId={booking.id} />
+          </section>
+        </>
+      )}
 
       <RuleDivider className="my-16" label="Fil de discussion" tone="paprika" />
 
       {/* Fil de discussion — POST réel sur /api/bookings/[id]/messages */}
       <section aria-labelledby="thread-title" className="space-y-8">
         <SectionHeading
-          number="02"
+          number={showJournal ? "02" : "01"}
           title="Échanges avec la maison"
           kicker={`${messages.length} message${messages.length > 1 ? "s" : ""} jusqu'ici.`}
           tone="paprika"

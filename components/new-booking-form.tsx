@@ -166,6 +166,12 @@ export function NewBookingForm({
         title="Suppléments souhaités"
         description="Options facultatives. Les tarifs sont indicatifs — la maison les confirme dans le devis."
       >
+        <p className="rounded-md border border-cp-cobalt bg-cp-cobalt-light/60 px-4 py-3 font-body text-sm text-cp-ink">
+          Pour tout supplément, précisez le détail (médicament et posologie,
+          régime alimentaire, fréquence du brossage…) dans la{" "}
+          <strong className="font-semibold">note pour la maison</strong> ci-dessous.
+        </p>
+
         {presets.length > 0 && (
           <ul className="grid gap-px overflow-hidden rounded-md border border-cp-ink bg-cp-ink sm:grid-cols-2">
             {presets.map((preset) => (
@@ -220,8 +226,8 @@ export function NewBookingForm({
             </Button>
           )}
           <p className="font-body text-xs text-cp-ink-soft">
-            Pour une demande sur mesure, la maison vous proposera un tarif dans
-            le devis.
+            Pour une demande sur mesure, décrivez-la dans la note ci-dessous —
+            la maison vous proposera un tarif dans le devis.
           </p>
         </div>
       </FormSection>
