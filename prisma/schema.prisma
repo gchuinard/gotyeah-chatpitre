@@ -297,6 +297,7 @@ enum NotificationType {
   BOOKING_REJECTED // (client) réservation refusée
   BOOKING_QUESTION // (client) l'admin a posé une question
   MESSAGE_RECEIVED // (bidirectionnel) nouveau message reçu
+  CAT_REVIEWED // (client) la maison a posé un avis sur un chat
   ARRIVAL_REMINDER // (admin) arrivée prévue le lendemain
 }
 
