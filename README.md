@@ -14,6 +14,14 @@ réservation, notifications in-app et facturation.
 > PDF). Le seed `npm run db:seed` (re)pose les comptes démo et un jeu
 > de séjours panachés ; en production il faut le lancer manuellement
 > dans le conteneur après chaque déploiement.
+>
+> **Suppléments & avis.** Le client peut joindre des options à sa demande
+> (presets du catalogue + demandes libres) ; chaque supplément porte une
+> unité de facturation (par jour / par visite / forfait) et son total est
+> dérivé serveur. La maison pose un avis par chat sur chaque séjour
+> (validé / avec réserve / refusé + note), visible du client sur le séjour
+> et sur la fiche du chat, avec notification. Les confirmations destructives
+> passent par une boîte de dialogue maison (plus de `window.confirm`).
 
 ## Stack technique
 
@@ -159,15 +167,20 @@ Chacune a sa variante `-deep` (hover) et `-light` (tints / fonds doux).
 | `RuledBox` | Encadré 6 variantes (regular / deep / cobalt / paprika / feuille / ink) |
 | `LibraryStamp` | Étiquette mono caps tonale (paprika / cobalt / feuille / ink), boxed optionnel |
 | `Field` | Label Manrope semibold + contrôle + hint/error (erreur paprika) |
+| `ConfirmDialog` | Boîte de confirmation maison (Base UI Dialog) — remplace `window.confirm` |
 | `BookingStatusBadge` | Pastille numérotée des 6 statuts (cobalt outline pour calme, paprika fill pour action, feuille fill pour confirmation, ink fill pour refus) |
 | `CatCard` | Fiche pensionnaire avec illustration Charley Harper dérivée du nom |
 | `BookingCard` | Fiche séjour |
 | `MessageThread` + `MessageBubble` | Fil de discussion (client paper, maison ink) |
+| `ConversationView` | Fil câblé sur l'API ; côté admin, boutons Refuser / Envoyer / Poser une question |
 | `OccupancyCalendar` | Grille calendaire d'occupation, 4 niveaux de densité |
 | `SiteHeader` + `SiteFooter` | Chrome public |
 | `ClientHeader` | Chrome client/admin avec `NotificationBell` + `UserMenu` |
 | `AdmissionCriteria` + `PriceCard` + `FaqAccordion` | Sections de la home |
-| `CatForm` | Formulaire de pensionnaire en 4 sections numérotées |
+| `CatForm` | Formulaire de pensionnaire en 4 sections numérotées (+ avis de la maison en édition) |
+| `QuoteForm` | Devis admin : tarifs, acompte, lignes de suppléments (unité + prix unitaire + quantité) |
+| `ExtrasPresetsEditor` | Édition du catalogue de presets de suppléments (admin) |
+| `CatReviewControl` | Avis admin par chat sur un séjour (état + note) |
 
 ### Page de référence
 
@@ -210,7 +223,10 @@ Les routes échangent du JSON ; les routes protégées exigent le cookie de sess
 | `PATCH /api/notifications/[id]/read` | Marquer une notification comme lue |
 
 Les mutations pertinentes créent automatiquement les notifications
-(nouvelle demande → admins, changement de statut → client, message → l'autre partie).
+(nouvelle demande → admins, changement de statut → client, message → l'autre
+partie, avis posé sur un chat → client). Une question posée par l'admin se fait
+depuis le fil de discussion : le message est posté et le séjour passe en
+`QUESTION_ASKED` en un seul geste, avec une notification unique.
 
 ## Modèle de données
 
@@ -253,8 +269,14 @@ utilisateur non-root). Cible de déploiement : Raspberry Pi 5, derrière Nginx
 Proxy Manager + Cloudflare. En production, `DATABASE_URL` pointe vers le
 PostgreSQL du homelab.
 
+Déploiement actuel (manuel) : `git pull` sur le Pi puis
+`docker compose -f docker-compose.prod.yml up -d --build` (les migrations
+s'appliquent au démarrage du conteneur). Un workflow GitHub Actions
+(`.github/workflows/ci.yml`) vérifie build + lint sur `main` et les PR.
+
 ## Hors périmètre (étapes suivantes)
 
 Upload réel des photos de chats (en attendant, illustrations Charley Harper),
-rappels automatiques d'arrivée (cron `ARRIVAL_REMINDER`), pipeline CI/CD
-de déploiement.
+rappels automatiques d'arrivée (cron `ARRIVAL_REMINDER`), déploiement continu
+(CD) automatique vers le Pi (le CI build/lint est en place, le déploiement
+reste manuel).
