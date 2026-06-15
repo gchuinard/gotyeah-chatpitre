@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 
 import { MessageThread } from "@/components/message-thread";
 import { Button } from "@/components/ui/button";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 
@@ -73,20 +74,21 @@ export function ConversationView({
   bookingId,
   initialMessages,
   voice,
-  canAskQuestion = false,
+  canRespond = false,
 }: {
   bookingId: string;
   initialMessages: ConversationMessage[];
   voice: Voice;
-  /** Admin uniquement : affiche « Poser une question » (message + passage du
-   *  séjour en QUESTION_ASKED). Activé tant que la demande n'est pas tranchée. */
-  canAskQuestion?: boolean;
+  /** Admin uniquement, tant que la demande n'est pas tranchée : affiche les
+   *  actions « Poser une question » (message + QUESTION_ASKED) et « Refuser ». */
+  canRespond?: boolean;
 }) {
   const router = useRouter();
   const config = VOICE_CONFIG[voice];
   const [messages, setMessages] = useState<ConversationMessage[]>(initialMessages);
   const [body, setBody] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [rejectOpen, setRejectOpen] = useState(false);
   const [pending, startTransition] = useTransition();
 
   /// Envoie le contenu du composer, soit comme message simple, soit comme
@@ -150,6 +152,24 @@ export function ConversationView({
     send("message");
   }
 
+  /// Refuse la demande (statut REJECTED). Confirmé via ConfirmDialog.
+  function reject() {
+    setError(null);
+    startTransition(async () => {
+      const res = await fetch(`/api/admin/bookings/${bookingId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: "REJECTED" }),
+      });
+      if (!res.ok) {
+        const data: { error?: string } = await res.json().catch(() => ({}));
+        setError(data.error ?? "Échec du refus de la demande.");
+        return;
+      }
+      router.refresh();
+    });
+  }
+
   return (
     <div className="space-y-6">
       <MessageThread
@@ -184,6 +204,20 @@ export function ConversationView({
           {error && (
             <p className="mr-auto font-body text-xs text-cp-paprika">{error}</p>
           )}
+          {canRespond && (
+            <button
+              type="button"
+              disabled={pending}
+              onClick={() => setRejectOpen(true)}
+              className={cn(
+                "mr-auto font-mono text-[0.65rem] font-bold uppercase tracking-[0.18em] underline-offset-4 transition-colors hover:underline",
+                voice === "admin" ? "text-cp-paper/70 hover:text-cp-paper" : "text-cp-paprika",
+                pending && "opacity-60",
+              )}
+            >
+              Refuser la demande
+            </button>
+          )}
           <Button
             type="submit"
             size="default"
@@ -193,7 +227,7 @@ export function ConversationView({
           >
             {pending ? "Envoi…" : "Envoyer →"}
           </Button>
-          {canAskQuestion && (
+          {canRespond && (
             <Button
               type="button"
               size="default"
@@ -208,6 +242,19 @@ export function ConversationView({
           )}
         </div>
       </form>
+
+      {canRespond && (
+        <ConfirmDialog
+          open={rejectOpen}
+          onOpenChange={setRejectOpen}
+          title="Refuser cette demande ?"
+          description="Le séjour passera en « Refusé » et le client en sera notifié. Vous pourrez toujours échanger dans le fil, mais la demande ne pourra plus être acceptée."
+          confirmLabel="Refuser la demande"
+          cancelLabel="Annuler"
+          confirmVariant="destructive"
+          onConfirm={reject}
+        />
+      )}
     </div>
   );
 }

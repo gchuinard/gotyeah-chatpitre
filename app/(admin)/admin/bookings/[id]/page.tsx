@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-import { AdminStatusActions } from "@/components/admin-status-actions";
 import { BookingStatusBadge } from "@/components/booking-status-badge";
 import { ConversationView } from "@/components/conversation-view";
 import { LibraryStamp } from "@/components/library-stamp";
@@ -275,7 +274,6 @@ export default async function AdminBookingDetailPage({
               defaultAmount: Number(p.defaultAmount),
             }))}
           />
-          <AdminStatusActions bookingId={booking.id} />
         </>
       )}
 
@@ -311,7 +309,7 @@ export default async function AdminBookingDetailPage({
           bookingId={booking.id}
           initialMessages={messages}
           voice="admin"
-          canAskQuestion={awaitingQuote}
+          canRespond={awaitingQuote}
         />
       </section>
 

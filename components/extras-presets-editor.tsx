@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import type { ExtraUnit } from "@prisma/client";
 
 import { Button } from "@/components/ui/button";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { Field } from "@/components/field";
 import { Input } from "@/components/ui/input";
 import { EXTRA_UNIT_LABEL, EXTRA_UNIT_OPTIONS } from "@/lib/extras";
@@ -104,6 +105,7 @@ function PresetRow({
   const [unit, setUnit] = useState<ExtraUnit>(preset.unit);
   const [amount, setAmount] = useState(String(preset.defaultAmount));
   const [error, setError] = useState<string | null>(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
   const [pending, startTransition] = useTransition();
 
   function cancel(): void {
@@ -137,7 +139,6 @@ function PresetRow({
   }
 
   function remove(): void {
-    if (!window.confirm(`Supprimer le préset « ${preset.label} » ?`)) return;
     setError(null);
     startTransition(async () => {
       const res = await fetch(`/api/admin/extras-presets/${preset.id}`, {
@@ -227,7 +228,7 @@ function PresetRow({
               type="button"
               variant="ghost"
               size="sm"
-              onClick={remove}
+              onClick={() => setConfirmOpen(true)}
               disabled={pending}
             >
               {pending ? "…" : "Supprimer"}
@@ -243,6 +244,15 @@ function PresetRow({
           {error}
         </p>
       )}
+      <ConfirmDialog
+        open={confirmOpen}
+        onOpenChange={setConfirmOpen}
+        title="Supprimer ce préset ?"
+        description={`« ${preset.label} » sera retiré du catalogue. Les devis déjà posés ne sont pas affectés.`}
+        confirmLabel="Supprimer"
+        confirmVariant="destructive"
+        onConfirm={remove}
+      />
     </li>
   );
 }
