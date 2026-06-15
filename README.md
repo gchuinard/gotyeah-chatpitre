@@ -202,6 +202,7 @@ Les routes échangent du JSON ; les routes protégées exigent le cookie de sess
 | `GET /api/invoices/[bookingId]/pdf` | Facture PDF d'une réservation acceptée |
 | `GET /api/admin/bookings` | Toutes les réservations (admin) |
 | `PATCH /api/admin/bookings/[id]` | Devis (tarifs, acompte, suppléments) · statut · notes admin |
+| `PATCH /api/admin/bookings/[id]/cats/[catId]` | Avis de la maison sur un chat du séjour (état + note, admin) |
 | `POST /api/admin/bookings/[id]/stay-updates` | Ajouter une note au carnet de séjour (admin) |
 | `GET` · `POST /api/admin/extras-presets` | Liste · création d'un préset de supplément (admin) |
 | `PATCH` · `DELETE /api/admin/extras-presets/[id]` | Mise à jour · suppression d'un préset (admin) |
@@ -213,7 +214,9 @@ Les mutations pertinentes créent automatiquement les notifications
 
 ## Modèle de données
 
-11 modèles Prisma : `User`, `Cat`, `Booking`, `BookingCat` (table de liaison),
+11 modèles Prisma : `User`, `Cat`, `Booking`, `BookingCat` (table de liaison ;
+porte aussi l'avis de la maison sur chaque chat du séjour — `reviewStatus`
+validé/réserve/refusé + `reviewNote`, visible côté client),
 `BookingExtra` (lignes de suppléments d'un devis), `ExtraPreset` (catalogue
 éditable des suppléments proposés au formulaire de devis), `BookingMessage`,
 `StayUpdate` (carnet de séjour : note photo+texte quotidienne),

@@ -120,6 +120,12 @@ export const adminBookingUpdateSchema = z.object({
   extras: z.array(bookingExtraInputSchema).optional(),
 });
 
+/// Avis de l'admin sur un chat d'un séjour (état + note libre).
+export const catReviewSchema = z.object({
+  reviewStatus: z.enum(["PENDING", "OK", "RESERVE", "REJECTED"]),
+  reviewNote: z.string().trim().max(500).optional(),
+});
+
 // --- Catalogue de presets de suppléments (admin) ---------------------------
 
 export const extraPresetCreateSchema = z.object({

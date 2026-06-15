@@ -1,5 +1,6 @@
 import type {
   Booking,
+  BookingCat,
   BookingExtra,
   BookingMessage,
   BookingStatus,
@@ -58,7 +59,7 @@ export function toCatCardProps(cat: Cat): CatCardProps {
 // =========================================================================
 
 export type BookingWithRelations = Booking & {
-  cats: { cat: Cat }[];
+  cats: (BookingCat & { cat: Cat })[];
   extras: BookingExtra[];
   user: User;
   messages: (BookingMessage & { author: { firstName: string; lastName: string } })[];

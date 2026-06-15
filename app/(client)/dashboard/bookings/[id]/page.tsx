@@ -10,8 +10,10 @@ import { RuledBox } from "@/components/ruled-box";
 import { SectionHeading } from "@/components/section-heading";
 import { StayJournal } from "@/components/stay-journal";
 import { getCurrentUser, isAdmin } from "@/lib/auth";
+import { CAT_REVIEW_BADGE, CAT_REVIEW_LABEL } from "@/lib/cat-review";
 import { extraUnitGloss } from "@/lib/extras";
 import {
+  ageLabel,
   displayRef,
   formatDate,
   getBookingFor,
@@ -215,6 +217,53 @@ export default async function BookingDetailPage({
         )
       )}
 
+      {/* Pensionnaires + avis de la maison (validé / réserve / refusé + note) */}
+      <section className="mt-12 space-y-6">
+        <SectionHeading
+          number="01"
+          title="Pensionnaires"
+          kicker="L'avis de la maison sur chaque chat apparaît ici une fois la fiche étudiée."
+          tone="cobalt"
+        />
+        <ul className="grid gap-px overflow-hidden rounded-md border border-cp-ink bg-cp-ink sm:grid-cols-2">
+          {booking.cats.map((link) => (
+            <li key={link.cat.id} className="flex flex-col gap-3 bg-cp-paper p-5">
+              <header className="flex items-baseline justify-between gap-3">
+                <p className="font-display text-2xl italic leading-tight text-cp-ink">
+                  {link.cat.name}
+                </p>
+                <p className="font-mono text-[0.6rem] font-bold uppercase tracking-[0.18em] text-cp-paprika">
+                  N° {displayRef(link.cat.id)}
+                </p>
+              </header>
+              <p className="font-body text-sm text-cp-ink-soft">
+                {link.cat.breed ?? "sans race"} · {ageLabel(link.cat.birthDate)}
+              </p>
+              <div className="border-t border-cp-ink/20 pt-3">
+                {link.reviewStatus === "PENDING" ? (
+                  <p className="font-mono text-[0.6rem] font-bold uppercase tracking-[0.16em] text-cp-mute">
+                    En cours d&apos;évaluation
+                  </p>
+                ) : (
+                  <div className="space-y-2">
+                    <span
+                      className={`inline-flex items-center rounded-full border px-3 py-0.5 font-mono text-[0.6rem] font-bold uppercase tracking-[0.16em] ${CAT_REVIEW_BADGE[link.reviewStatus]}`}
+                    >
+                      {CAT_REVIEW_LABEL[link.reviewStatus]}
+                    </span>
+                    {link.reviewNote && (
+                      <p className="font-body text-sm leading-relaxed text-cp-ink">
+                        {link.reviewNote}
+                      </p>
+                    )}
+                  </div>
+                )}
+              </div>
+            </li>
+          ))}
+        </ul>
+      </section>
+
       {booking.clientNotes && (
         <RuledBox variant="deep" className="mt-10">
           <p className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.22em] text-cp-paprika">
@@ -254,7 +303,7 @@ export default async function BookingDetailPage({
           <RuleDivider className="my-16" label="Carnet de séjour" tone="cobalt" />
           <section aria-labelledby="journal-title" className="space-y-8">
             <SectionHeading
-              number="01"
+              number="02"
               title="Carnet de séjour"
               kicker="Une note photo quotidienne pendant que votre chat est avec nous."
               tone="cobalt"
@@ -270,7 +319,7 @@ export default async function BookingDetailPage({
       {/* Fil de discussion — POST réel sur /api/bookings/[id]/messages */}
       <section aria-labelledby="thread-title" className="space-y-8">
         <SectionHeading
-          number={showJournal ? "02" : "01"}
+          number={showJournal ? "03" : "02"}
           title="Échanges avec la maison"
           kicker={`${messages.length} message${messages.length > 1 ? "s" : ""} jusqu'ici.`}
           tone="paprika"

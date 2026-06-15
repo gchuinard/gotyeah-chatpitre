@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { BookingStatusBadge } from "@/components/booking-status-badge";
+import { CatReviewControl } from "@/components/cat-review-control";
 import { ConversationView } from "@/components/conversation-view";
 import { LibraryStamp } from "@/components/library-stamp";
 import { QuoteForm } from "@/components/quote-form";
@@ -169,25 +170,31 @@ export default async function AdminBookingDetailPage({
           kicker={`${cats.length} fiche${cats.length > 1 ? "s" : ""} à valider avant l'arrivée.`}
         />
         <ul className="grid gap-px overflow-hidden rounded-md border border-cp-ink bg-cp-ink sm:grid-cols-2">
-          {cats.map((cat) => (
-            <li key={cat.id} className="flex flex-col gap-3 bg-cp-paper p-5">
+          {booking.cats.map((link) => (
+            <li key={link.cat.id} className="flex flex-col gap-3 bg-cp-paper p-5">
               <header className="flex items-baseline justify-between gap-3">
                 <p className="font-display text-2xl italic leading-tight text-cp-ink">
-                  {cat.name}
+                  {link.cat.name}
                 </p>
                 <p className="font-mono text-[0.6rem] font-bold uppercase tracking-[0.18em] text-cp-paprika">
-                  N° {displayRef(cat.id)}
+                  N° {displayRef(link.cat.id)}
                 </p>
               </header>
               <p className="font-body text-sm text-cp-ink-soft">
-                {cat.breed} · {ageLabel(cat.birthDate)}
+                {link.cat.breed} · {ageLabel(link.cat.birthDate)}
               </p>
               <ul className="grid grid-cols-2 gap-x-3 gap-y-1.5 border-t border-cp-ink/30 pt-3 font-mono text-[0.6rem] font-bold uppercase tracking-[0.14em]">
-                <Criterion ok={cat.isSterilized} label="Stérilisé" />
-                <Criterion ok={cat.isIdentified} label="Identifié" />
-                <Criterion ok={cat.vaccinesUpToDate} label="Vaccins" />
-                <Criterion ok={cat.isSociable} label="Sociable" />
+                <Criterion ok={link.cat.isSterilized} label="Stérilisé" />
+                <Criterion ok={link.cat.isIdentified} label="Identifié" />
+                <Criterion ok={link.cat.vaccinesUpToDate} label="Vaccins" />
+                <Criterion ok={link.cat.isSociable} label="Sociable" />
               </ul>
+              <CatReviewControl
+                bookingId={booking.id}
+                catId={link.cat.id}
+                initialStatus={link.reviewStatus}
+                initialNote={link.reviewNote}
+              />
             </li>
           ))}
         </ul>

@@ -144,12 +144,28 @@ model Booking {
   @@index([status])
 }
 
+/// Avis de l'admin sur un chat pour un séjour donné.
+///   PENDING  → pas encore évalué
+///   OK       → validé, rien à signaler
+///   RESERVE  → validé avec réserve (ex. « non stérilisé mais à jour vaccins »)
+///   REJECTED → refusé pour ce chat
+enum CatReviewStatus {
+  PENDING
+  OK
+  RESERVE
+  REJECTED
+}
+
 /// Table de liaison Booking <-> Cat (une réservation concerne 1+ chats).
 model BookingCat {
   bookingId String
   catId     String
   booking   Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
   cat       Cat     @relation(fields: [catId], references: [id])
+
+  // Avis de l'admin sur ce chat pour ce séjour, visible aussi du client.
+  reviewStatus CatReviewStatus @default(PENDING)
+  reviewNote   String?
 
   @@id([bookingId, catId])
   @@index([catId])
