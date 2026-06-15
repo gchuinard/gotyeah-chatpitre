@@ -196,7 +196,7 @@ Les routes échangent du JSON ; les routes protégées exigent le cookie de sess
 | `POST /api/auth/logout` | Déconnexion |
 | `GET` · `POST /api/cats` | Liste · création des chats |
 | `GET` · `PATCH` · `DELETE /api/cats/[id]` | Détail · mise à jour · suppression d'un chat |
-| `GET` · `POST /api/bookings` | Liste · création des réservations |
+| `GET` · `POST /api/bookings` | Liste · création des réservations (le client peut joindre des suppléments souhaités : presets du catalogue + demandes libres) |
 | `GET /api/bookings/[id]` | Détail d'une réservation |
 | `POST /api/bookings/[id]/messages` | Poster un message sur une réservation |
 | `GET /api/invoices/[bookingId]/pdf` | Facture PDF d'une réservation acceptée |
@@ -222,6 +222,13 @@ Les tarifs par défaut (prix par chat, pourcentage d'acompte) sont stockés
 dans `Setting` et donc modifiables sans redéploiement ; le devis effectif
 (`pricePerFirstCat`, `pricePerExtraCat`, `depositPercentage`, suppléments)
 est posé par l'admin sur chaque séjour individuellement.
+
+Les lignes `BookingExtra` ont deux origines (champ `requestedByClient`) : posées
+par l'admin sur le devis, ou demandées par le client à la réservation (presets
+du catalogue avec prix indicatif, ou demandes libres dont le montant `amount`
+est `null` — « à chiffrer »). Les options du client pré-remplissent l'éditeur de
+devis admin, qui confirme/ajuste les montants ; le passage à `ACCEPTED` est
+refusé tant qu'une ligne demandée n'est pas chiffrée.
 
 ## Production
 

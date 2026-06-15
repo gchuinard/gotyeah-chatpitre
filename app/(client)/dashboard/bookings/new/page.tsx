@@ -4,16 +4,20 @@ import { LibraryStamp } from "@/components/library-stamp";
 import { NewBookingForm } from "@/components/new-booking-form";
 import { RuleDivider } from "@/components/rule-divider";
 import { getCurrentUser } from "@/lib/auth";
-import { getCatsByOwner } from "@/lib/repository";
+import { getCatsByOwner, getExtraPresets } from "@/lib/repository";
 
-/// Demande de nouveau séjour — Prisma : on charge les chats du
-/// propriétaire et on passe au formulaire client qui POST sur l'API.
+/// Demande de nouveau séjour — Prisma : on charge les chats du propriétaire
+/// et le catalogue de suppléments, puis on passe au formulaire client qui
+/// POST sur l'API.
 
 export default async function NewBookingPage() {
   const user = await getCurrentUser();
   if (!user) return null;
 
-  const cats = await getCatsByOwner(user.id);
+  const [cats, presets] = await Promise.all([
+    getCatsByOwner(user.id),
+    getExtraPresets(),
+  ]);
 
   return (
     <div className="mx-auto w-full max-w-4xl px-6 py-12 sm:px-10 sm:py-20">
@@ -45,7 +49,14 @@ export default async function NewBookingPage() {
 
       <RuleDivider className="my-12" />
 
-      <NewBookingForm cats={cats} />
+      <NewBookingForm
+        cats={cats}
+        presets={presets.map((p) => ({
+          id: p.id,
+          label: p.label,
+          defaultAmount: Number(p.defaultAmount),
+        }))}
+      />
     </div>
   );
 }

@@ -97,20 +97,50 @@ export default async function BookingDetailPage({
       <RuleDivider className="my-12" />
 
       {awaitingQuote ? (
-        <aside className="rounded-md border border-cp-cobalt bg-cp-paper-deep p-6 sm:p-8">
-          <p className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.18em] text-cp-cobalt">
-            Devis en cours d&apos;évaluation
-          </p>
-          <p className="mt-3 font-display text-2xl italic leading-snug text-cp-ink sm:text-3xl">
-            La maison étudie votre demande et vous reviendra avec un tarif
-            personnalisé sous 48 h.
-          </p>
-          <p className="mt-3 font-body text-sm text-cp-ink-soft">
-            Les nuitées, l&apos;éventuel coût de soins ou nourriture
-            particulière et l&apos;acompte vous seront communiqués ici dès
-            que le devis sera prêt.
-          </p>
-        </aside>
+        <>
+          <aside className="rounded-md border border-cp-cobalt bg-cp-paper-deep p-6 sm:p-8">
+            <p className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.18em] text-cp-cobalt">
+              Devis en cours d&apos;évaluation
+            </p>
+            <p className="mt-3 font-display text-2xl italic leading-snug text-cp-ink sm:text-3xl">
+              La maison étudie votre demande et vous reviendra avec un tarif
+              personnalisé sous 48 h.
+            </p>
+            <p className="mt-3 font-body text-sm text-cp-ink-soft">
+              Les nuitées, l&apos;éventuel coût de soins ou nourriture
+              particulière et l&apos;acompte vous seront communiqués ici dès
+              que le devis sera prêt.
+            </p>
+          </aside>
+
+          {booking.extras.length > 0 && (
+            <RuledBox variant="cobalt" className="mt-6">
+              <p className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.22em] text-cp-cobalt">
+                Suppléments souhaités
+              </p>
+              <ul className="mt-3 divide-y divide-cp-cobalt/30">
+                {booking.extras.map((extra) => (
+                  <li
+                    key={extra.id}
+                    className="flex items-baseline justify-between gap-3 py-2 first:pt-0 last:pb-0"
+                  >
+                    <span className="font-body text-base leading-relaxed text-cp-ink">
+                      {extra.label}
+                    </span>
+                    <span className="font-mono text-sm font-bold whitespace-nowrap text-cp-cobalt">
+                      {extra.amount === null
+                        ? "à chiffrer"
+                        : `~ ${Number(extra.amount).toLocaleString("fr-FR")}€`}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+              <p className="mt-3 font-body text-xs italic text-cp-ink-soft">
+                Tarifs indicatifs — la maison les confirme dans le devis final.
+              </p>
+            </RuledBox>
+          )}
+        </>
       ) : (
         hasQuote && (
           <>
@@ -148,7 +178,9 @@ export default async function BookingDetailPage({
                         {extra.label}
                       </span>
                       <span className="font-mono text-sm font-bold whitespace-nowrap text-cp-paprika">
-                        +{Number(extra.amount).toLocaleString("fr-FR")}€
+                        {extra.amount === null
+                          ? "à chiffrer"
+                          : `+${Number(extra.amount).toLocaleString("fr-FR")}€`}
                       </span>
                     </li>
                   ))}

@@ -57,6 +57,15 @@ export const bookingCreateSchema = z
     endDate: z.coerce.date(),
     catIds: z.array(z.string().min(1)).min(1, "Sélectionnez au moins un chat."),
     clientNotes: z.string().trim().optional(),
+    // Options choisies par le client à la demande. `extraPresetIds` : cases
+    // cochées dans le catalogue (le serveur résout label + prix indicatif).
+    // `customExtras` : demandes libres (texte), chiffrées ensuite par l'admin.
+    // Le client n'envoie jamais de montant — il est posé serveur.
+    extraPresetIds: z.array(z.string().min(1)).max(30).optional(),
+    customExtras: z
+      .array(z.string().trim().min(1).max(120))
+      .max(10, "Pas plus de 10 demandes personnalisées.")
+      .optional(),
   })
   .refine((d) => differenceInCalendarDays(d.endDate, d.startDate) >= 1, {
     message: "Le séjour doit durer au moins une nuit.",

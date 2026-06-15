@@ -44,7 +44,7 @@ export default async function AdminBookingDetailPage({
   const awaitingQuote = ["PENDING", "QUESTION_ASKED"].includes(booking.status);
   const hasQuote = booking.totalAmount !== null;
   const extrasTotal = booking.extras.reduce(
-    (sum, e) => sum + Number(e.amount),
+    (sum, e) => sum + Number(e.amount ?? 0),
     0,
   );
   // Valeurs suggérées (lues dans Setting via computeBookingPricing) +
@@ -254,7 +254,8 @@ export default async function AdminBookingDetailPage({
               depositPercentage: booking.depositPercentage,
               extras: booking.extras.map((e) => ({
                 label: e.label,
-                amount: Number(e.amount),
+                amount: e.amount === null ? null : Number(e.amount),
+                requestedByClient: e.requestedByClient,
               })),
             }}
             suggested={{

@@ -82,6 +82,12 @@ export function getCatsByOwner(ownerId: string): Promise<Cat[]> {
   });
 }
 
+/// Catalogue des presets de suppléments, trié — proposé au client dans le
+/// formulaire de demande de séjour (options à cocher avec prix indicatif).
+export function getExtraPresets() {
+  return prisma.extraPreset.findMany({ orderBy: { sortOrder: "asc" } });
+}
+
 /// Tous les séjours d'un propriétaire, statut prioritaire d'abord puis date
 /// décroissante (les plus récents/proches en haut).
 export async function getBookingsByOwner(

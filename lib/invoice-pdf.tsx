@@ -434,7 +434,7 @@ export function InvoicePdf({
               <Text style={[styles.amountText, styles.colQty]}>—</Text>
               <Text style={[styles.amountMono, styles.colUnit]}>—</Text>
               <Text style={[styles.amountMono, styles.colTotal]}>
-                {formatAmount(Number(extra.amount))}
+                {formatAmount(Number(extra.amount ?? 0))}
               </Text>
             </View>
           ))}

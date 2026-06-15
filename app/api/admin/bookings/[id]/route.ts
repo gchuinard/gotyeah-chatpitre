@@ -66,8 +66,10 @@ export function PATCH(req: NextRequest, { params }: RouteContext) {
     const depositPercentage =
       data.depositPercentage ?? booking.depositPercentage;
 
-    // Suppléments finaux : ceux fournis si présents, sinon les existants.
-    const finalExtras =
+    // Suppléments finaux : ceux fournis si présents, sinon les existants. Les
+    // lignes demandées par le client peuvent avoir un montant null (« à
+    // chiffrer ») — comptées comme 0 tant que l'admin ne les a pas chiffrées.
+    const finalExtras: { label: string; amount: Prisma.Decimal | null }[] =
       data.extras !== undefined
         ? data.extras.map((e) => ({
             label: e.label,
@@ -75,7 +77,7 @@ export function PATCH(req: NextRequest, { params }: RouteContext) {
           }))
         : booking.extras.map((e) => ({ label: e.label, amount: e.amount }));
     const extrasTotal = finalExtras.reduce(
-      (sum, e) => sum.plus(e.amount),
+      (sum, e) => sum.plus(e.amount ?? 0),
       new Prisma.Decimal(0),
     );
 
@@ -99,6 +101,14 @@ export function PATCH(req: NextRequest, { params }: RouteContext) {
       throw new HttpError(
         400,
         "Saisissez un tarif avant d'accepter la demande.",
+      );
+    }
+    // Refuse d'accepter tant qu'une ligne demandée par le client n'est pas
+    // chiffrée (montant null) — l'admin doit confirmer chaque supplément.
+    if (data.status === "ACCEPTED" && finalExtras.some((e) => e.amount === null)) {
+      throw new HttpError(
+        400,
+        "Chiffrez tous les suppléments demandés avant d'accepter la demande.",
       );
     }
 

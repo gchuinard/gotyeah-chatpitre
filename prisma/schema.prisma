@@ -144,17 +144,28 @@ model BookingCat {
   @@index([catId])
 }
 
-/// Ligne de supplément chiffrée par l'admin sur un devis (nourriture spéciale,
-/// brossage, soins, visite véto…). Snapshot : `label` et `amount` sont figés
-/// au moment où l'admin pose la ligne, indépendamment du catalogue.
+/// Ligne de supplément d'un devis (nourriture spéciale, brossage, soins,
+/// visite véto…). Snapshot : `label` et `amount` sont figés au moment où la
+/// ligne est posée, indépendamment du catalogue.
+///
+/// Deux origines possibles :
+/// — admin : ligne chiffrée par la maison (`requestedByClient = false`).
+/// — client : option demandée à la réservation (`requestedByClient = true`).
+///   Le prix est alors indicatif (issu du catalogue) ou `null` (« à chiffrer »
+///   pour une demande libre) ; l'admin confirme le montant dans le devis.
 model BookingExtra {
   id        String  @id @default(cuid())
   bookingId String
   booking   Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
 
-  label     String
-  amount    Decimal @db.Decimal(10, 2)
-  sortOrder Int     @default(0)
+  label  String
+  // `null` = montant non encore chiffré (demande client libre). `0` est un
+  // prix valide (ex. « croquettes fournies par le client ») — distinct de null.
+  amount Decimal? @db.Decimal(10, 2)
+  // Origine de la ligne : demandée par le client à la réservation, ou posée
+  // par l'admin. Sert à l'affichage (indicatif vs confirmé) et au devis.
+  requestedByClient Boolean @default(false)
+  sortOrder         Int     @default(0)
 
   createdAt DateTime @default(now())
 

@@ -32,8 +32,37 @@ export function POST(req: NextRequest) {
       throw new HttpError(400, "Un ou plusieurs chats sélectionnés sont introuvables.");
     }
 
+    // Options demandées par le client. Les presets sont résolus depuis le
+    // catalogue (label + prix indicatif = snapshot) ; le client n'envoie
+    // jamais de montant. Les demandes libres naissent sans prix (« à
+    // chiffrer ») : l'admin confirmera le montant dans le devis.
+    const presetIds = data.extraPresetIds ?? [];
+    const presets = presetIds.length
+      ? await prisma.extraPreset.findMany({
+          where: { id: { in: presetIds } },
+          orderBy: { sortOrder: "asc" },
+        })
+      : [];
+    const customExtras = data.customExtras ?? [];
+
+    const extraRows = [
+      ...presets.map((p, idx) => ({
+        label: p.label,
+        amount: p.defaultAmount,
+        requestedByClient: true,
+        sortOrder: idx * 10,
+      })),
+      ...customExtras.map((label, idx) => ({
+        label,
+        amount: null,
+        requestedByClient: true,
+        sortOrder: (presets.length + idx) * 10,
+      })),
+    ];
+
     // Pas de tarif à la création : la demande nait en PENDING sans devis.
-    // L'admin pose les montants au passage à ACCEPTED via PATCH.
+    // L'admin pose les montants au passage à ACCEPTED via PATCH. Les options
+    // du client pré-remplissent le devis admin (snapshot dans BookingExtra).
     const booking = await prisma.booking.create({
       data: {
         userId: user.id,
@@ -41,6 +70,7 @@ export function POST(req: NextRequest) {
         endDate: data.endDate,
         clientNotes: data.clientNotes ?? null,
         cats: { create: cats.map((cat) => ({ catId: cat.id })) },
+        ...(extraRows.length > 0 ? { extras: { create: extraRows } } : {}),
       },
       include: { cats: { include: { cat: true } } },
     });

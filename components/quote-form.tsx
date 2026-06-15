@@ -24,7 +24,9 @@ export type QuoteFormPreset = {
 
 export type QuoteFormExtra = {
   label: string;
-  amount: number;
+  // null = ligne demandée par le client, pas encore chiffrée (« à chiffrer »).
+  amount: number | null;
+  requestedByClient?: boolean;
 };
 
 type QuoteFormProps = {
@@ -54,6 +56,8 @@ type Line = {
   presetId: string;
   label: string;
   amount: string;
+  /** Vrai si la ligne vient d'une option demandée par le client. */
+  requestedByClient?: boolean;
 };
 
 let lineCounter = 0;
@@ -74,7 +78,9 @@ function linesFromExtras(
       key: nextKey(),
       presetId: match ? match.id : OTHER_VALUE,
       label: e.label,
-      amount: String(e.amount),
+      // null (« à chiffrer ») → champ vide, à remplir par l'admin.
+      amount: e.amount === null ? "" : String(e.amount),
+      requestedByClient: e.requestedByClient,
     };
   });
 }
@@ -354,6 +360,11 @@ function ExtraLineRow({
   return (
     <li className="grid gap-2 sm:grid-cols-[minmax(0,2fr)_minmax(0,1fr)_auto] sm:items-start">
       <div className="space-y-2">
+        {line.requestedByClient && (
+          <p className="font-mono text-[0.55rem] font-bold uppercase tracking-[0.18em] text-cp-cobalt">
+            ★ Demandé par le client
+          </p>
+        )}
         <select
           id={selectId}
           aria-label="Choix du supplément"
@@ -386,6 +397,7 @@ function ExtraLineRow({
           min={0}
           step="0.01"
           inputMode="decimal"
+          placeholder={line.requestedByClient ? "à chiffrer" : undefined}
           aria-label="Montant du supplément en euros"
           value={line.amount}
           onChange={(e) => onAmountChange(e.target.value)}
