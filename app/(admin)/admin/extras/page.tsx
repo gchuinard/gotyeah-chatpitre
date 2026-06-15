@@ -20,6 +20,7 @@ export default async function AdminExtrasPage() {
   const presets: ExtraPresetItem[] = presetsRaw.map((p) => ({
     id: p.id,
     label: p.label,
+    unit: p.unit,
     defaultAmount: Number(p.defaultAmount),
     sortOrder: p.sortOrder,
   }));

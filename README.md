@@ -225,10 +225,16 @@ est posé par l'admin sur chaque séjour individuellement.
 
 Les lignes `BookingExtra` ont deux origines (champ `requestedByClient`) : posées
 par l'admin sur le devis, ou demandées par le client à la réservation (presets
-du catalogue avec prix indicatif, ou demandes libres dont le montant `amount`
+du catalogue avec prix indicatif, ou demandes libres dont le prix `unitAmount`
 est `null` — « à chiffrer »). Les options du client pré-remplissent l'éditeur de
 devis admin, qui confirme/ajuste les montants ; le passage à `ACCEPTED` est
 refusé tant qu'une ligne demandée n'est pas chiffrée.
+
+Chaque supplément porte une **unité de facturation** (`ExtraUnit` :
+`PER_DAY` / `PER_VISIT` / `FLAT`). `unitAmount` est le prix unitaire et le
+total de ligne `amount` est dérivé serveur : `unitAmount × nuits` (par jour),
+`× quantity` (par visite) ou `× 1` (forfait). `ExtraPreset` porte aussi une
+unité par défaut. Le total dérivé n'est jamais reçu du client.
 
 ## Production
 

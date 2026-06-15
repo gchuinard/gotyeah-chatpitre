@@ -10,6 +10,7 @@ import { RuledBox } from "@/components/ruled-box";
 import { SectionHeading } from "@/components/section-heading";
 import { StayJournal } from "@/components/stay-journal";
 import { getCurrentUser, isAdmin } from "@/lib/auth";
+import { extraUnitGloss } from "@/lib/extras";
 import {
   displayRef,
   formatDate,
@@ -124,8 +125,18 @@ export default async function BookingDetailPage({
                     key={extra.id}
                     className="flex items-baseline justify-between gap-3 py-2 first:pt-0 last:pb-0"
                   >
-                    <span className="font-body text-base leading-relaxed text-cp-ink">
-                      {extra.label}
+                    <span className="flex flex-col">
+                      <span className="font-body text-base leading-relaxed text-cp-ink">
+                        {extra.label}
+                      </span>
+                      <span className="font-mono text-[0.65rem] uppercase tracking-[0.14em] text-cp-ink-soft">
+                        {extraUnitGloss(
+                          extra.unit,
+                          extra.unitAmount === null ? null : Number(extra.unitAmount),
+                          extra.quantity,
+                          nights,
+                        )}
+                      </span>
                     </span>
                     <span className="font-mono text-sm font-bold whitespace-nowrap text-cp-cobalt">
                       {extra.amount === null
@@ -174,8 +185,18 @@ export default async function BookingDetailPage({
                       key={extra.id}
                       className="flex items-baseline justify-between gap-3 py-2 first:pt-0 last:pb-0"
                     >
-                      <span className="font-body text-base leading-relaxed text-cp-ink">
-                        {extra.label}
+                      <span className="flex flex-col">
+                        <span className="font-body text-base leading-relaxed text-cp-ink">
+                          {extra.label}
+                        </span>
+                        <span className="font-mono text-[0.65rem] uppercase tracking-[0.14em] text-cp-ink-soft">
+                          {extraUnitGloss(
+                            extra.unit,
+                            extra.unitAmount === null ? null : Number(extra.unitAmount),
+                            extra.quantity,
+                            nights,
+                          )}
+                        </span>
                       </span>
                       <span className="font-mono text-sm font-bold whitespace-nowrap text-cp-paprika">
                         {extra.amount === null

@@ -99,6 +99,17 @@ enum BookingStatus {
   COMPLETED // séjour terminé
 }
 
+/// Base de facturation d'un supplément. Le total de ligne se déduit du prix
+/// unitaire et d'un multiplicateur dépendant de l'unité :
+///   PER_DAY   → × nombre de nuits du séjour (auto)
+///   PER_VISIT → × quantité saisie (nb de visites / d'unités)
+///   FLAT      → forfait, montant unique pour le séjour (× 1)
+enum ExtraUnit {
+  PER_DAY
+  PER_VISIT
+  FLAT
+}
+
 /// Demande de réservation d'un séjour pour un ou plusieurs chats.
 model Booking {
   id     String @id @default(cuid())
@@ -158,9 +169,18 @@ model BookingExtra {
   bookingId String
   booking   Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
 
-  label  String
-  // `null` = montant non encore chiffré (demande client libre). `0` est un
-  // prix valide (ex. « croquettes fournies par le client ») — distinct de null.
+  label String
+  // Base de facturation (snapshot). Le total `amount` est dérivé serveur de
+  // `unitAmount` × multiplicateur (nuits / quantity / 1 selon `unit`).
+  unit ExtraUnit @default(FLAT)
+  // Prix unitaire (par jour / par visite / forfait). `null` = pas encore
+  // chiffré (demande client libre) — l'admin le pose dans le devis.
+  unitAmount Decimal? @db.Decimal(10, 2)
+  // Nombre d'unités (visites). Ignoré pour PER_DAY (utilise les nuits) et
+  // vaut 1 pour FLAT.
+  quantity Int @default(1)
+  // Total de ligne calculé (snapshot). `null` = montant non encore chiffré.
+  // `0` est un prix valide (ex. « croquettes fournies par le client »).
   amount Decimal? @db.Decimal(10, 2)
   // Origine de la ligne : demandée par le client à la réservation, ou posée
   // par l'admin. Sert à l'affichage (indicatif vs confirmé) et au devis.
@@ -176,10 +196,13 @@ model BookingExtra {
 /// les lignes BookingExtra dans le formulaire de devis. Une modification du
 /// préset n'altère pas les devis déjà posés.
 model ExtraPreset {
-  id            String  @id @default(cuid())
-  label         String
-  defaultAmount Decimal @db.Decimal(10, 2)
-  sortOrder     Int     @default(0)
+  id    String    @id @default(cuid())
+  label String
+  // Base de facturation par défaut du supplément ; `defaultAmount` est le
+  // prix unitaire correspondant (par jour / par visite / forfait).
+  unit          ExtraUnit @default(FLAT)
+  defaultAmount Decimal   @db.Decimal(10, 2)
+  sortOrder     Int       @default(0)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

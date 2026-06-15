@@ -1,7 +1,9 @@
 import type { NextRequest } from "next/server";
+import { differenceInCalendarDays } from "date-fns";
 import { prisma } from "@/lib/db";
 import { handle, HttpError, json, parseJson, requireUser } from "@/lib/api";
 import { bookingCreateSchema } from "@/lib/validations";
+import { extraLineTotal } from "@/lib/pricing";
 import { notifyAdmins } from "@/lib/notifications";
 
 /// GET /api/bookings — liste les réservations de l'utilisateur courant.
@@ -44,16 +46,26 @@ export function POST(req: NextRequest) {
         })
       : [];
     const customExtras = data.customExtras ?? [];
+    const nights = differenceInCalendarDays(data.endDate, data.startDate);
 
     const extraRows = [
+      // Presets : on snapshot l'unité + le prix unitaire, quantité 1, et on
+      // pré-calcule le total indicatif (× nuits pour les « par jour »).
       ...presets.map((p, idx) => ({
         label: p.label,
-        amount: p.defaultAmount,
+        unit: p.unit,
+        unitAmount: p.defaultAmount,
+        quantity: 1,
+        amount: extraLineTotal(p.unit, p.defaultAmount, 1, nights),
         requestedByClient: true,
         sortOrder: idx * 10,
       })),
+      // Demandes libres : forfait, non chiffré (l'admin posera le prix).
       ...customExtras.map((label, idx) => ({
         label,
+        unit: "FLAT" as const,
+        unitAmount: null,
+        quantity: 1,
         amount: null,
         requestedByClient: true,
         sortOrder: (presets.length + idx) * 10,

@@ -61,13 +61,13 @@ async function main() {
   const presetCount = await prisma.extraPreset.count();
   if (presetCount === 0) {
     const presets = [
-      { label: "Croquettes fournies par le client", defaultAmount: "0", sortOrder: 10 },
-      { label: "Croquettes spéciales fournies par la maison", defaultAmount: "5", sortOrder: 20 },
-      { label: "Brossage quotidien long poil", defaultAmount: "25", sortOrder: 30 },
-      { label: "Administration de médicament", defaultAmount: "15", sortOrder: 40 },
-      { label: "Visite vétérinaire", defaultAmount: "30", sortOrder: 50 },
-      { label: "Pension chaton (< 6 mois)", defaultAmount: "10", sortOrder: 60 },
-    ];
+      { label: "Croquettes fournies par le client", unit: "FLAT", defaultAmount: "0", sortOrder: 10 },
+      { label: "Croquettes spéciales fournies par la maison", unit: "PER_DAY", defaultAmount: "2", sortOrder: 20 },
+      { label: "Brossage quotidien long poil", unit: "PER_DAY", defaultAmount: "3", sortOrder: 30 },
+      { label: "Administration de médicament", unit: "PER_DAY", defaultAmount: "2", sortOrder: 40 },
+      { label: "Visite vétérinaire", unit: "PER_VISIT", defaultAmount: "30", sortOrder: 50 },
+      { label: "Pension chaton (< 6 mois)", unit: "PER_DAY", defaultAmount: "3", sortOrder: 60 },
+    ] as const;
     for (const p of presets) {
       await prisma.extraPreset.create({ data: p });
     }

@@ -1,10 +1,16 @@
 import type { NextRequest } from "next/server";
-import type { BookingStatus, NotificationType, Prisma as PrismaTypes } from "@prisma/client";
+import type {
+  BookingStatus,
+  ExtraUnit,
+  NotificationType,
+  Prisma as PrismaTypes,
+} from "@prisma/client";
 import { Prisma } from "@prisma/client";
 
 import { prisma } from "@/lib/db";
 import { handle, HttpError, json, parseJson, requireAdmin } from "@/lib/api";
 import { adminBookingUpdateSchema } from "@/lib/validations";
+import { extraLineTotal } from "@/lib/pricing";
 import { createNotification } from "@/lib/notifications";
 import { differenceInCalendarDays } from "date-fns";
 
@@ -66,16 +72,34 @@ export function PATCH(req: NextRequest, { params }: RouteContext) {
     const depositPercentage =
       data.depositPercentage ?? booking.depositPercentage;
 
-    // Suppléments finaux : ceux fournis si présents, sinon les existants. Les
-    // lignes demandées par le client peuvent avoir un montant null (« à
-    // chiffrer ») — comptées comme 0 tant que l'admin ne les a pas chiffrées.
-    const finalExtras: { label: string; amount: Prisma.Decimal | null }[] =
+    const nights = differenceInCalendarDays(booking.endDate, booking.startDate);
+
+    // Suppléments finaux : ceux fournis si présents, sinon les existants. Le
+    // total de chaque ligne est dérivé de l'unité × prix unitaire (× nuits /
+    // quantité). Les demandes client encore non chiffrées valent null
+    // (« à chiffrer ») — comptées comme 0 tant que l'admin ne les pose pas.
+    const finalExtras: {
+      label: string;
+      unit: ExtraUnit;
+      unitAmount: Prisma.Decimal | null;
+      quantity: number;
+      amount: Prisma.Decimal | null;
+    }[] =
       data.extras !== undefined
         ? data.extras.map((e) => ({
             label: e.label,
-            amount: new Prisma.Decimal(e.amount),
+            unit: e.unit,
+            unitAmount: new Prisma.Decimal(e.unitAmount),
+            quantity: e.quantity,
+            amount: extraLineTotal(e.unit, e.unitAmount, e.quantity, nights),
           }))
-        : booking.extras.map((e) => ({ label: e.label, amount: e.amount }));
+        : booking.extras.map((e) => ({
+            label: e.label,
+            unit: e.unit,
+            unitAmount: e.unitAmount,
+            quantity: e.quantity,
+            amount: e.amount,
+          }));
     const extrasTotal = finalExtras.reduce(
       (sum, e) => sum.plus(e.amount ?? 0),
       new Prisma.Decimal(0),
@@ -85,7 +109,6 @@ export function PATCH(req: NextRequest, { params }: RouteContext) {
     let totalAmount = booking.totalAmount;
     let depositAmount = booking.depositAmount;
     if (pricePerFirstCat !== null && pricePerExtraCat !== null) {
-      const nights = differenceInCalendarDays(booking.endDate, booking.startDate);
       const extras = Math.max(0, booking.cats.length - 1);
       const perNight = pricePerFirstCat.plus(pricePerExtraCat.times(extras));
       const nightsTotal = perNight.times(nights);
@@ -131,7 +154,10 @@ export function PATCH(req: NextRequest, { params }: RouteContext) {
             data: data.extras.map((e, idx) => ({
               bookingId: id,
               label: e.label,
-              amount: new Prisma.Decimal(e.amount),
+              unit: e.unit,
+              unitAmount: new Prisma.Decimal(e.unitAmount),
+              quantity: e.quantity,
+              amount: extraLineTotal(e.unit, e.unitAmount, e.quantity, nights),
               sortOrder: idx * 10,
             })),
           });

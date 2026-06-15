@@ -2,10 +2,12 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import type { ExtraUnit } from "@prisma/client";
 
 import { Button } from "@/components/ui/button";
 import { Field } from "@/components/field";
 import { Input } from "@/components/ui/input";
+import { EXTRA_UNIT_LABEL, EXTRA_UNIT_OPTIONS } from "@/lib/extras";
 
 /// Éditeur du catalogue des presets de suppléments. Affiche chaque préset
 /// avec actions « Modifier » / « Supprimer » (édition inline), et une
@@ -17,9 +19,40 @@ import { Input } from "@/components/ui/input";
 export type ExtraPresetItem = {
   id: string;
   label: string;
+  unit: ExtraUnit;
   defaultAmount: number;
   sortOrder: number;
 };
+
+const UNIT_SELECT_CLASS =
+  "h-11 w-full min-w-0 rounded-md border border-cp-ink bg-cp-paper px-3 py-2 font-body text-base text-cp-ink transition-colors outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[3px] focus-visible:outline-cp-paprika md:text-sm";
+
+/// Petit <select> d'unité réutilisé en édition et en création.
+function UnitSelect({
+  id,
+  value,
+  onChange,
+}: {
+  id: string;
+  value: ExtraUnit;
+  onChange: (v: ExtraUnit) => void;
+}) {
+  return (
+    <select
+      id={id}
+      aria-label="Unité de facturation"
+      value={value}
+      onChange={(e) => onChange(e.target.value as ExtraUnit)}
+      className={UNIT_SELECT_CLASS}
+    >
+      {EXTRA_UNIT_OPTIONS.map((o) => (
+        <option key={o.value} value={o.value}>
+          {o.label}
+        </option>
+      ))}
+    </select>
+  );
+}
 
 export function ExtrasPresetsEditor({ presets }: { presets: ExtraPresetItem[] }) {
   const [adding, setAdding] = useState(false);
@@ -68,12 +101,14 @@ function PresetRow({
   const router = useRouter();
   const [editing, setEditing] = useState(false);
   const [label, setLabel] = useState(preset.label);
+  const [unit, setUnit] = useState<ExtraUnit>(preset.unit);
   const [amount, setAmount] = useState(String(preset.defaultAmount));
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
   function cancel(): void {
     setLabel(preset.label);
+    setUnit(preset.unit);
     setAmount(String(preset.defaultAmount));
     setEditing(false);
     setError(null);
@@ -87,6 +122,7 @@ function PresetRow({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           label: label.trim(),
+          unit,
           defaultAmount: Number(amount) || 0,
         }),
       });
@@ -131,8 +167,13 @@ function PresetRow({
               />
             </Field>
           </div>
+          <div className="w-44">
+            <Field label="Unité" htmlFor={`unit-${preset.id}`}>
+              <UnitSelect id={`unit-${preset.id}`} value={unit} onChange={setUnit} />
+            </Field>
+          </div>
           <div className="w-32">
-            <Field label="Prix par défaut (€)" htmlFor={`amount-${preset.id}`}>
+            <Field label="Prix unitaire (€)" htmlFor={`amount-${preset.id}`}>
               <Input
                 id={`amount-${preset.id}`}
                 type="number"
@@ -167,6 +208,9 @@ function PresetRow({
             </p>
             <p className="font-mono text-sm font-bold text-cp-paprika">
               {preset.defaultAmount.toLocaleString("fr-FR")}€
+            </p>
+            <p className="font-mono text-[0.6rem] font-bold uppercase tracking-[0.16em] text-cp-cobalt">
+              {EXTRA_UNIT_LABEL[preset.unit]}
             </p>
           </div>
           <div className="flex gap-2">
@@ -206,6 +250,7 @@ function PresetRow({
 function AddForm({ onDone }: { onDone: () => void }) {
   const router = useRouter();
   const [label, setLabel] = useState("");
+  const [unit, setUnit] = useState<ExtraUnit>("FLAT");
   const [amount, setAmount] = useState("0");
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
@@ -222,6 +267,7 @@ function AddForm({ onDone }: { onDone: () => void }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           label: label.trim(),
+          unit,
           defaultAmount: Number(amount) || 0,
         }),
       });
@@ -251,8 +297,13 @@ function AddForm({ onDone }: { onDone: () => void }) {
             />
           </Field>
         </div>
+        <div className="w-44">
+          <Field label="Unité" htmlFor="new-preset-unit">
+            <UnitSelect id="new-preset-unit" value={unit} onChange={setUnit} />
+          </Field>
+        </div>
         <div className="w-32">
-          <Field label="Prix par défaut (€)" htmlFor="new-preset-amount">
+          <Field label="Prix unitaire (€)" htmlFor="new-preset-amount">
             <Input
               id="new-preset-amount"
               type="number"

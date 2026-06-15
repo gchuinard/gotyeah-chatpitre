@@ -2,10 +2,12 @@
 
 import { useId, useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import type { ExtraUnit } from "@prisma/client";
 
 import { Field } from "@/components/field";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { EXTRA_UNIT_OPTIONS, extraLineTotalNumber } from "@/lib/extras";
 
 /// Formulaire de devis admin. L'admin saisit les tarifs unitaires, le
 /// pourcentage d'acompte et les éventuelles lignes de suppléments — chaque
@@ -19,13 +21,16 @@ import { Button } from "@/components/ui/button";
 export type QuoteFormPreset = {
   id: string;
   label: string;
+  unit: ExtraUnit;
   defaultAmount: number;
 };
 
 export type QuoteFormExtra = {
   label: string;
+  unit: ExtraUnit;
   // null = ligne demandée par le client, pas encore chiffrée (« à chiffrer »).
-  amount: number | null;
+  unitAmount: number | null;
+  quantity: number;
   requestedByClient?: boolean;
 };
 
@@ -55,7 +60,11 @@ type Line = {
   /** id du préset choisi, "" si aucun, OTHER_VALUE si Autre. */
   presetId: string;
   label: string;
-  amount: string;
+  unit: ExtraUnit;
+  /** Prix unitaire (saisi). Chaîne vide = « à chiffrer ». */
+  unitAmount: string;
+  /** Quantité (saisie) — utilisée seulement pour « par visite ». */
+  quantity: string;
   /** Vrai si la ligne vient d'une option demandée par le client. */
   requestedByClient?: boolean;
 };
@@ -78,8 +87,10 @@ function linesFromExtras(
       key: nextKey(),
       presetId: match ? match.id : OTHER_VALUE,
       label: e.label,
+      unit: e.unit,
       // null (« à chiffrer ») → champ vide, à remplir par l'admin.
-      amount: e.amount === null ? "" : String(e.amount),
+      unitAmount: e.unitAmount === null ? "" : String(e.unitAmount),
+      quantity: String(e.quantity),
       requestedByClient: e.requestedByClient,
     };
   });
@@ -116,7 +127,17 @@ export function QuoteForm({
     const first = Number(pricePerFirstCat) || 0;
     const extra = Number(pricePerExtraCat) || 0;
     const perNightCalc = first + extras * extra;
-    const extrasSum = lines.reduce((sum, l) => sum + (Number(l.amount) || 0), 0);
+    const extrasSum = lines.reduce(
+      (sum, l) =>
+        sum +
+        (extraLineTotalNumber(
+          l.unit,
+          Number(l.unitAmount) || 0,
+          Number(l.quantity) || 1,
+          nights,
+        ) ?? 0),
+      0,
+    );
     const totalCalc = perNightCalc * nights + extrasSum;
     const depositPct = Number(depositPercentage) || 0;
     const depositCalc = Math.round(totalCalc * depositPct) / 100;
@@ -131,7 +152,14 @@ export function QuoteForm({
   function addLine(): void {
     setLines((prev) => [
       ...prev,
-      { key: nextKey(), presetId: "", label: "", amount: "0" },
+      {
+        key: nextKey(),
+        presetId: "",
+        label: "",
+        unit: "FLAT",
+        unitAmount: "0",
+        quantity: "1",
+      },
     ]);
   }
 
@@ -144,10 +172,10 @@ export function QuoteForm({
       prev.map((l) => {
         if (l.key !== key) return l;
         if (presetId === OTHER_VALUE) {
-          return { ...l, presetId: OTHER_VALUE, label: "", amount: "0" };
+          return { ...l, presetId: OTHER_VALUE, label: "", unit: "FLAT", unitAmount: "0" };
         }
         if (presetId === "") {
-          return { ...l, presetId: "", label: "", amount: "0" };
+          return { ...l, presetId: "", label: "", unit: "FLAT", unitAmount: "0" };
         }
         const preset = presets.find((p) => p.id === presetId);
         if (!preset) return l;
@@ -155,7 +183,8 @@ export function QuoteForm({
           ...l,
           presetId,
           label: preset.label,
-          amount: String(preset.defaultAmount),
+          unit: preset.unit,
+          unitAmount: String(preset.defaultAmount),
         };
       }),
     );
@@ -165,8 +194,16 @@ export function QuoteForm({
     setLines((prev) => prev.map((l) => (l.key === key ? { ...l, label } : l)));
   }
 
-  function changeLineAmount(key: string, amount: string): void {
-    setLines((prev) => prev.map((l) => (l.key === key ? { ...l, amount } : l)));
+  function changeLineUnit(key: string, unit: ExtraUnit): void {
+    setLines((prev) => prev.map((l) => (l.key === key ? { ...l, unit } : l)));
+  }
+
+  function changeLineUnitAmount(key: string, unitAmount: string): void {
+    setLines((prev) => prev.map((l) => (l.key === key ? { ...l, unitAmount } : l)));
+  }
+
+  function changeLineQuantity(key: string, quantity: string): void {
+    setLines((prev) => prev.map((l) => (l.key === key ? { ...l, quantity } : l)));
   }
 
   function submit(opts: { withAccept: boolean }): void {
@@ -175,7 +212,9 @@ export function QuoteForm({
     const cleanExtras = lines
       .map((l) => ({
         label: l.label.trim(),
-        amount: Number(l.amount) || 0,
+        unit: l.unit,
+        unitAmount: Number(l.unitAmount) || 0,
+        quantity: Math.max(1, Math.round(Number(l.quantity) || 1)),
       }))
       .filter((e) => e.label.length > 0);
 
@@ -276,9 +315,12 @@ export function QuoteForm({
               key={line.key}
               line={line}
               presets={presets}
+              nights={nights}
               onPresetChange={(v) => changePreset(line.key, v)}
               onLabelChange={(v) => changeLineLabel(line.key, v)}
-              onAmountChange={(v) => changeLineAmount(line.key, v)}
+              onUnitChange={(v) => changeLineUnit(line.key, v)}
+              onUnitAmountChange={(v) => changeLineUnitAmount(line.key, v)}
+              onQuantityChange={(v) => changeLineQuantity(line.key, v)}
               onRemove={() => removeLine(line.key)}
             />
           ))}
@@ -340,80 +382,152 @@ export function QuoteForm({
   );
 }
 
+const SELECT_CLASS =
+  "h-11 w-full min-w-0 rounded-md border border-cp-ink bg-cp-paper px-3 py-2 font-body text-base text-cp-ink transition-colors outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[3px] focus-visible:outline-cp-paprika md:text-sm";
+
 function ExtraLineRow({
   line,
   presets,
+  nights,
   onPresetChange,
   onLabelChange,
-  onAmountChange,
+  onUnitChange,
+  onUnitAmountChange,
+  onQuantityChange,
   onRemove,
 }: {
   line: Line;
   presets: QuoteFormPreset[];
+  nights: number;
   onPresetChange: (v: string) => void;
   onLabelChange: (v: string) => void;
-  onAmountChange: (v: string) => void;
+  onUnitChange: (v: ExtraUnit) => void;
+  onUnitAmountChange: (v: string) => void;
+  onQuantityChange: (v: string) => void;
   onRemove: () => void;
 }) {
   const selectId = useId();
   const isOther = line.presetId === OTHER_VALUE;
+  const lineTotal = extraLineTotalNumber(
+    line.unit,
+    line.unitAmount === "" ? null : Number(line.unitAmount) || 0,
+    Number(line.quantity) || 1,
+    nights,
+  );
   return (
-    <li className="grid gap-2 sm:grid-cols-[minmax(0,2fr)_minmax(0,1fr)_auto] sm:items-start">
-      <div className="space-y-2">
-        {line.requestedByClient && (
-          <p className="font-mono text-[0.55rem] font-bold uppercase tracking-[0.18em] text-cp-cobalt">
-            ★ Demandé par le client
-          </p>
-        )}
-        <select
-          id={selectId}
-          aria-label="Choix du supplément"
-          value={line.presetId}
-          onChange={(e) => onPresetChange(e.target.value)}
-          className="h-11 w-full min-w-0 rounded-md border border-cp-ink bg-cp-paper px-3 py-2 font-body text-base text-cp-ink transition-colors outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[3px] focus-visible:outline-cp-paprika md:text-sm"
+    <li className="rounded-md border border-cp-ink/30 bg-cp-paper-deep/40 p-3">
+      {line.requestedByClient && (
+        <p className="mb-2 font-mono text-[0.55rem] font-bold uppercase tracking-[0.18em] text-cp-cobalt">
+          ★ Demandé par le client
+        </p>
+      )}
+      <div className="grid gap-2 sm:grid-cols-[minmax(0,2fr)_auto] sm:items-start">
+        <div className="space-y-2">
+          <select
+            id={selectId}
+            aria-label="Choix du supplément"
+            value={line.presetId}
+            onChange={(e) => onPresetChange(e.target.value)}
+            className={SELECT_CLASS}
+          >
+            <option value="">— Choisir un supplément —</option>
+            {presets.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.label} ({p.defaultAmount}€{unitShort(p.unit)})
+              </option>
+            ))}
+            <option value={OTHER_VALUE}>Autre (à préciser)</option>
+          </select>
+          {isOther && (
+            <Input
+              type="text"
+              placeholder="Préciser le libellé du supplément"
+              aria-label="Libellé du supplément"
+              value={line.label}
+              onChange={(e) => onLabelChange(e.target.value)}
+            />
+          )}
+        </div>
+
+        <button
+          type="button"
+          onClick={onRemove}
+          aria-label="Supprimer cette ligne"
+          className="inline-flex h-11 w-11 items-center justify-center self-start justify-self-end rounded-md border border-cp-ink bg-cp-paper text-cp-ink transition-colors hover:bg-cp-paprika hover:text-cp-paper"
         >
-          <option value="">— Choisir un supplément —</option>
-          {presets.map((p) => (
-            <option key={p.id} value={p.id}>
-              {p.label} ({p.defaultAmount}€)
-            </option>
-          ))}
-          <option value={OTHER_VALUE}>Autre (à préciser)</option>
-        </select>
-        {isOther && (
+          <span aria-hidden className="text-lg leading-none">×</span>
+        </button>
+      </div>
+
+      {/* Unité · prix unitaire · quantité (si par visite) · total de ligne */}
+      <div className="mt-2 grid items-end gap-2 sm:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)_minmax(0,0.8fr)_auto]">
+        <label className="block">
+          <span className="mb-1 block font-mono text-[0.55rem] font-bold uppercase tracking-[0.16em] text-cp-ink-soft">
+            Unité
+          </span>
+          <select
+            aria-label="Unité de facturation"
+            value={line.unit}
+            onChange={(e) => onUnitChange(e.target.value as ExtraUnit)}
+            className={SELECT_CLASS}
+          >
+            {EXTRA_UNIT_OPTIONS.map((o) => (
+              <option key={o.value} value={o.value}>
+                {o.label}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <label className="block">
+          <span className="mb-1 block font-mono text-[0.55rem] font-bold uppercase tracking-[0.16em] text-cp-ink-soft">
+            Prix unitaire (€)
+          </span>
           <Input
-            type="text"
-            placeholder="Préciser le libellé du supplément"
-            aria-label="Libellé du supplément"
-            value={line.label}
-            onChange={(e) => onLabelChange(e.target.value)}
+            type="number"
+            min={0}
+            step="0.01"
+            inputMode="decimal"
+            placeholder={line.requestedByClient ? "à chiffrer" : undefined}
+            aria-label="Prix unitaire en euros"
+            value={line.unitAmount}
+            onChange={(e) => onUnitAmountChange(e.target.value)}
           />
-        )}
-      </div>
+        </label>
 
-      <div>
-        <Input
-          type="number"
-          min={0}
-          step="0.01"
-          inputMode="decimal"
-          placeholder={line.requestedByClient ? "à chiffrer" : undefined}
-          aria-label="Montant du supplément en euros"
-          value={line.amount}
-          onChange={(e) => onAmountChange(e.target.value)}
-        />
-      </div>
+        <label className="block">
+          <span className="mb-1 block font-mono text-[0.55rem] font-bold uppercase tracking-[0.16em] text-cp-ink-soft">
+            {line.unit === "PER_VISIT" ? "Quantité" : line.unit === "PER_DAY" ? "Nuits" : "—"}
+          </span>
+          {line.unit === "PER_VISIT" ? (
+            <Input
+              type="number"
+              min={1}
+              step={1}
+              aria-label="Nombre de visites"
+              value={line.quantity}
+              onChange={(e) => onQuantityChange(e.target.value)}
+            />
+          ) : (
+            <div className="flex h-11 items-center px-1 font-mono text-sm text-cp-ink-soft">
+              {line.unit === "PER_DAY" ? `× ${nights}` : "—"}
+            </div>
+          )}
+        </label>
 
-      <button
-        type="button"
-        onClick={onRemove}
-        aria-label="Supprimer cette ligne"
-        className="inline-flex h-11 w-11 items-center justify-center self-start rounded-md border border-cp-ink bg-cp-paper text-cp-ink transition-colors hover:bg-cp-paprika hover:text-cp-paper"
-      >
-        <span aria-hidden className="text-lg leading-none">×</span>
-      </button>
+        <div className="pb-2.5 text-right">
+          <span className="font-mono text-sm font-bold whitespace-nowrap text-cp-ink">
+            = {lineTotal === null ? "à chiffrer" : `${lineTotal.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}€`}
+          </span>
+        </div>
+      </div>
     </li>
   );
+}
+
+/// Suffixe court d'unité pour l'option du sélecteur (« /jour », « /visite »).
+function unitShort(unit: ExtraUnit): string {
+  return unit === "PER_DAY" ? "/jour" : unit === "PER_VISIT" ? "/visite" : "";
 }
 
 function Summary({

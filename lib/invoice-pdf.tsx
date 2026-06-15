@@ -7,6 +7,7 @@ import {
 } from "@react-pdf/renderer";
 import type { Booking, BookingExtra, Cat, User } from "@prisma/client";
 
+import { EXTRA_UNIT_LABEL, extraUnitMultiplier } from "@/lib/extras";
 import { displayRef, formatDate, nightsBetween } from "@/lib/format";
 
 // Couleurs du DA — en valeurs absolues parce que @react-pdf/renderer ne
@@ -423,21 +424,30 @@ export function InvoicePdf({
             </Text>
           </View>
 
-          {booking.extras.map((extra) => (
-            <View key={extra.id} style={styles.tableRow}>
-              <View style={styles.colDesignation}>
-                <Text style={styles.designationTitle}>{extra.label}</Text>
-                <Text style={styles.designationGloss}>
-                  Supplément posé par la maison sur le devis.
+          {booking.extras.map((extra) => {
+            const qty = extraUnitMultiplier(extra.unit, extra.quantity, nights);
+            return (
+              <View key={extra.id} style={styles.tableRow}>
+                <View style={styles.colDesignation}>
+                  <Text style={styles.designationTitle}>{extra.label}</Text>
+                  <Text style={styles.designationGloss}>
+                    Supplément {EXTRA_UNIT_LABEL[extra.unit]}.
+                  </Text>
+                </View>
+                <Text style={[styles.amountText, styles.colQty]}>
+                  {extra.unit === "FLAT" ? "—" : qty}
+                </Text>
+                <Text style={[styles.amountMono, styles.colUnit]}>
+                  {extra.unitAmount === null
+                    ? "—"
+                    : formatAmount(Number(extra.unitAmount))}
+                </Text>
+                <Text style={[styles.amountMono, styles.colTotal]}>
+                  {formatAmount(Number(extra.amount ?? 0))}
                 </Text>
               </View>
-              <Text style={[styles.amountText, styles.colQty]}>—</Text>
-              <Text style={[styles.amountMono, styles.colUnit]}>—</Text>
-              <Text style={[styles.amountMono, styles.colTotal]}>
-                {formatAmount(Number(extra.amount ?? 0))}
-              </Text>
-            </View>
-          ))}
+            );
+          })}
         </View>
 
         {/* TOTAUX */}

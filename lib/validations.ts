@@ -78,12 +78,22 @@ export const bookingMessageSchema = z.object({
 
 // --- Admin ------------------------------------------------------------------
 
-/// Une ligne de supplément posée sur le devis. Label libre + montant total.
+/// Unité de facturation d'un supplément (cf. enum Prisma ExtraUnit).
+export const extraUnitSchema = z.enum(["PER_DAY", "PER_VISIT", "FLAT"]);
+
+/// Une ligne de supplément posée sur le devis : libellé, unité de facturation,
+/// prix unitaire et quantité. Le total de ligne est dérivé serveur.
 export const bookingExtraInputSchema = z.object({
   label: z.string().trim().min(1, "Le libellé d'un supplément est requis."),
-  amount: z.coerce
+  unit: extraUnitSchema.default("FLAT"),
+  unitAmount: z.coerce
     .number()
     .nonnegative("Suppléments négatifs impossibles."),
+  quantity: z.coerce
+    .number()
+    .int("La quantité doit être un entier.")
+    .min(1, "La quantité doit être d'au moins 1.")
+    .default(1),
 });
 
 export const adminBookingUpdateSchema = z.object({
@@ -110,6 +120,7 @@ export const adminBookingUpdateSchema = z.object({
 
 export const extraPresetCreateSchema = z.object({
   label: z.string().trim().min(1, "Le libellé est requis."),
+  unit: extraUnitSchema.default("FLAT"),
   defaultAmount: z.coerce
     .number()
     .nonnegative("Le prix par défaut ne peut pas être négatif."),

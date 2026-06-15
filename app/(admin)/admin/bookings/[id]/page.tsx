@@ -254,7 +254,9 @@ export default async function AdminBookingDetailPage({
               depositPercentage: booking.depositPercentage,
               extras: booking.extras.map((e) => ({
                 label: e.label,
-                amount: e.amount === null ? null : Number(e.amount),
+                unit: e.unit,
+                unitAmount: e.unitAmount === null ? null : Number(e.unitAmount),
+                quantity: e.quantity,
                 requestedByClient: e.requestedByClient,
               })),
             }}
@@ -266,6 +268,7 @@ export default async function AdminBookingDetailPage({
             presets={presets.map((p) => ({
               id: p.id,
               label: p.label,
+              unit: p.unit,
               defaultAmount: Number(p.defaultAmount),
             }))}
           />

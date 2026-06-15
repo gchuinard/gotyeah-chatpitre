@@ -3,7 +3,7 @@
 import { useState, useTransition, type FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import type { Cat } from "@prisma/client";
+import type { Cat, ExtraUnit } from "@prisma/client";
 
 import { DateRangePicker } from "@/components/date-range-picker";
 import { Field } from "@/components/field";
@@ -12,6 +12,7 @@ import { SectionHeading } from "@/components/section-heading";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { EXTRA_UNIT_SHORT } from "@/lib/extras";
 import { ageLabel, displayRef } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
@@ -24,6 +25,7 @@ import { cn } from "@/lib/utils";
 export type ExtraPresetOption = {
   id: string;
   label: string;
+  unit: ExtraUnit;
   defaultAmount: number;
 };
 
@@ -172,6 +174,7 @@ export function NewBookingForm({
                 id={`extra-pick-${preset.id}`}
                 presetId={preset.id}
                 label={preset.label}
+                unit={preset.unit}
                 amount={preset.defaultAmount}
               />
             ))}
@@ -354,13 +357,22 @@ function ExtraPickRow({
   id,
   presetId,
   label,
+  unit,
   amount,
 }: {
   id: string;
   presetId: string;
   label: string;
+  unit: ExtraUnit;
   amount: number;
 }) {
+  // Affiche le prix avec son unité : « ~2€/jour », « 30€/visite », « 5€ forfait ».
+  const priceLabel =
+    amount <= 0
+      ? "inclus"
+      : unit === "FLAT"
+        ? `${amount.toLocaleString("fr-FR")}€ forfait`
+        : `~ ${amount.toLocaleString("fr-FR")}€${EXTRA_UNIT_SHORT[unit]}`;
   return (
     <li>
       <label
@@ -401,7 +413,7 @@ function ExtraPickRow({
             {label}
           </span>
           <span className="font-mono text-sm font-bold whitespace-nowrap text-cp-paprika">
-            {amount > 0 ? `~ ${amount.toLocaleString("fr-FR")}€` : "inclus"}
+            {priceLabel}
           </span>
         </span>
       </label>

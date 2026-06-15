@@ -54,6 +54,7 @@ export default async function NewBookingPage() {
         presets={presets.map((p) => ({
           id: p.id,
           label: p.label,
+          unit: p.unit,
           defaultAmount: Number(p.defaultAmount),
         }))}
       />

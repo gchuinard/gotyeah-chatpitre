@@ -1,6 +1,7 @@
 import { differenceInCalendarDays } from "date-fns";
-import { Prisma } from "@prisma/client";
+import { Prisma, type ExtraUnit } from "@prisma/client";
 import { prisma } from "@/lib/db";
+import { extraUnitMultiplier } from "@/lib/extras";
 
 // Calcul de la tarification d'un séjour. Les tarifs « vivants » sont stockés
 // dans la table Setting (modifiables côté admin) ; un repli codé en dur évite
@@ -21,6 +22,20 @@ export interface BookingPricing {
   depositPercentage: number;
   totalAmount: Prisma.Decimal;
   depositAmount: Prisma.Decimal;
+}
+
+/// Total d'une ligne de supplément = prix unitaire × multiplicateur. Renvoie
+/// `null` si le prix unitaire n'est pas encore chiffré (demande client libre).
+export function extraLineTotal(
+  unit: ExtraUnit,
+  unitAmount: Prisma.Decimal | number | null,
+  quantity: number,
+  nights: number,
+): Prisma.Decimal | null {
+  if (unitAmount === null) return null;
+  return new Prisma.Decimal(unitAmount)
+    .times(extraUnitMultiplier(unit, quantity, nights))
+    .toDecimalPlaces(2);
 }
 
 /// Lit un réglage dans la table Setting, avec repli sur la valeur par défaut.
