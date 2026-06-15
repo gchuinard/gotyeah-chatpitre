@@ -43,6 +43,9 @@ export default async function AdminBookingDetailPage({
   const ref = displayRef(booking.id);
   const awaitingQuote = ["PENDING", "QUESTION_ASKED"].includes(booking.status);
   const hasQuote = booking.totalAmount !== null;
+  // Le carnet de séjour n'a de sens qu'une fois le séjour validé : masqué tant
+  // que la demande n'est pas acceptée (ou terminée).
+  const showJournal = ["ACCEPTED", "COMPLETED"].includes(booking.status);
   const extrasTotal = booking.extras.reduce(
     (sum, e) => sum + Number(e.amount ?? 0),
     0,
@@ -276,26 +279,29 @@ export default async function AdminBookingDetailPage({
         </>
       )}
 
-      <RuleDivider className="my-16" label="Carnet de séjour" tone="cobalt" />
+      {/* Carnet de séjour — masqué tant que le séjour n'est pas validé. */}
+      {showJournal && (
+        <>
+          <RuleDivider className="my-16" label="Carnet de séjour" tone="cobalt" />
+          <section aria-labelledby="journal-title" className="space-y-8">
+            <SectionHeading
+              number="02"
+              title="Carnet de séjour"
+              kicker="Une note photo quotidienne — c'est ce que voit le client."
+              tone="cobalt"
+            />
 
-      {/* Carnet de séjour — admin peut poster, Prisma */}
-      <section aria-labelledby="journal-title" className="space-y-8">
-        <SectionHeading
-          number="02"
-          title="Carnet de séjour"
-          kicker="Une note photo quotidienne — c'est ce que voit le client."
-          tone="cobalt"
-        />
-
-        <StayJournal bookingId={booking.id} cats={cats} canAdd />
-      </section>
+            <StayJournal bookingId={booking.id} cats={cats} canAdd />
+          </section>
+        </>
+      )}
 
       <RuleDivider className="my-16" label="Fil de discussion" tone="paprika" />
 
       {/* Fil — POST réel */}
       <section aria-labelledby="thread-title" className="space-y-8">
         <SectionHeading
-          number="03"
+          number={showJournal ? "03" : "02"}
           title="Échanges avec le client"
           kicker={`${messages.length} message${messages.length > 1 ? "s" : ""} échangé${messages.length > 1 ? "s" : ""} jusqu'ici.`}
           tone="paprika"
