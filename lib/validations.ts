@@ -101,6 +101,10 @@ export const adminBookingUpdateSchema = z.object({
     .enum(["PENDING", "QUESTION_ASKED", "ACCEPTED", "REJECTED", "CANCELLED", "COMPLETED"])
     .optional(),
   adminNotes: z.string().trim().optional(),
+  // Question posée au client : quand ce champ est fourni (avec
+  // status=QUESTION_ASKED), le message est posté dans le fil et le client
+  // reçoit une unique notification « question posée ».
+  questionMessage: z.string().trim().min(1, "La question ne peut pas être vide.").optional(),
   // Devis posé par l'admin. totalAmount et depositAmount sont recalculés
   // côté serveur — pas acceptés depuis le client.
   pricePerFirstCat: z.coerce.number().nonnegative("Tarif négatif impossible.").optional(),

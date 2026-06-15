@@ -46,7 +46,7 @@ const STATUS_NOTIFICATION: Partial<
 /// recréées dans la foulée (transaction).
 export function PATCH(req: NextRequest, { params }: RouteContext) {
   return handle(async () => {
-    await requireAdmin();
+    const admin = await requireAdmin();
     const { id } = await params;
 
     const booking = await prisma.booking.findUnique({
@@ -145,7 +145,8 @@ export function PATCH(req: NextRequest, { params }: RouteContext) {
       depositAmount,
     };
 
-    // Update booking + remplace les extras dans une transaction si demandé.
+    // Update booking + remplace les extras + poste la question éventuelle,
+    // le tout dans une transaction.
     const updated = await prisma.$transaction(async (tx) => {
       if (data.extras !== undefined) {
         await tx.bookingExtra.deleteMany({ where: { bookingId: id } });
@@ -163,11 +164,31 @@ export function PATCH(req: NextRequest, { params }: RouteContext) {
           });
         }
       }
+      // Question au client : on poste le message dans le fil (vu par le
+      // client comme un message de la maison).
+      if (data.questionMessage) {
+        await tx.bookingMessage.create({
+          data: {
+            bookingId: id,
+            authorId: admin.id,
+            isFromAdmin: true,
+            content: data.questionMessage,
+          },
+        });
+      }
       return tx.booking.update({ where: { id }, data: updateData });
     });
 
-    // Notifie le client si le statut a effectivement changé.
-    if (data.status && data.status !== booking.status) {
+    // Notification au client. Une question l'emporte sur la notif de statut
+    // générique (évite de notifier deux fois pour un même geste).
+    if (data.questionMessage) {
+      await createNotification({
+        userId: booking.userId,
+        type: "BOOKING_QUESTION",
+        title: "La pension vous a posé une question",
+        link: `/dashboard/bookings/${booking.id}`,
+      });
+    } else if (data.status && data.status !== booking.status) {
       const notif = STATUS_NOTIFICATION[data.status];
       if (notif) {
         await createNotification({
