@@ -187,7 +187,16 @@ export default async function DashboardPage() {
         ) : (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {cats.map((cat) => (
-              <CatCard key={cat.id} {...toCatCardProps(cat)} />
+              <Link
+                key={cat.id}
+                href={`/dashboard/cats/${cat.id}/edit`}
+                className="group block outline-none focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-cp-paprika"
+              >
+                <CatCard
+                  {...toCatCardProps(cat)}
+                  className="transition-shadow group-hover:shadow-[6px_6px_0_0_var(--color-cp-ink)]"
+                />
+              </Link>
             ))}
           </div>
         )}

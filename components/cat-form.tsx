@@ -36,10 +36,14 @@ export function CatForm({
   mode,
   defaultValues,
   reference,
+  reviewSlot,
 }: {
   mode: "create" | "edit";
   defaultValues?: CatFormValues;
   reference?: string;
+  /** Bloc « avis de la maison » (séjours + statut + note), rendu sous
+   *  l'en-tête en mode édition. Construit côté serveur par la page. */
+  reviewSlot?: React.ReactNode;
 }) {
   const router = useRouter();
   const v = defaultValues ?? {};
@@ -148,6 +152,8 @@ export function CatForm({
             : "Renseignez la fiche complète avant de demander un premier séjour. Tout sera vérifié à l'arrivée."}
         </p>
       </header>
+
+      {reviewSlot}
 
       <RuleDivider className="my-12" />
 
