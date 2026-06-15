@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, useTransition, type FormEvent } from "react";
+import { useState, useTransition, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 
 import { MessageThread } from "@/components/message-thread";
@@ -73,48 +73,69 @@ export function ConversationView({
   bookingId,
   initialMessages,
   voice,
+  canAskQuestion = false,
 }: {
   bookingId: string;
   initialMessages: ConversationMessage[];
   voice: Voice;
+  /** Admin uniquement : affiche « Poser une question » (message + passage du
+   *  séjour en QUESTION_ASKED). Activé tant que la demande n'est pas tranchée. */
+  canAskQuestion?: boolean;
 }) {
   const router = useRouter();
   const config = VOICE_CONFIG[voice];
   const [messages, setMessages] = useState<ConversationMessage[]>(initialMessages);
+  const [body, setBody] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
-  const formRef = useRef<HTMLFormElement>(null);
 
-  function onSubmit(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault();
+  /// Envoie le contenu du composer, soit comme message simple, soit comme
+  /// question (qui bascule le séjour en QUESTION_ASKED via la route admin).
+  function send(mode: "message" | "question") {
     setError(null);
-    const formData = new FormData(e.currentTarget);
-    const body = String(formData.get("body") ?? "").trim();
-    if (!body) return;
+    const content = body.trim();
+    if (!content) {
+      setError(
+        mode === "question"
+          ? "Écrivez votre question avant de l'envoyer."
+          : "Écrivez un message avant de l'envoyer.",
+      );
+      return;
+    }
 
     const optimisticId = `m-optimistic-${Date.now()}`;
     const optimistic: ConversationMessage = {
       id: optimisticId,
-      body,
+      body: content,
       fromAdmin: config.fromAdmin,
       authorLabel: config.authorLabel,
       sentAt: new Date().toISOString(),
     };
     setMessages((prev) => [...prev, optimistic]);
-    formRef.current?.reset();
+    setBody("");
 
     startTransition(async () => {
-      const res = await fetch(`/api/bookings/${bookingId}/messages`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ content: body }),
-      });
+      const res =
+        mode === "question"
+          ? await fetch(`/api/admin/bookings/${bookingId}`, {
+              method: "PATCH",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                status: "QUESTION_ASKED",
+                questionMessage: content,
+              }),
+            })
+          : await fetch(`/api/bookings/${bookingId}/messages`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ content }),
+            });
 
       if (!res.ok) {
         // Retire l'optimistic + affiche l'erreur
         setMessages((prev) => prev.filter((m) => m.id !== optimisticId));
         const data: { error?: string } = await res.json().catch(() => ({}));
-        setError(data.error ?? "Échec de l'envoi du message.");
+        setError(data.error ?? "Échec de l'envoi.");
         return;
       }
 
@@ -122,6 +143,11 @@ export function ConversationView({
       // re-fetchés depuis Prisma (avec les vrais ids + horodatages).
       router.refresh();
     });
+  }
+
+  function onSubmit(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    send("message");
   }
 
   return (
@@ -137,7 +163,6 @@ export function ConversationView({
       />
 
       <form
-        ref={formRef}
         onSubmit={onSubmit}
         className={cn("space-y-4", config.formClass)}
         noValidate
@@ -149,13 +174,15 @@ export function ConversationView({
           id={`${voice}-reply`}
           name="body"
           rows={4}
+          value={body}
+          onChange={(e) => setBody(e.target.value)}
           placeholder={config.placeholder}
           className={config.textareaClass}
           disabled={pending}
         />
-        <div className="flex items-center justify-end gap-4">
+        <div className="flex flex-wrap items-center justify-end gap-3">
           {error && (
-            <p className="font-body text-xs text-cp-paprika">{error}</p>
+            <p className="mr-auto font-body text-xs text-cp-paprika">{error}</p>
           )}
           <Button
             type="submit"
@@ -166,6 +193,19 @@ export function ConversationView({
           >
             {pending ? "Envoi…" : "Envoyer →"}
           </Button>
+          {canAskQuestion && (
+            <Button
+              type="button"
+              size="default"
+              variant="secondary"
+              className={config.buttonClass}
+              disabled={pending}
+              onClick={() => send("question")}
+              title="Envoie le message et marque le séjour « Question posée » (le client est notifié)."
+            >
+              {pending ? "Envoi…" : "Poser une question →"}
+            </Button>
+          )}
         </div>
       </form>
     </div>

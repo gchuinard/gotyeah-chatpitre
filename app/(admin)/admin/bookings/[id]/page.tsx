@@ -311,6 +311,7 @@ export default async function AdminBookingDetailPage({
           bookingId={booking.id}
           initialMessages={messages}
           voice="admin"
+          canAskQuestion={awaitingQuote}
         />
       </section>
 
