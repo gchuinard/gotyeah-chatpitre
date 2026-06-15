@@ -294,7 +294,7 @@ export default async function AdminBookingDetailPage({
         </>
       )}
 
-      <RuleDivider className="my-16" label="Fil de discussion" tone="paprika" />
+      <RuleDivider className="my-16" tone="paprika" />
 
       {/* Fil — POST réel */}
       <section aria-labelledby="thread-title" className="space-y-8">

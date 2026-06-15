@@ -210,8 +210,7 @@ export function ConversationView({
               disabled={pending}
               onClick={() => setRejectOpen(true)}
               className={cn(
-                "mr-auto font-mono text-[0.65rem] font-bold uppercase tracking-[0.18em] underline-offset-4 transition-colors hover:underline",
-                voice === "admin" ? "text-cp-paper/70 hover:text-cp-paper" : "text-cp-paprika",
+                "mr-auto inline-flex h-11 items-center rounded-md border border-cp-paprika-light bg-transparent px-5 font-body text-sm font-semibold text-cp-paprika-light transition-colors hover:border-cp-paprika hover:bg-cp-paprika hover:text-cp-paper",
                 pending && "opacity-60",
               )}
             >

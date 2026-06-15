@@ -265,7 +265,7 @@ export default async function BookingDetailPage({
         </>
       )}
 
-      <RuleDivider className="my-16" label="Fil de discussion" tone="paprika" />
+      <RuleDivider className="my-16" tone="paprika" />
 
       {/* Fil de discussion — POST réel sur /api/bookings/[id]/messages */}
       <section aria-labelledby="thread-title" className="space-y-8">
