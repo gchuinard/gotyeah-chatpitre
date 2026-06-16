@@ -143,6 +143,8 @@ export function PATCH(req: NextRequest, { params }: RouteContext) {
       depositPercentage,
       totalAmount,
       depositAmount,
+      paidAmount:
+        data.paidAmount !== undefined ? new Prisma.Decimal(data.paidAmount) : undefined,
     };
 
     // Update booking + remplace les extras + poste la question éventuelle,
