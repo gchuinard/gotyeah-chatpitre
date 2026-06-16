@@ -309,6 +309,21 @@ export function countClients(): Promise<number> {
   });
 }
 
+/// Détail d'un compte client pour l'admin : ses chats et ses séjours (avec les
+/// chats de chaque séjour), pour la fiche /admin/clients/[id].
+export function getClientForAdmin(id: string) {
+  return prisma.user.findUnique({
+    where: { id },
+    include: {
+      cats: { orderBy: { name: "asc" } },
+      bookings: {
+        orderBy: { startDate: "desc" },
+        include: { cats: { include: { cat: { select: { id: true, name: true } } } } },
+      },
+    },
+  });
+}
+
 // =========================================================================
 // Notifications (in-app)
 // =========================================================================
