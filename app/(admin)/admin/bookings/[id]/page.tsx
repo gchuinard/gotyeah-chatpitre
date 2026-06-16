@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { BookingPaymentControl } from "@/components/booking-payment-control";
 import { BookingStatusBadge } from "@/components/booking-status-badge";
 import { CatReviewControl } from "@/components/cat-review-control";
 import { ConversationView } from "@/components/conversation-view";
@@ -251,6 +252,23 @@ export default async function AdminBookingDetailPage({
             Ouvrir la facture PDF ↓
           </a>
         </aside>
+      )}
+
+      {/* Encaissement — montant réellement payé (distinct du total facturé). */}
+      {hasQuote && (
+        <section className="mt-6 rounded-md border border-cp-ink bg-cp-paper p-5 sm:p-6">
+          <p className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.22em] text-cp-paprika">
+            Encaissement
+          </p>
+          <p className="mb-3 mt-1 font-body text-sm text-cp-ink-soft">
+            Ce qui a réellement été payé pour ce séjour (distinct du total facturé).
+          </p>
+          <BookingPaymentControl
+            bookingId={booking.id}
+            total={Number(booking.totalAmount)}
+            initialPaid={booking.paidAmount === null ? null : Number(booking.paidAmount)}
+          />
+        </section>
       )}
 
       {/* Devis + actions — uniquement tant que PENDING ou QUESTION_ASKED. */}

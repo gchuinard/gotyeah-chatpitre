@@ -115,6 +115,12 @@ export const adminBookingUpdateSchema = z.object({
     .min(0)
     .max(100)
     .optional(),
+  // Montant réellement encaissé sur le séjour (saisi par l'admin), distinct du
+  // total facturé. 0 = rien d'encaissé.
+  paidAmount: z.coerce
+    .number()
+    .nonnegative("Montant encaissé négatif impossible.")
+    .optional(),
   // Lignes de suppléments — quand le champ est fourni, il remplace
   // intégralement les lignes existantes (un array vide vide les suppléments).
   extras: z.array(bookingExtraInputSchema).optional(),

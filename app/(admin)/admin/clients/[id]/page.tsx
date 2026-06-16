@@ -39,6 +39,12 @@ export default async function AdminClientDetailPage({
   const totalBilled = client.bookings
     .filter((b) => (b.status === "ACCEPTED" || b.status === "COMPLETED") && b.totalAmount !== null)
     .reduce((sum, b) => sum + Number(b.totalAmount), 0);
+  // Total encaissé : montants réellement payés, saisis par l'admin sur chaque séjour.
+  const totalCollected = client.bookings.reduce(
+    (sum, b) => sum + Number(b.paidAmount ?? 0),
+    0,
+  );
+  const remaining = totalBilled - totalCollected;
 
   return (
     <article className="mx-auto w-full max-w-5xl px-6 py-12 sm:px-10 sm:py-16">
@@ -71,7 +77,7 @@ export default async function AdminClientDetailPage({
         </p>
       </header>
 
-      <section className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <section className="mt-8 grid gap-4 sm:grid-cols-3">
         <DetailTile label="Email">
           <a
             href={`mailto:${client.email}`}
@@ -97,12 +103,33 @@ export default async function AdminClientDetailPage({
             {address || <span className="text-cp-mute">Non renseignée</span>}
           </span>
         </DetailTile>
+      </section>
+
+      <section className="mt-4 grid gap-4 sm:grid-cols-3">
         <DetailTile label="Total facturé">
           <span className="font-display text-3xl font-bold leading-none text-cp-ink">
             {totalBilled.toLocaleString("fr-FR")}€
           </span>
           <span className="font-mono text-[0.6rem] uppercase tracking-[0.16em] text-cp-ink-soft">
             séjours acceptés + terminés
+          </span>
+        </DetailTile>
+        <DetailTile label="Total encaissé">
+          <span className="font-display text-3xl font-bold leading-none text-cp-feuille">
+            {totalCollected.toLocaleString("fr-FR")}€
+          </span>
+          <span className="font-mono text-[0.6rem] uppercase tracking-[0.16em] text-cp-ink-soft">
+            paiements enregistrés
+          </span>
+        </DetailTile>
+        <DetailTile label="Reste à encaisser">
+          <span
+            className={`font-display text-3xl font-bold leading-none ${remaining > 0 ? "text-cp-paprika" : "text-cp-ink"}`}
+          >
+            {remaining.toLocaleString("fr-FR")}€
+          </span>
+          <span className="font-mono text-[0.6rem] uppercase tracking-[0.16em] text-cp-ink-soft">
+            {remaining > 0 ? "impayé" : "soldé"}
           </span>
         </DetailTile>
       </section>

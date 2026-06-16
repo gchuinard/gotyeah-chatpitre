@@ -184,6 +184,7 @@ model Booking {
   depositPercentage Int      @default(20)
   totalAmount       Decimal? @db.Decimal(10, 2) // nuitées × (1er chat + extras) + suppléments
   depositAmount     Decimal? @db.Decimal(10, 2) // depositPercentage % du total
+  paidAmount        Decimal? @db.Decimal(10, 2) // montant réellement encaissé (saisi par l'admin)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
