@@ -313,7 +313,7 @@ export function VideoCall({
         </div>
       )}
 
-      <div className="flex items-center justify-center gap-3">
+      <div className="sticky bottom-0 z-30 flex items-center justify-center gap-3 bg-cp-paper/95 py-3 backdrop-blur-sm sm:static sm:bg-transparent sm:py-0 sm:backdrop-blur-none">
         <Button
           type="button"
           variant={micOn ? "outline" : "secondary"}

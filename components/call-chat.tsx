@@ -57,7 +57,7 @@ export function CallChat({
                 {m.mine ? "Vous" : peerName}
               </span>
               <span
-                className={`max-w-[85%] rounded-md px-3 py-1.5 font-body text-sm leading-snug whitespace-pre-wrap ${
+                className={`max-w-[85%] break-words rounded-md px-3 py-1.5 font-body text-sm leading-snug whitespace-pre-wrap ${
                   m.mine
                     ? "bg-cp-ink text-cp-paper"
                     : "border border-cp-ink bg-cp-paper text-cp-ink"

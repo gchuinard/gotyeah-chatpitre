@@ -54,7 +54,7 @@ export default async function AdminCatDetailPage({
     <article className="mx-auto w-full max-w-5xl px-6 py-12 sm:px-10 sm:py-16">
       <nav
         aria-label="Fil d'Ariane"
-        className="mb-10 flex items-center gap-2 font-mono text-[0.65rem] font-bold uppercase tracking-[0.18em] text-cp-ink-soft"
+        className="mb-10 flex flex-wrap items-center gap-x-2 gap-y-1 font-mono text-[0.65rem] font-bold uppercase tracking-[0.18em] text-cp-ink-soft"
       >
         <Link href="/admin" className="hover:text-cp-paprika">
           Administration
@@ -64,12 +64,12 @@ export default async function AdminCatDetailPage({
           Clients
         </Link>
         <span aria-hidden>/</span>
-        <span className="text-cp-ink">{cat.name}</span>
+        <span className="min-w-0 break-words text-cp-ink">{cat.name}</span>
       </nav>
 
       <header className="space-y-4">
         <LibraryStamp boxed>Fiche N° {displayRef(cat.id)}</LibraryStamp>
-        <h1 className="font-display text-5xl font-medium leading-[0.95] tracking-[-0.01em] text-cp-ink sm:text-6xl">
+        <h1 className="font-display text-5xl font-medium leading-[0.95] tracking-[-0.01em] text-cp-ink break-words sm:text-6xl">
           {cat.name}
         </h1>
         <p className="font-display text-xl italic leading-snug text-cp-ink-soft">

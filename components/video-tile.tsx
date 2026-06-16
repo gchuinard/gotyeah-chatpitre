@@ -33,7 +33,7 @@ export function VideoTile({
           {placeholder}
         </div>
       )}
-      <span className="absolute bottom-2 left-2 rounded-sm bg-cp-ink/70 px-2 py-1 font-mono text-[0.6rem] font-bold uppercase tracking-[0.16em] text-cp-paper">
+      <span className="absolute bottom-2 left-2 max-w-[calc(100%-1rem)] truncate rounded-sm bg-cp-ink/70 px-2 py-1 font-mono text-[0.6rem] font-bold uppercase tracking-[0.16em] text-cp-paper">
         {label}
       </span>
     </div>

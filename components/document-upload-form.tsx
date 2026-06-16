@@ -18,7 +18,7 @@ const SELECT_CLASS =
   "h-11 w-full min-w-0 rounded-md border border-cp-ink bg-cp-paper px-3 font-body text-base text-cp-ink transition-colors outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[3px] focus-visible:outline-cp-paprika";
 
 const FILE_INPUT_CLASS =
-  "w-full cursor-pointer rounded-md border border-cp-ink bg-cp-paper px-3 py-2 font-body text-sm text-cp-ink file:mr-3 file:cursor-pointer file:rounded-sm file:border-0 file:bg-cp-ink file:px-3 file:py-1.5 file:font-mono file:text-xs file:font-bold file:uppercase file:tracking-wider file:text-cp-paper focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[3px] focus-visible:outline-cp-paprika";
+  "w-full min-h-11 cursor-pointer rounded-md border border-cp-ink bg-cp-paper px-3 py-2 font-body text-sm text-cp-ink file:mr-3 file:cursor-pointer file:rounded-sm file:border-0 file:bg-cp-ink file:px-3 file:py-1.5 file:font-mono file:text-xs file:font-bold file:uppercase file:tracking-wider file:text-cp-paper focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[3px] focus-visible:outline-cp-paprika";
 
 /// Formulaire de téléversement d'un document pour un chat. Poste en multipart
 /// vers /api/cats/[id]/documents. Le type est pré-sélectionné depuis le nom du
@@ -27,12 +27,16 @@ export function DocumentUploadForm({
   catId,
   onUploaded,
   refresh = true,
+  embedded = false,
 }: {
   catId: string;
   onUploaded?: () => void;
   // refresh=false depuis la visio : éviter router.refresh qui re-rendrait la
   // page d'appel (l'îlot WebRTC doit rester monté).
   refresh?: boolean;
+  // embedded=true dans un dialog déjà encadré : retire la carte (bord + padding)
+  // pour ne pas doubler le cadre et gagner de la largeur sur mobile.
+  embedded?: boolean;
 }) {
   const router = useRouter();
   const fileRef = useRef<HTMLInputElement>(null);
@@ -97,7 +101,11 @@ export function DocumentUploadForm({
   return (
     <form
       onSubmit={submit}
-      className="grid gap-4 rounded-md border border-cp-ink bg-cp-paper p-5 sm:grid-cols-2 sm:p-6"
+      className={
+        embedded
+          ? "grid gap-4 sm:grid-cols-2"
+          : "grid gap-4 rounded-md border border-cp-ink bg-cp-paper p-5 sm:grid-cols-2 sm:p-6"
+      }
     >
       <Field label="Fichier (image ou PDF)" htmlFor="doc-file" required className="sm:col-span-2">
         <input
@@ -142,7 +150,7 @@ export function DocumentUploadForm({
           />
         </Field>
       )}
-      <div className="flex items-center gap-3 sm:col-span-2">
+      <div className="flex flex-wrap items-center gap-3 sm:col-span-2">
         <Button type="submit" disabled={pending}>
           {pending ? "Envoi…" : "Téléverser le document"}
         </Button>
