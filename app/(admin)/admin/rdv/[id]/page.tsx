@@ -2,9 +2,14 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { LibraryStamp } from "@/components/library-stamp";
+import { RdvDocumentButton } from "@/components/rdv-document-button";
 import { VideoCall } from "@/components/video-call";
 import { getCurrentUser, isAdmin } from "@/lib/auth";
-import { formatDateTime, getAppointmentFor } from "@/lib/repository";
+import {
+  formatDateTime,
+  getAppointmentFor,
+  getCatsForBookingOrOwner,
+} from "@/lib/repository";
 
 /// Page d'appel côté maison (admin) — in-chrome. L'admin est le pair
 /// « initiateur » (émet l'offre dès que le client est présent).
@@ -22,6 +27,7 @@ export default async function AdminRdvPage({
   if (!appointment) notFound();
 
   const client = appointment.client;
+  const cats = await getCatsForBookingOrOwner(appointment.bookingId, appointment.clientId);
   const backHref = appointment.bookingId
     ? `/admin/bookings/${appointment.bookingId}`
     : "/admin";
@@ -38,6 +44,10 @@ export default async function AdminRdvPage({
           {formatDateTime(appointment.scheduledAt)} · {appointment.durationMin} min
         </p>
       </header>
+
+      <div className="mt-6">
+        <RdvDocumentButton cats={cats} />
+      </div>
 
       <div className="mt-10">
         <VideoCall

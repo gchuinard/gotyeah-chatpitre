@@ -61,6 +61,11 @@ COPY --from=builder --chown=nextjs:nodejs /app/node_modules ./node_modules
 COPY --chown=nextjs:nodejs docker/entrypoint.sh ./entrypoint.sh
 RUN chmod +x ./entrypoint.sh
 
+# Répertoire des documents téléversés, possédé par l'utilisateur non-root :
+# le volume nommé monté ici hérite de cet ownership à sa première création
+# (sinon le volume naît root:root et l'app uid 1001 ne peut pas y écrire).
+RUN mkdir -p /data/uploads && chown -R nextjs:nodejs /data
+
 USER nextjs
 EXPOSE 3000
 CMD ["./entrypoint.sh"]

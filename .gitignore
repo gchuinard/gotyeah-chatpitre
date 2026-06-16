@@ -17,6 +17,9 @@
 /.next/
 /out/
 
+# documents téléversés en dev sur l'hôte (jamais versionnés — données privées)
+/.uploads/
+
 # production
 /build
 

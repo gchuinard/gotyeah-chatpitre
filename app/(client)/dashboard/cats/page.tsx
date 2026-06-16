@@ -8,7 +8,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { getCatsByOwner, toCatCardProps } from "@/lib/repository";
 
 /// Liste de la troupe : grille de fiches CatCard, chaque carte clique
-/// vers l'édition. Lecture Prisma via repository.
+/// vers la fiche du chat (détail). Lecture Prisma via repository.
 
 export default async function CatsListPage() {
   const user = await getCurrentUser();
@@ -62,7 +62,7 @@ export default async function CatsListPage() {
           {cats.map((cat) => (
             <li key={cat.id}>
               <Link
-                href={`/dashboard/cats/${cat.id}/edit`}
+                href={`/dashboard/cats/${cat.id}`}
                 className="group block outline-none focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-cp-paprika"
               >
                 <CatCard

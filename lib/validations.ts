@@ -170,6 +170,37 @@ export const appointmentCreateSchema = z.object({
   notes: z.string().trim().max(1000).optional(),
 });
 
+// --- Documents des chats ----------------------------------------------------
+
+/// Type d'un document — doit refléter EXACTEMENT l'enum Prisma DocumentType.
+export const documentTypeSchema = z.enum([
+  "VACCINATION",
+  "IDENTIFICATION",
+  "HEALTH_CERTIFICATE",
+  "ANTIPARASITIC",
+  "PRESCRIPTION",
+  "PASSPORT",
+  "STERILIZATION",
+  "INSURANCE",
+  "CARE_AUTHORIZATION",
+  "DIET",
+  "PHOTO",
+  "OTHER",
+]);
+
+/// Métadonnées d'un upload de document (le fichier lui-même est validé à part :
+/// taille + type MIME). Un libellé libre est requis pour le type « Autre ».
+export const documentUploadMetaSchema = z
+  .object({
+    type: documentTypeSchema,
+    customLabel: z.string().trim().min(1).max(120).optional(),
+    documentDate: z.coerce.date().optional(),
+  })
+  .refine((d) => d.type !== "OTHER" || Boolean(d.customLabel), {
+    message: "Un libellé est requis pour le type « Autre ».",
+    path: ["customLabel"],
+  });
+
 // --- Utilitaire -------------------------------------------------------------
 
 /// Transforme une ZodError en un objet plat { champ: message } facile à

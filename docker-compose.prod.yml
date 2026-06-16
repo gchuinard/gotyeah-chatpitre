@@ -46,6 +46,11 @@ services:
       # — on surcharge le DATABASE_URL du .env (qui pointe sur localhost).
       DATABASE_URL: postgresql://chatpitre:chatpitre@db:5432/chatpitre
       NODE_ENV: production
+      # Répertoire des documents téléversés (monté sur le volume ci-dessous).
+      UPLOAD_DIR: /data/uploads
+    # Documents téléversés — volume persistant (survit aux `up -d --build`).
+    volumes:
+      - chatpitre_uploads:/data/uploads
     # `expose` (et non `ports`) : 3000 n'est ouvert qu'aux conteneurs des
     # réseaux rejoints, jamais à l'hôte. NPM atteint l'app par son nom.
     expose:
@@ -64,6 +69,8 @@ volumes:
   # Réutilise le volume de données existant (préfixé par le nom de projet
   # `gotyeah-chatpitre`) — aucune perte de données au passage dev → prod.
   chatpitre_pgdata:
+  # Documents téléversés des chats (carnets de vaccination, certificats…).
+  chatpitre_uploads:
 
 networks:
   # Réseau interne app ↔ db, créé automatiquement par Compose.
