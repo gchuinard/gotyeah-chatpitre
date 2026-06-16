@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import type { AppointmentStatus } from "@prisma/client";
 
 import { Field } from "@/components/field";
+import { RdvJoinButton } from "@/components/rdv-join-button";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { formatDateTime } from "@/lib/format";
@@ -101,11 +102,20 @@ export function RdvScheduler({
                   {a.durationMin} min{a.title ? ` · ${a.title}` : ""}
                 </p>
               </div>
-              <span
-                className={`font-mono text-[0.6rem] font-bold uppercase tracking-[0.16em] ${STATUS_TONE[a.status]}`}
-              >
-                {STATUS_LABEL[a.status]}
-              </span>
+              <div className="flex items-center gap-3">
+                <span
+                  className={`font-mono text-[0.6rem] font-bold uppercase tracking-[0.16em] ${STATUS_TONE[a.status]}`}
+                >
+                  {STATUS_LABEL[a.status]}
+                </span>
+                {a.status === "SCHEDULED" && (
+                  <RdvJoinButton
+                    href={`/admin/rdv/${a.id}`}
+                    scheduledAt={a.scheduledAt}
+                    durationMin={a.durationMin}
+                  />
+                )}
+              </div>
             </li>
           ))}
         </ul>
