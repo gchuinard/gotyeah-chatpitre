@@ -25,6 +25,7 @@ model User {
   address      String?
   postalCode   String?
   city         String?
+  adminNotes   String? // note interne de la maison sur ce client (jamais visible du client)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 

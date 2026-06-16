@@ -201,6 +201,14 @@ export const documentUploadMetaSchema = z
     path: ["customLabel"],
   });
 
+// --- Compte client (admin) --------------------------------------------------
+
+/// Note interne de la maison sur un client (éditée depuis la fiche client).
+/// `null` efface la note.
+export const clientAdminNotesSchema = z.object({
+  adminNotes: z.string().trim().max(2000).nullable(),
+});
+
 // --- Utilitaire -------------------------------------------------------------
 
 /// Transforme une ZodError en un objet plat { champ: message } facile à
