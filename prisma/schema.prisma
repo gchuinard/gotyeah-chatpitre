@@ -36,6 +36,8 @@ model User {
 
   appointments        Appointment[] @relation("AppointmentClient") // rdv où l'utilisateur est le client
   appointmentsCreated Appointment[] @relation("AppointmentCreatedBy") // rdv planifiés (admin)
+
+  uploadedDocuments CatDocument[] // documents téléversés par cet utilisateur
 }
 
 // ---------------------------------------------------------------------------
@@ -85,8 +87,56 @@ model Cat {
 
   bookingCats BookingCat[]
   stayUpdates StayUpdate[]
+  documents   CatDocument[]
 
   @@index([ownerId])
+}
+
+// ---------------------------------------------------------------------------
+// Documents des chats (pièces téléversées)
+// ---------------------------------------------------------------------------
+
+enum DocumentType {
+  VACCINATION // carnet de vaccination
+  IDENTIFICATION // puce / I-CAD
+  HEALTH_CERTIFICATE // certificat de santé vétérinaire
+  ANTIPARASITIC // antiparasitaire (puces, vermifuge)
+  PRESCRIPTION // ordonnance / traitement
+  PASSPORT // passeport européen / antirabique
+  STERILIZATION // certificat de stérilisation
+  INSURANCE // assurance santé animale
+  CARE_AUTHORIZATION // autorisation de soins
+  DIET // régime & consignes
+  PHOTO // photo
+  OTHER // autre (libellé libre)
+}
+
+/// Document associé à un chat (carnet de vaccination, certificat de santé…).
+/// Le fichier est stocké sur disque sous un nom OPAQUE (storageKey) et n'est
+/// servi que par une route authentifiée — jamais d'URL publique. Le nom
+/// d'affichage « à notre sauce » est calculé au téléchargement.
+model CatDocument {
+  id String @id @default(cuid())
+
+  catId String
+  cat   Cat    @relation(fields: [catId], references: [id], onDelete: Cascade)
+
+  // Auteur de l'envoi (client ou admin). SET NULL si le compte disparaît.
+  uploadedById String?
+  uploadedBy   User?   @relation(fields: [uploadedById], references: [id], onDelete: SetNull)
+
+  type         DocumentType
+  customLabel  String? // rempli uniquement pour type = OTHER
+  originalName String // nom du fichier d'origine (conservé pour info)
+  storageKey   String       @unique // nom opaque sur disque (pas devinable, pas de collision)
+  mimeType     String
+  sizeBytes    Int
+  documentDate DateTime? // date du document (ex. vaccination) ; sinon createdAt
+
+  createdAt DateTime @default(now())
+
+  @@index([catId])
+  @@index([catId, type])
 }
 
 // ---------------------------------------------------------------------------

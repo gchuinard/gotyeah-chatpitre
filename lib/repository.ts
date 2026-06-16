@@ -6,6 +6,7 @@ import type {
   BookingMessage,
   BookingStatus,
   Cat,
+  CatDocument,
   StayUpdate,
   User,
 } from "@prisma/client";
@@ -363,6 +364,49 @@ export function getAppointmentsForBooking(bookingId: string): Promise<Appointmen
     where: { bookingId },
     orderBy: { scheduledAt: "asc" },
   });
+}
+
+// =========================================================================
+// Documents des chats
+// =========================================================================
+
+export type CatDocumentWithCat = CatDocument & { cat: Cat };
+
+/// Récupère un chat par id avec vérification d'accès : renvoyé si l'utilisateur
+/// en est le propriétaire OU s'il est admin. Sinon null (404 pour la page/route).
+export async function getCatFor(
+  id: string,
+  userId: string,
+  isAdmin: boolean,
+): Promise<Cat | null> {
+  const cat = await prisma.cat.findUnique({ where: { id } });
+  if (!cat) return null;
+  if (!isAdmin && cat.ownerId !== userId) return null;
+  return cat;
+}
+
+/// Documents d'un chat, groupés par type puis du plus récent au plus ancien.
+export function getDocumentsForCat(catId: string): Promise<CatDocument[]> {
+  return prisma.catDocument.findMany({
+    where: { catId },
+    orderBy: [{ type: "asc" }, { createdAt: "desc" }],
+  });
+}
+
+/// Récupère un document par id (avec son chat) et vérifie l'accès : propriétaire
+/// du chat OU admin. Sinon null. Sert le download et la suppression.
+export async function getCatDocumentFor(
+  id: string,
+  userId: string,
+  isAdmin: boolean,
+): Promise<CatDocumentWithCat | null> {
+  const doc = await prisma.catDocument.findUnique({
+    where: { id },
+    include: { cat: true },
+  });
+  if (!doc) return null;
+  if (!isAdmin && doc.cat.ownerId !== userId) return null;
+  return doc;
 }
 
 // =========================================================================
