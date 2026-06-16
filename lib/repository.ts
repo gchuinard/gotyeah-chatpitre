@@ -357,6 +357,14 @@ export async function getAppointmentFor(
   return appointment;
 }
 
+/// Tous les rdv d'un séjour, du plus proche au plus lointain.
+export function getAppointmentsForBooking(bookingId: string): Promise<Appointment[]> {
+  return prisma.appointment.findMany({
+    where: { bookingId },
+    orderBy: { scheduledAt: "asc" },
+  });
+}
+
 // =========================================================================
 // Internes
 // =========================================================================
