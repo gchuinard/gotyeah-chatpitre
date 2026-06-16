@@ -75,6 +75,8 @@ Voir `.env.example`. Le fichier `.env` n'est jamais versionné.
 | `ADMIN_EMAILS` | Emails admin séparés par des virgules. Tout compte dont l'email y figure obtient les droits admin. |
 | `BASE_URL` | URL de base de l'application |
 | `NODE_ENV` | `development` ou `production` |
+| `CLOUDFLARE_TURN_KEY_ID` | Id de la clé TURN Cloudflare Realtime (relais des télé-rendez-vous). Optionnel : sans clé, repli sur STUN public. |
+| `CLOUDFLARE_TURN_KEY_API_TOKEN` | Token d'API de la clé TURN Cloudflare Realtime. |
 
 ## Commandes
 
