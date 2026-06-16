@@ -42,6 +42,30 @@ export const DOCUMENT_TYPE_OPTIONS = DOCUMENT_TYPE_ORDER.map((value) => ({
   label: DOCUMENT_TYPE_LABEL[value],
 }));
 
+/// Classes Tailwind (badge outline) par type — tons du DA (santé = cobalt,
+/// identité = feuille, administratif = paprika, autre = mute).
+export const DOCUMENT_TYPE_BADGE: Record<DocumentType, string> = {
+  VACCINATION: "border-cp-cobalt text-cp-cobalt",
+  IDENTIFICATION: "border-cp-feuille text-cp-feuille",
+  HEALTH_CERTIFICATE: "border-cp-cobalt text-cp-cobalt",
+  ANTIPARASITIC: "border-cp-cobalt text-cp-cobalt",
+  PRESCRIPTION: "border-cp-cobalt text-cp-cobalt",
+  PASSPORT: "border-cp-feuille text-cp-feuille",
+  STERILIZATION: "border-cp-cobalt text-cp-cobalt",
+  INSURANCE: "border-cp-paprika text-cp-paprika",
+  CARE_AUTHORIZATION: "border-cp-paprika text-cp-paprika",
+  DIET: "border-cp-canari-deep text-cp-ink-soft",
+  PHOTO: "border-cp-ink text-cp-ink",
+  OTHER: "border-cp-mute text-cp-mute",
+};
+
+/// Taille de fichier lisible : « 482 Ko », « 1.4 Mo ».
+export function formatFileSize(bytes: number): string {
+  if (bytes < 1024) return `${bytes} o`;
+  if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} Ko`;
+  return `${(bytes / 1024 / 1024).toFixed(1)} Mo`;
+}
+
 /// Types MIME acceptés (images + PDF).
 export const ALLOWED_MIME_TYPES = [
   "image/jpeg",
