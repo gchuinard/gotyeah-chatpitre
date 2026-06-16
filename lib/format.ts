@@ -34,6 +34,11 @@ export function formatDateTime(date: Date): string {
   return dateTimeFormatter.format(date).replace(", ", " · ").replace(":", "h");
 }
 
+/// « 2026-06-16 » — date ISO courte (UTC), pour les noms de fichiers.
+export function formatISODate(date: Date): string {
+  return date.toISOString().slice(0, 10);
+}
+
 /// Identifiant d'affichage court dérivé d'un cuid (les 4 derniers caractères
 /// en majuscules). Stable par entité, sert de « numéro de référence »
 /// utilisateur tant qu'on n'a pas de séquence dédiée en base.

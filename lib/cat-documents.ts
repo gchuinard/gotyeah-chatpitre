@@ -75,6 +75,24 @@ export function isImageMime(mime: string): boolean {
   return mime.startsWith("image/");
 }
 
+const EXTENSION_MIME: Record<string, AllowedMimeType> = {
+  jpg: "image/jpeg",
+  jpeg: "image/jpeg",
+  png: "image/png",
+  heic: "image/heic",
+  heif: "image/heif",
+  pdf: "application/pdf",
+};
+
+/// Résout un type MIME autorisé depuis l'indice du navigateur, avec repli sur
+/// l'extension du nom de fichier (utile pour HEIC, dont le MIME envoyé est
+/// souvent vide ou incohérent). null si non autorisé.
+export function resolveMimeType(typeHint: string, filename: string): AllowedMimeType | null {
+  if (isAllowedMimeType(typeHint)) return typeHint;
+  const ext = filename.toLowerCase().split(".").pop() ?? "";
+  return EXTENSION_MIME[ext] ?? null;
+}
+
 /// Taille maximale par défaut d'un document, en Mo. Le serveur peut la
 /// surcharger via MAX_UPLOAD_MB ; sert de référence partagée (UI + défaut).
 export const MAX_UPLOAD_MB = 20;
