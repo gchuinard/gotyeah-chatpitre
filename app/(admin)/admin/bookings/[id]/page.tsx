@@ -186,6 +186,12 @@ export default async function AdminBookingDetailPage({
               <p className="font-body text-sm text-cp-ink-soft">
                 {link.cat.breed} · {ageLabel(link.cat.birthDate)}
               </p>
+              <Link
+                href={`/admin/cats/${link.cat.id}`}
+                className="font-mono text-[0.6rem] font-bold uppercase tracking-[0.16em] text-cp-cobalt hover:text-cp-paprika"
+              >
+                Fiche &amp; documents →
+              </Link>
               <ul className="grid grid-cols-2 gap-x-3 gap-y-1.5 border-t border-cp-ink/30 pt-3 font-mono text-[0.6rem] font-bold uppercase tracking-[0.14em]">
                 <Criterion ok={link.cat.isSterilized} label="Stérilisé" />
                 <Criterion ok={link.cat.isIdentified} label="Identifié" />
