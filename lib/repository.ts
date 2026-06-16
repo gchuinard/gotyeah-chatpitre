@@ -1,4 +1,5 @@
 import type {
+  Appointment,
   Booking,
   BookingCat,
   BookingExtra,
@@ -328,6 +329,32 @@ export async function getNotificationsFor(
     unread: n.readAt === null,
     href: n.link ?? undefined,
   }));
+}
+
+// =========================================================================
+// Télé-rendez-vous (visioconférence)
+// =========================================================================
+
+export type AppointmentWithRelations = Appointment & {
+  client: User;
+  booking: Booking | null;
+};
+
+/// Récupère un rdv par id avec vérification d'accès : renvoyé si l'utilisateur
+/// en est le client OU s'il est admin. Sinon null (équivalent 404 pour la page
+/// ou la route de signaling).
+export async function getAppointmentFor(
+  id: string,
+  userId: string,
+  isAdmin: boolean,
+): Promise<AppointmentWithRelations | null> {
+  const appointment = await prisma.appointment.findUnique({
+    where: { id },
+    include: { client: true, booking: true },
+  });
+  if (!appointment) return null;
+  if (!isAdmin && appointment.clientId !== userId) return null;
+  return appointment;
 }
 
 // =========================================================================
