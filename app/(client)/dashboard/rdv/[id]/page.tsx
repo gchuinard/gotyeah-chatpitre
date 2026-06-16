@@ -2,9 +2,14 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { LibraryStamp } from "@/components/library-stamp";
+import { RdvDocumentButton } from "@/components/rdv-document-button";
 import { VideoCall } from "@/components/video-call";
 import { getCurrentUser, isAdmin } from "@/lib/auth";
-import { formatDateTime, getAppointmentFor } from "@/lib/repository";
+import {
+  formatDateTime,
+  getAppointmentFor,
+  getCatsForBookingOrOwner,
+} from "@/lib/repository";
 
 /// Page d'appel côté client — in-chrome (hérite du header + de l'auth-gate du
 /// layout). Le client est le pair « répondeur » (l'admin émet l'offre).
@@ -21,6 +26,7 @@ export default async function ClientRdvPage({
   const appointment = await getAppointmentFor(id, user.id, isAdmin(user));
   if (!appointment) notFound();
 
+  const cats = await getCatsForBookingOrOwner(appointment.bookingId, appointment.clientId);
   const backHref = appointment.bookingId
     ? `/dashboard/bookings/${appointment.bookingId}`
     : "/dashboard";
@@ -36,6 +42,10 @@ export default async function ClientRdvPage({
           Prévu le {formatDateTime(appointment.scheduledAt)} · {appointment.durationMin} min
         </p>
       </header>
+
+      <div className="mt-6">
+        <RdvDocumentButton cats={cats} />
+      </div>
 
       <div className="mt-10">
         <VideoCall

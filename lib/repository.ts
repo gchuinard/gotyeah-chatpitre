@@ -385,6 +385,27 @@ export async function getCatFor(
   return cat;
 }
 
+/// Chats proposables à l'upload depuis un rdv : ceux du séjour s'il est rattaché,
+/// sinon tous les chats du client (cas d'un appel-conseil sans séjour).
+export async function getCatsForBookingOrOwner(
+  bookingId: string | null,
+  ownerId: string,
+): Promise<{ id: string; name: string }[]> {
+  if (bookingId) {
+    const links = await prisma.bookingCat.findMany({
+      where: { bookingId },
+      include: { cat: { select: { id: true, name: true } } },
+      orderBy: { cat: { name: "asc" } },
+    });
+    return links.map((l) => l.cat);
+  }
+  return prisma.cat.findMany({
+    where: { ownerId },
+    select: { id: true, name: true },
+    orderBy: { name: "asc" },
+  });
+}
+
 /// Documents d'un chat, groupés par type puis du plus récent au plus ancien.
 export function getDocumentsForCat(catId: string): Promise<CatDocument[]> {
   return prisma.catDocument.findMany({

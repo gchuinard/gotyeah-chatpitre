@@ -26,9 +26,13 @@ const FILE_INPUT_CLASS =
 export function DocumentUploadForm({
   catId,
   onUploaded,
+  refresh = true,
 }: {
   catId: string;
   onUploaded?: () => void;
+  // refresh=false depuis la visio : éviter router.refresh qui re-rendrait la
+  // page d'appel (l'îlot WebRTC doit rester monté).
+  refresh?: boolean;
 }) {
   const router = useRouter();
   const fileRef = useRef<HTMLInputElement>(null);
@@ -86,7 +90,7 @@ export function DocumentUploadForm({
       setType("VACCINATION");
       setDone(true);
       onUploaded?.();
-      router.refresh();
+      if (refresh) router.refresh();
     });
   }
 
