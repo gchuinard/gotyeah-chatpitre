@@ -23,7 +23,14 @@ export type SignalingEvent =
   | { type: "ready"; connectionId: string; peers: Peer[] }
   | { type: "peer-joined"; peer: Peer }
   | { type: "peer-left"; peer: Peer }
-  | { type: "signal"; from: string; kind: string; sdp?: string; candidate?: unknown };
+  | {
+      type: "signal";
+      from: string;
+      kind: string;
+      sdp?: string;
+      candidate?: unknown;
+      text?: string;
+    };
 
 type Subscriber = Peer & {
   send: (event: SignalingEvent) => void;
@@ -88,7 +95,7 @@ export function joinRoom(
 export function publishSignal(
   roomId: string,
   from: string,
-  message: { kind: string; sdp?: string; candidate?: unknown },
+  message: { kind: string; sdp?: string; candidate?: unknown; text?: string },
 ): void {
   const room = rooms.get(roomId);
   if (!room) return;
