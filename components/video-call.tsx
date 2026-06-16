@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Mic, MicOff, PhoneOff, Video, VideoOff } from "lucide-react";
 
+import { CallChat, type ChatMessage } from "@/components/call-chat";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { Button } from "@/components/ui/button";
 import { VideoTile } from "@/components/video-tile";
@@ -44,6 +45,7 @@ export function VideoCall({
   const [camOn, setCamOn] = useState(true);
   const [errorMsg, setErrorMsg] = useState("");
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
 
   const isInitiator = selfRole === "admin";
 
@@ -114,6 +116,9 @@ export function VideoCall({
         } else if (ev.kind === "bye") {
           if (active) setPhase("ended");
           if (remoteVideoRef.current) remoteVideoRef.current.srcObject = null;
+        } else if (ev.kind === "chat" && ev.text) {
+          const text = ev.text;
+          setMessages((prev) => [...prev, { id: crypto.randomUUID(), mine: false, text }]);
         }
       } catch {
         // message de signaling défaillant — ignoré
@@ -227,6 +232,21 @@ export function VideoCall({
     setCamOn(next);
   }
 
+  function sendChat(text: string) {
+    const trimmed = text.trim();
+    if (!trimmed) return;
+    // Affichage optimiste local, puis relais au pair via le canal de signaling.
+    setMessages((prev) => [...prev, { id: crypto.randomUUID(), mine: true, text: trimmed }]);
+    const from = connectionIdRef.current;
+    if (from) {
+      fetch(`/api/rdv/${appointmentId}/signal`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ from, kind: "chat", text: trimmed }),
+      }).catch(() => {});
+    }
+  }
+
   function hangUp() {
     // Prévenir l'autre pair (keepalive : la requête survit à la navigation).
     const from = connectionIdRef.current;
@@ -272,21 +292,24 @@ export function VideoCall({
           {errorMsg}
         </div>
       ) : (
-        <div className="relative">
-          <VideoTile
-            videoRef={remoteVideoRef}
-            label={peerName}
-            placeholder={remotePlaceholder}
-          />
-          <div className="absolute bottom-3 right-3 w-1/3 max-w-[12rem] shadow-[4px_4px_0_0_var(--color-cp-ink)]">
+        <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
+          <div className="relative self-start">
             <VideoTile
-              videoRef={localVideoRef}
-              label={`${selfName} (vous)`}
-              muted
-              mirrored
-              placeholder={camOn ? null : "Caméra coupée"}
+              videoRef={remoteVideoRef}
+              label={peerName}
+              placeholder={remotePlaceholder}
             />
+            <div className="absolute bottom-3 right-3 w-1/3 max-w-[12rem] shadow-[4px_4px_0_0_var(--color-cp-ink)]">
+              <VideoTile
+                videoRef={localVideoRef}
+                label={`${selfName} (vous)`}
+                muted
+                mirrored
+                placeholder={camOn ? null : "Caméra coupée"}
+              />
+            </div>
           </div>
+          <CallChat messages={messages} onSend={sendChat} peerName={peerName} />
         </div>
       )}
 

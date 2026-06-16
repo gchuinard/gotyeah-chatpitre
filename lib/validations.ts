@@ -147,9 +147,11 @@ export const extraPresetUpdateSchema = extraPresetCreateSchema.partial();
 /// `sdp` et `candidate` sont relayés tels quels à l'autre pair.
 export const rdvSignalSchema = z.object({
   from: z.string().min(1).max(64),
-  kind: z.enum(["offer", "answer", "ice", "bye"]),
+  kind: z.enum(["offer", "answer", "ice", "bye", "chat"]),
   sdp: z.string().max(100_000).optional(),
   candidate: z.unknown().optional(),
+  // Message de chat texte éphémère échangé pendant l'appel (kind: "chat").
+  text: z.string().trim().min(1).max(2000).optional(),
 });
 
 /// Planification d'un télé-rendez-vous par l'admin (depuis un séjour). Le
