@@ -41,6 +41,8 @@ services:
       DATABASE_URL: postgresql://chatpitre:chatpitre@db:5432/chatpitre
       # Hot reload fiable sur volume monté (WSL2 / système de fichiers Windows).
       WATCHPACK_POLLING: "true"
+      # Documents téléversés, hors de /app (non masqué par le bind ci-dessous).
+      UPLOAD_DIR: /data/uploads
     ports:
       - "3000:3000"
     volumes:
@@ -49,6 +51,9 @@ services:
       # …mais node_modules et .next restent ceux de l'image (volumes anonymes).
       - /app/node_modules
       - /app/.next
+      # Documents téléversés (persistés hors du bind `.:/app`).
+      - chatpitre_uploads:/data/uploads
 
 volumes:
   chatpitre_pgdata:
+  chatpitre_uploads:
