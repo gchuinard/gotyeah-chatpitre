@@ -15,6 +15,7 @@ import {
   isImageMime,
 } from "@/lib/cat-documents";
 import { formatDate } from "@/lib/format";
+import { cn } from "@/lib/utils";
 
 export type CatDocumentItem = {
   id: string;
@@ -112,7 +113,7 @@ export function CatDocuments({
 
                 <div className="min-w-0 flex-1">
                   <span
-                    className={`inline-flex items-center rounded-full border px-2.5 py-0.5 font-mono text-[0.55rem] font-bold uppercase tracking-[0.16em] ${DOCUMENT_TYPE_BADGE[doc.type]}`}
+                    className={`inline-flex max-w-full items-center truncate rounded-full border px-2.5 py-0.5 font-mono text-[0.6rem] font-bold uppercase tracking-[0.16em] ${DOCUMENT_TYPE_BADGE[doc.type]}`}
                   >
                     {label}
                   </span>
@@ -124,10 +125,10 @@ export function CatDocuments({
                   </p>
                 </div>
 
-                <div className="flex shrink-0 items-center gap-2">
+                <div className="flex w-full shrink-0 items-center justify-end gap-2 sm:w-auto">
                   <a
                     href={`/api/documents/${doc.id}?download=1`}
-                    className={buttonVariants({ variant: "outline", size: "sm" })}
+                    className={cn(buttonVariants({ variant: "outline", size: "sm" }), "h-11")}
                   >
                     Télécharger
                   </a>

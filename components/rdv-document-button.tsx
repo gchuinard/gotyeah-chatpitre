@@ -24,7 +24,7 @@ export function RdvDocumentButton({ cats }: { cats: CatOption[] }) {
 
   return (
     <>
-      <Button type="button" variant="outline" size="sm" onClick={() => setOpen(true)}>
+      <Button type="button" variant="outline" onClick={() => setOpen(true)}>
         <FilePlus />
         Ajouter un document
       </Button>
@@ -32,7 +32,7 @@ export function RdvDocumentButton({ cats }: { cats: CatOption[] }) {
       <Dialog.Root open={open} onOpenChange={setOpen}>
         <Dialog.Portal>
           <Dialog.Backdrop className="fixed inset-0 z-50 bg-cp-ink/40 backdrop-blur-sm transition-opacity duration-200 data-[ending-style]:opacity-0 data-[starting-style]:opacity-0" />
-          <Dialog.Popup className="fixed left-1/2 top-1/2 z-50 max-h-[calc(100vh-2rem)] w-[min(34rem,calc(100vw-2rem))] -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-md border-2 border-cp-ink bg-cp-paper p-6 transition-all duration-200 sm:p-8 data-[ending-style]:scale-95 data-[ending-style]:opacity-0 data-[starting-style]:scale-95 data-[starting-style]:opacity-0">
+          <Dialog.Popup className="fixed left-1/2 top-4 z-50 max-h-[calc(100vh-2rem)] w-[min(34rem,calc(100vw-2rem))] -translate-x-1/2 -translate-y-0 overflow-y-auto rounded-md border-2 border-cp-ink bg-cp-paper p-6 transition-all duration-200 sm:top-1/2 sm:-translate-y-1/2 sm:p-8 data-[ending-style]:scale-95 data-[ending-style]:opacity-0 data-[starting-style]:scale-95 data-[starting-style]:opacity-0">
             <Dialog.Title className="font-display text-2xl font-medium leading-tight text-cp-ink">
               Ajouter un document
             </Dialog.Title>
@@ -58,7 +58,7 @@ export function RdvDocumentButton({ cats }: { cats: CatOption[] }) {
                   </select>
                 </Field>
               )}
-              <DocumentUploadForm key={catId} catId={catId} refresh={false} />
+              <DocumentUploadForm key={catId} catId={catId} refresh={false} embedded />
             </div>
 
             <div className="mt-6 flex justify-end">
