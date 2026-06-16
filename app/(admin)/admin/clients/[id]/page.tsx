@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { BookingStatusBadge } from "@/components/booking-status-badge";
+import { ClientAdminNotes } from "@/components/client-admin-notes";
 import { LibraryStamp } from "@/components/library-stamp";
 import { RuleDivider } from "@/components/rule-divider";
 import { SectionHeading } from "@/components/section-heading";
@@ -32,6 +33,12 @@ export default async function AdminClientDetailPage({
   const address = [client.address, client.postalCode, client.city]
     .filter(Boolean)
     .join(", ");
+
+  // Total facturé : somme des séjours chiffrés (acceptés + terminés). Aucune
+  // facture n'est stockée en base — les montants viennent des devis posés.
+  const totalBilled = client.bookings
+    .filter((b) => (b.status === "ACCEPTED" || b.status === "COMPLETED") && b.totalAmount !== null)
+    .reduce((sum, b) => sum + Number(b.totalAmount), 0);
 
   return (
     <article className="mx-auto w-full max-w-5xl px-6 py-12 sm:px-10 sm:py-16">
@@ -64,7 +71,7 @@ export default async function AdminClientDetailPage({
         </p>
       </header>
 
-      <section className="mt-8 grid gap-4 sm:grid-cols-3">
+      <section className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <DetailTile label="Email">
           <a
             href={`mailto:${client.email}`}
@@ -90,6 +97,26 @@ export default async function AdminClientDetailPage({
             {address || <span className="text-cp-mute">Non renseignée</span>}
           </span>
         </DetailTile>
+        <DetailTile label="Total facturé">
+          <span className="font-display text-3xl font-bold leading-none text-cp-ink">
+            {totalBilled.toLocaleString("fr-FR")}€
+          </span>
+          <span className="font-mono text-[0.6rem] uppercase tracking-[0.16em] text-cp-ink-soft">
+            séjours acceptés + terminés
+          </span>
+        </DetailTile>
+      </section>
+
+      <section className="mt-4">
+        <div className="rounded-md border border-cp-ink bg-cp-paper p-5 sm:p-6">
+          <p className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.22em] text-cp-paprika">
+            Note interne
+          </p>
+          <p className="mb-3 mt-1 font-body text-sm text-cp-ink-soft">
+            Visible uniquement par la maison.
+          </p>
+          <ClientAdminNotes clientId={client.id} initialNotes={client.adminNotes} />
+        </div>
       </section>
 
       <RuleDivider className="my-12" label="Pensionnaires" tone="cobalt" />
