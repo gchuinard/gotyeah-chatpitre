@@ -86,14 +86,20 @@ export default async function AdminClientsListPage() {
                 className="border-t border-cp-ink/20 transition-colors hover:bg-cp-paper-deep/40"
               >
                 <Td>
-                  <p className="font-mono text-sm font-bold uppercase tracking-[0.16em] text-cp-paprika">
+                  <Link
+                    href={`/admin/clients/${c.id}`}
+                    className="font-mono text-sm font-bold uppercase tracking-[0.16em] text-cp-paprika hover:underline hover:underline-offset-4"
+                  >
                     {displayRef(c.id)}
-                  </p>
+                  </Link>
                 </Td>
                 <Td>
-                  <p className="font-display text-2xl italic leading-tight text-cp-ink">
+                  <Link
+                    href={`/admin/clients/${c.id}`}
+                    className="font-display text-2xl italic leading-tight text-cp-ink hover:text-cp-paprika"
+                  >
                     {c.firstName} {c.lastName}
-                  </p>
+                  </Link>
                 </Td>
                 <Td>
                   <p className="font-body text-sm text-cp-ink">
@@ -132,9 +138,8 @@ export default async function AdminClientsListPage() {
       </div>
 
       <p className="mt-8 max-w-2xl font-body text-sm text-cp-ink-soft">
-        Le détail d&apos;une fiche client (historique complet des séjours,
-        rendez-vous, notes admin) viendra plus tard — pour l&apos;instant
-        ces lignes donnent la vue d&apos;ensemble.
+        Clique sur un client pour ouvrir sa fiche : ses pensionnaires (et leurs
+        documents) et son historique de séjours.
       </p>
     </div>
   );
