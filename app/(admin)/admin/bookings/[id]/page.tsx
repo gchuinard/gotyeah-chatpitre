@@ -6,6 +6,7 @@ import { CatReviewControl } from "@/components/cat-review-control";
 import { ConversationView } from "@/components/conversation-view";
 import { LibraryStamp } from "@/components/library-stamp";
 import { QuoteForm } from "@/components/quote-form";
+import { RdvScheduler } from "@/components/rdv-scheduler";
 import { RuleDivider } from "@/components/rule-divider";
 import { RuledBox } from "@/components/ruled-box";
 import { SectionHeading } from "@/components/section-heading";
@@ -18,6 +19,7 @@ import {
   ageLabel,
   displayRef,
   formatDate,
+  getAppointmentsForBooking,
   getBookingFor,
   nightsBetween,
 } from "@/lib/repository";
@@ -37,6 +39,7 @@ export default async function AdminBookingDetailPage({
   const booking = await getBookingFor(id, user.id, true);
   if (!booking) notFound();
 
+  const appointments = await getAppointmentsForBooking(booking.id);
   const cats = booking.cats.map((link) => link.cat);
   const client = booking.user;
   const nights = nightsBetween(booking.startDate, booking.endDate);
@@ -300,6 +303,19 @@ export default async function AdminBookingDetailPage({
           </section>
         </>
       )}
+
+      {/* Télé-rendez-vous */}
+      <RuleDivider className="my-16" label="Télé-rendez-vous" tone="feuille" />
+      <RdvScheduler
+        bookingId={booking.id}
+        appointments={appointments.map((a) => ({
+          id: a.id,
+          scheduledAt: a.scheduledAt.toISOString(),
+          durationMin: a.durationMin,
+          status: a.status,
+          title: a.title,
+        }))}
+      />
 
       <RuleDivider className="my-16" tone="paprika" />
 

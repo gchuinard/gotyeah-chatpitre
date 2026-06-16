@@ -32,7 +32,10 @@ model User {
   bookings      Booking[]
   notifications Notification[]
   messages      BookingMessage[] // messages écrits par cet utilisateur
-  stayUpdates   StayUpdate[]     // entrées du carnet de séjour postées (admin)
+  stayUpdates   StayUpdate[] // entrées du carnet de séjour postées (admin)
+
+  appointments        Appointment[] @relation("AppointmentClient") // rdv où l'utilisateur est le client
+  appointmentsCreated Appointment[] @relation("AppointmentCreatedBy") // rdv planifiés (admin)
 }
 
 // ---------------------------------------------------------------------------
@@ -134,11 +137,12 @@ model Booking {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  cats        BookingCat[]
-  extras      BookingExtra[]
-  messages    BookingMessage[]
-  invoices    Invoice[]
-  stayUpdates StayUpdate[]
+  cats         BookingCat[]
+  extras       BookingExtra[]
+  messages     BookingMessage[]
+  invoices     Invoice[]
+  stayUpdates  StayUpdate[]
+  appointments Appointment[]
 
   @@index([userId])
   @@index([status])
@@ -185,23 +189,23 @@ model BookingExtra {
   bookingId String
   booking   Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
 
-  label String
+  label             String
   // Base de facturation (snapshot). Le total `amount` est dérivé serveur de
   // `unitAmount` × multiplicateur (nuits / quantity / 1 selon `unit`).
-  unit ExtraUnit @default(FLAT)
+  unit              ExtraUnit @default(FLAT)
   // Prix unitaire (par jour / par visite / forfait). `null` = pas encore
   // chiffré (demande client libre) — l'admin le pose dans le devis.
-  unitAmount Decimal? @db.Decimal(10, 2)
+  unitAmount        Decimal?  @db.Decimal(10, 2)
   // Nombre d'unités (visites). Ignoré pour PER_DAY (utilise les nuits) et
   // vaut 1 pour FLAT.
-  quantity Int @default(1)
+  quantity          Int       @default(1)
   // Total de ligne calculé (snapshot). `null` = montant non encore chiffré.
   // `0` est un prix valide (ex. « croquettes fournies par le client »).
-  amount Decimal? @db.Decimal(10, 2)
+  amount            Decimal?  @db.Decimal(10, 2)
   // Origine de la ligne : demandée par le client à la réservation, ou posée
   // par l'admin. Sert à l'affichage (indicatif vs confirmé) et au devis.
-  requestedByClient Boolean @default(false)
-  sortOrder         Int     @default(0)
+  requestedByClient Boolean   @default(false)
+  sortOrder         Int       @default(0)
 
   createdAt DateTime @default(now())
 
@@ -212,8 +216,8 @@ model BookingExtra {
 /// les lignes BookingExtra dans le formulaire de devis. Une modification du
 /// préset n'altère pas les devis déjà posés.
 model ExtraPreset {
-  id    String    @id @default(cuid())
-  label String
+  id            String    @id @default(cuid())
+  label         String
   // Base de facturation par défaut du supplément ; `defaultAmount` est le
   // prix unitaire correspondant (par jour / par visite / forfait).
   unit          ExtraUnit @default(FLAT)
@@ -288,6 +292,55 @@ model StayUpdate {
 }
 
 // ---------------------------------------------------------------------------
+// Rendez-vous (visioconférence)
+// ---------------------------------------------------------------------------
+
+enum AppointmentStatus {
+  SCHEDULED // créneau posé, à venir
+  COMPLETED // appel effectué
+  CANCELLED // rendez-vous annulé
+}
+
+/// Télé-rendez-vous : appel vidéo 1:1 entre un client (propriétaire) et la
+/// maison (admin). La vidéo passe en WebRTC pair-à-pair ; cette table ne porte
+/// que la métadonnée du rdv (créneau, statut, lien au séjour), jamais l'état
+/// SDP/ICE volatile du signaling (qui vit dans un bus en mémoire). L'accès à la
+/// salle est gardé par session : seuls le client concerné et un admin entrent.
+model Appointment {
+  id String @id @default(cuid())
+
+  // Client concerné (propriétaire). Calqué sur Booking.userId : Restrict.
+  clientId String
+  client   User   @relation("AppointmentClient", fields: [clientId], references: [id], onDelete: Restrict)
+
+  // Séjour rattaché — optionnel (un appel-conseil peut précéder toute
+  // réservation) ; SetNull pour préserver l'historique si le séjour est supprimé.
+  bookingId String?
+  booking   Booking? @relation(fields: [bookingId], references: [id], onDelete: SetNull)
+
+  // Auteur de la planification (généralement l'admin). SetNull si le compte part.
+  createdById String?
+  createdBy   User?   @relation("AppointmentCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+
+  scheduledAt DateTime // début du créneau
+  durationMin Int               @default(30)
+  status      AppointmentStatus @default(SCHEDULED)
+  title       String? // motif du rendez-vous (texte libre)
+  notes       String? // notes internes de l'admin
+
+  // Fenêtre réelle de l'appel (renseignée au connect / hangup).
+  startedAt DateTime?
+  endedAt   DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([clientId])
+  @@index([bookingId])
+  @@index([scheduledAt])
+}
+
+// ---------------------------------------------------------------------------
 // Notifications
 // ---------------------------------------------------------------------------
 
@@ -299,6 +352,8 @@ enum NotificationType {
   MESSAGE_RECEIVED // (bidirectionnel) nouveau message reçu
   CAT_REVIEWED // (client) la maison a posé un avis sur un chat
   ARRIVAL_REMINDER // (admin) arrivée prévue le lendemain
+  APPOINTMENT_SCHEDULED // (client) un télé-rendez-vous a été planifié
+  APPOINTMENT_CANCELLED // (client) un télé-rendez-vous a été annulé
 }
 
 /// Notification in-app destinée à un utilisateur.

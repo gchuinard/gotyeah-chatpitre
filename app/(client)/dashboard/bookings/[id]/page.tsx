@@ -5,6 +5,7 @@ import { BookingStatusBadge } from "@/components/booking-status-badge";
 import { CancelBookingButton } from "@/components/cancel-booking-button";
 import { ConversationView } from "@/components/conversation-view";
 import { LibraryStamp } from "@/components/library-stamp";
+import { RdvJoinButton } from "@/components/rdv-join-button";
 import { RuleDivider } from "@/components/rule-divider";
 import { RuledBox } from "@/components/ruled-box";
 import { SectionHeading } from "@/components/section-heading";
@@ -16,6 +17,8 @@ import {
   ageLabel,
   displayRef,
   formatDate,
+  formatDateTime,
+  getAppointmentsForBooking,
   getBookingFor,
   nightsBetween,
 } from "@/lib/repository";
@@ -35,6 +38,7 @@ export default async function BookingDetailPage({
   const booking = await getBookingFor(id, user.id, isAdmin(user));
   if (!booking) notFound();
 
+  const appointments = await getAppointmentsForBooking(booking.id);
   const cats = booking.cats.map((link) => link.cat);
   const nights = nightsBetween(booking.startDate, booking.endDate);
   const ref = displayRef(booking.id);
@@ -310,6 +314,46 @@ export default async function BookingDetailPage({
             />
 
             <StayJournal bookingId={booking.id} />
+          </section>
+        </>
+      )}
+
+      {appointments.length > 0 && (
+        <>
+          <RuleDivider className="my-16" label="Télé-rendez-vous" tone="feuille" />
+          <section className="space-y-4">
+            <p className="max-w-2xl font-display text-xl italic leading-snug text-cp-ink-soft">
+              La maison vous propose un appel vidéo. Rejoignez-le à l&apos;heure
+              dite depuis cette page.
+            </p>
+            <ul className="grid gap-px overflow-hidden rounded-md border border-cp-ink bg-cp-ink">
+              {appointments.map((a) => (
+                <li
+                  key={a.id}
+                  className="flex flex-wrap items-center justify-between gap-3 bg-cp-paper p-4"
+                >
+                  <div>
+                    <p className="font-display text-lg italic leading-tight text-cp-ink">
+                      {formatDateTime(a.scheduledAt)}
+                    </p>
+                    <p className="font-mono text-[0.6rem] uppercase tracking-[0.16em] text-cp-ink-soft">
+                      {a.durationMin} min{a.title ? ` · ${a.title}` : ""}
+                    </p>
+                  </div>
+                  {a.status === "SCHEDULED" ? (
+                    <RdvJoinButton
+                      href={`/dashboard/rdv/${a.id}`}
+                      scheduledAt={a.scheduledAt.toISOString()}
+                      durationMin={a.durationMin}
+                    />
+                  ) : (
+                    <span className="font-mono text-[0.6rem] font-bold uppercase tracking-[0.16em] text-cp-mute">
+                      {a.status === "CANCELLED" ? "Annulé" : "Terminé"}
+                    </span>
+                  )}
+                </li>
+              ))}
+            </ul>
           </section>
         </>
       )}

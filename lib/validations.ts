@@ -139,6 +139,35 @@ export const extraPresetCreateSchema = z.object({
 
 export const extraPresetUpdateSchema = extraPresetCreateSchema.partial();
 
+// --- Télé-rendez-vous (signaling WebRTC) -----------------------------------
+
+/// Message de signaling échangé entre les deux pairs d'un appel.
+/// `from` = id de connexion de l'émetteur (le serveur ne lui renvoie pas
+/// l'écho). `kind` distingue offre / réponse / candidat ICE / raccrochage ;
+/// `sdp` et `candidate` sont relayés tels quels à l'autre pair.
+export const rdvSignalSchema = z.object({
+  from: z.string().min(1).max(64),
+  kind: z.enum(["offer", "answer", "ice", "bye"]),
+  sdp: z.string().max(100_000).optional(),
+  candidate: z.unknown().optional(),
+});
+
+/// Planification d'un télé-rendez-vous par l'admin (depuis un séjour). Le
+/// créneau doit être dans le futur (tolérance d'une minute pour l'horloge).
+export const appointmentCreateSchema = z.object({
+  scheduledAt: z.coerce.date().refine((d) => d.getTime() > Date.now() - 60_000, {
+    message: "Le créneau doit être dans le futur.",
+  }),
+  durationMin: z.coerce
+    .number()
+    .int("La durée doit être un entier.")
+    .min(5)
+    .max(180)
+    .default(30),
+  title: z.string().trim().max(120).optional(),
+  notes: z.string().trim().max(1000).optional(),
+});
+
 // --- Utilitaire -------------------------------------------------------------
 
 /// Transforme une ZodError en un objet plat { champ: message } facile à
