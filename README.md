@@ -27,6 +27,13 @@ réservation, notifications in-app et facturation.
 > depuis un séjour : visioconférence **WebRTC pair-à-pair** intégrée au site
 > (sans Teams/Zoom), relais **TURN Cloudflare Realtime**, signaling par SSE. Le
 > client est notifié et rejoint l'appel depuis son espace à l'heure dite.
+>
+> **Documents des chats.** Chaque chat a une fiche (côté client et côté maison)
+> où l'on téléverse ses pièces (carnet de vaccination, identification, certificat
+> de santé, ordonnance… + un type « Autre » à libellé libre), aussi **depuis la
+> visio**. Les fichiers sont privés (servis par une route authentifiée, jamais
+> d'URL publique), affichés sous un nom normalisé « {Chat} — {Type} — {date} » ;
+> une photo peut être promue en portrait du chat.
 
 ## Stack technique
 
@@ -82,6 +89,8 @@ Voir `.env.example`. Le fichier `.env` n'est jamais versionné.
 | `NODE_ENV` | `development` ou `production` |
 | `CLOUDFLARE_TURN_KEY_ID` | Id de la clé TURN Cloudflare Realtime (relais des télé-rendez-vous). Optionnel : sans clé, repli sur STUN public. |
 | `CLOUDFLARE_TURN_KEY_API_TOKEN` | Token d'API de la clé TURN Cloudflare Realtime. |
+| `UPLOAD_DIR` | Répertoire de stockage des documents (en conteneur : `/data/uploads`, volume persistant). |
+| `MAX_UPLOAD_MB` | Taille maximale d'un document téléversé, en Mo (défaut 20). |
 
 ## Commandes
 
@@ -192,6 +201,9 @@ Chacune a sa variante `-deep` (hover) et `-light` (tints / fonds doux).
 | `RdvJoinButton` | Bouton « Rejoindre » qui s'active autour de l'heure du créneau |
 | `VideoCall` | Îlot d'appel WebRTC 1:1 (caméra/micro, signaling SSE, contrôles) |
 | `VideoTile` | Tuile vidéo 16:9 bordée avec libellé du participant |
+| `CatDocuments` | Section documents d'une fiche chat (liste + vignettes + actions) |
+| `DocumentUploadForm` | Formulaire d'upload (type auto-deviné, libellé libre, date) |
+| `RdvDocumentButton` | Bouton + dialog d'upload depuis la page d'appel |
 
 ### Page de référence
 
@@ -234,6 +246,10 @@ Les routes échangent du JSON ; les routes protégées exigent le cookie de sess
 | `GET /api/rdv/[id]/events` | Flux SSE de signaling de l'appel (offre/réponse/ICE) |
 | `POST /api/rdv/[id]/signal` | Émission d'un message de signaling vers l'autre pair |
 | `POST /api/admin/bookings/[id]/appointments` | Planifier un télé-rendez-vous (admin) |
+| `POST /api/cats/[id]/documents` | Téléverser un document sur un chat (propriétaire ou admin) |
+| `GET /api/documents/[id]` | Voir / télécharger un document (`?download=1`) — privé, auth requise |
+| `DELETE /api/documents/[id]` | Supprimer un document (propriétaire ou admin) |
+| `POST /api/documents/[id]/portrait` | Définir une photo comme portrait du chat |
 | `GET /api/notifications` | Mes notifications |
 | `PATCH /api/notifications/[id]/read` | Marquer une notification comme lue |
 
@@ -245,7 +261,7 @@ depuis le fil de discussion : le message est posté et le séjour passe en
 
 ## Modèle de données
 
-12 modèles Prisma : `User`, `Cat`, `Booking`, `BookingCat` (table de liaison ;
+13 modèles Prisma : `User`, `Cat`, `Booking`, `BookingCat` (table de liaison ;
 porte aussi l'avis de la maison sur chaque chat du séjour — `reviewStatus`
 validé/réserve/refusé + `reviewNote`, visible côté client),
 `BookingExtra` (lignes de suppléments d'un devis), `ExtraPreset` (catalogue
@@ -253,6 +269,8 @@ validé/réserve/refusé + `reviewNote`, visible côté client),
 `StayUpdate` (carnet de séjour : note photo+texte quotidienne),
 `Appointment` (télé-rendez-vous visio : créneau, durée, statut, lien optionnel
 au séjour ; `clientId`/`createdById` vers `User`),
+`CatDocument` (document d'un chat : type, libellé libre si « Autre », nom opaque
+sur disque, mime/taille, date),
 `Notification`, `Invoice`, `Setting`. Les montants sont en `Decimal(10,2)`.
 Les tarifs par défaut (prix par chat, pourcentage d'acompte) sont stockés
 dans `Setting` et donc modifiables sans redéploiement ; le devis effectif
@@ -309,10 +327,26 @@ déploiement est donc **mono-instance** (un seul conteneur). Un redéploiement
   `proxy_buffering off; proxy_read_timeout 3600s;` pour les connexions longues.
 - **HTTPS requis** côté navigateur (`getUserMedia`) — assuré par Cloudflare.
 
+### Documents des chats
+
+Les documents (carnets, certificats…) sont des données privées : stockés sur le
+volume Docker **`chatpitre_uploads`** (monté sur `/data/uploads`, persistant aux
+rebuilds) sous un nom opaque, servis **uniquement** par une route authentifiée
+(`/api/documents/[id]`) — jamais via une URL publique.
+
+- **Limite d'upload côté NPM** ⚠️ : Nginx (donc Nginx Proxy Manager) plafonne
+  `client_max_body_size` à **1 Mo** par défaut → tout fichier plus gros est
+  rejeté (413) avant d'atteindre l'app. La relever sur le proxy host (onglet
+  *Advanced*) à une valeur ≥ `MAX_UPLOAD_MB`, ex. `client_max_body_size 25m;`,
+  au même endroit que les directives SSE ci-dessus. Cloudflare (≈100 Mo) n'est
+  pas limitant.
+- **Sauvegarde** : inclure le volume `chatpitre_uploads` dans la routine de
+  sauvegarde du Pi (le `pg_dump` ne couvre que la base).
+
 ## Hors périmètre (étapes suivantes)
 
-Upload réel des photos de chats (en attendant, illustrations Charley Harper),
-rappels automatiques d'arrivée (cron `ARRIVAL_REMINDER`), déploiement continu
+Conversion HEIC → JPEG côté serveur (l'aperçu inline des HEIC est limité par les
+navigateurs), rappels automatiques d'arrivée (cron `ARRIVAL_REMINDER`), déploiement continu
 (CD) automatique vers le Pi (le CI build/lint est en place, le déploiement
 reste manuel). Côté visio : appels **1:1 uniquement** (ni groupe, ni
 enregistrement, ni salle d'attente).
