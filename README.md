@@ -22,6 +22,11 @@ réservation, notifications in-app et facturation.
 > (validé / avec réserve / refusé + note), visible du client sur le séjour
 > et sur la fiche du chat, avec notification. Les confirmations destructives
 > passent par une boîte de dialogue maison (plus de `window.confirm`).
+>
+> **Télé-rendez-vous.** La maison planifie un appel vidéo 1:1 avec le client
+> depuis un séjour : visioconférence **WebRTC pair-à-pair** intégrée au site
+> (sans Teams/Zoom), relais **TURN Cloudflare Realtime**, signaling par SSE. Le
+> client est notifié et rejoint l'appel depuis son espace à l'heure dite.
 
 ## Stack technique
 
@@ -183,6 +188,10 @@ Chacune a sa variante `-deep` (hover) et `-light` (tints / fonds doux).
 | `QuoteForm` | Devis admin : tarifs, acompte, lignes de suppléments (unité + prix unitaire + quantité) |
 | `ExtrasPresetsEditor` | Édition du catalogue de presets de suppléments (admin) |
 | `CatReviewControl` | Avis admin par chat sur un séjour (état + note) |
+| `RdvScheduler` | Planification admin d'un télé-rendez-vous + liste des rdv du séjour |
+| `RdvJoinButton` | Bouton « Rejoindre » qui s'active autour de l'heure du créneau |
+| `VideoCall` | Îlot d'appel WebRTC 1:1 (caméra/micro, signaling SSE, contrôles) |
+| `VideoTile` | Tuile vidéo 16:9 bordée avec libellé du participant |
 
 ### Page de référence
 
@@ -221,6 +230,10 @@ Les routes échangent du JSON ; les routes protégées exigent le cookie de sess
 | `POST /api/admin/bookings/[id]/stay-updates` | Ajouter une note au carnet de séjour (admin) |
 | `GET` · `POST /api/admin/extras-presets` | Liste · création d'un préset de supplément (admin) |
 | `PATCH` · `DELETE /api/admin/extras-presets/[id]` | Mise à jour · suppression d'un préset (admin) |
+| `GET /api/rdv/turn-credentials` | Identifiants ICE/TURN éphémères pour l'appel (Cloudflare Realtime) |
+| `GET /api/rdv/[id]/events` | Flux SSE de signaling de l'appel (offre/réponse/ICE) |
+| `POST /api/rdv/[id]/signal` | Émission d'un message de signaling vers l'autre pair |
+| `POST /api/admin/bookings/[id]/appointments` | Planifier un télé-rendez-vous (admin) |
 | `GET /api/notifications` | Mes notifications |
 | `PATCH /api/notifications/[id]/read` | Marquer une notification comme lue |
 
@@ -232,12 +245,14 @@ depuis le fil de discussion : le message est posté et le séjour passe en
 
 ## Modèle de données
 
-11 modèles Prisma : `User`, `Cat`, `Booking`, `BookingCat` (table de liaison ;
+12 modèles Prisma : `User`, `Cat`, `Booking`, `BookingCat` (table de liaison ;
 porte aussi l'avis de la maison sur chaque chat du séjour — `reviewStatus`
 validé/réserve/refusé + `reviewNote`, visible côté client),
 `BookingExtra` (lignes de suppléments d'un devis), `ExtraPreset` (catalogue
 éditable des suppléments proposés au formulaire de devis), `BookingMessage`,
 `StayUpdate` (carnet de séjour : note photo+texte quotidienne),
+`Appointment` (télé-rendez-vous visio : créneau, durée, statut, lien optionnel
+au séjour ; `clientId`/`createdById` vers `User`),
 `Notification`, `Invoice`, `Setting`. Les montants sont en `Decimal(10,2)`.
 Les tarifs par défaut (prix par chat, pourcentage d'acompte) sont stockés
 dans `Setting` et donc modifiables sans redéploiement ; le devis effectif
@@ -276,9 +291,28 @@ Déploiement actuel (manuel) : `git pull` sur le Pi puis
 s'appliquent au démarrage du conteneur). Un workflow GitHub Actions
 (`.github/workflows/ci.yml`) vérifie build + lint sur `main` et les PR.
 
+### Télé-rendez-vous (visioconférence)
+
+L'appel vidéo est **1:1, en WebRTC pair-à-pair** : le flux vidéo ne transite
+pas par le serveur. Le Raspberry Pi n'héberge que le **signaling** (échange des
+offres / candidats ICE) via SSE et un bus pub/sub **en mémoire** — le
+déploiement est donc **mono-instance** (un seul conteneur). Un redéploiement
+(`up -d --build`) interrompt les appels en cours.
+
+- **TURN (relais NAT).** Renseigner `CLOUDFLARE_TURN_KEY_ID` et
+  `CLOUDFLARE_TURN_KEY_API_TOKEN` (clé TURN du dashboard Cloudflare Realtime).
+  Sans ces variables, l'app retombe sur un STUN public : les appels en LAN
+  fonctionnent, mais pas derrière un NAT restrictif.
+- **Buffering SSE.** La route de signaling envoie `X-Accel-Buffering: no` et
+  `Cache-Control: no-transform` pour traverser Nginx Proxy Manager + Cloudflare.
+  En complément, sur le proxy host NPM (onglet *Advanced*) :
+  `proxy_buffering off; proxy_read_timeout 3600s;` pour les connexions longues.
+- **HTTPS requis** côté navigateur (`getUserMedia`) — assuré par Cloudflare.
+
 ## Hors périmètre (étapes suivantes)
 
 Upload réel des photos de chats (en attendant, illustrations Charley Harper),
 rappels automatiques d'arrivée (cron `ARRIVAL_REMINDER`), déploiement continu
 (CD) automatique vers le Pi (le CI build/lint est en place, le déploiement
-reste manuel).
+reste manuel). Côté visio : appels **1:1 uniquement** (ni groupe, ni
+enregistrement, ni salle d'attente).
