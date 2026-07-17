@@ -28,6 +28,13 @@ import {
 /// Détail admin d'un séjour — Prisma + actions de changement de statut
 /// PATCH + ConversationView qui POST réellement + carnet wired.
 
+/// Vrai si une édition client a été signalée récemment (fenêtre de fraîcheur
+/// de 15 min), pour n'afficher l'avertissement que tant qu'il est pertinent.
+function isEditingRecent(startedAt: Date | null): boolean {
+  if (!startedAt) return false;
+  return Date.now() - startedAt.getTime() < 15 * 60_000;
+}
+
 export default async function AdminBookingDetailPage({
   params,
 }: {
@@ -111,6 +118,26 @@ export default async function AdminBookingDetailPage({
           {client.firstName} {client.lastName}.
         </p>
       </header>
+
+      {isEditingRecent(booking.editingStartedAt) && (
+        <aside className="mt-6 rounded-md border border-cp-paprika bg-cp-paprika-light/40 px-4 py-3 font-mono text-[0.65rem] font-bold uppercase tracking-[0.18em] text-cp-paprika">
+          Modification en cours par le client, la demande peut encore changer.
+        </aside>
+      )}
+
+      {booking.interviewRequested && (
+        <aside className="mt-6 rounded-md border border-cp-cobalt bg-cp-cobalt-light/30 p-5">
+          <p className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.18em] text-cp-cobalt">
+            Entretien demandé ·{" "}
+            {booking.interviewChannel === "PHONE" ? "Téléphone" : "Visio"}
+          </p>
+          <p className="mt-2 font-body text-sm text-cp-ink">
+            {booking.interviewTopic
+              ? booking.interviewTopic
+              : "Le client souhaite un échange avant le séjour. Recontactez-le pour caler un créneau."}
+          </p>
+        </aside>
+      )}
 
       <RuleDivider className="my-12" />
 

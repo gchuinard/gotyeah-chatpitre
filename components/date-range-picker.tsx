@@ -74,6 +74,10 @@ function addMonths(d: Date, n: number): Date {
   return new Date(d.getFullYear(), d.getMonth() + n, 1);
 }
 
+function startOfMonth(d: Date): Date {
+  return new Date(d.getFullYear(), d.getMonth(), 1);
+}
+
 type DayCell = {
   date: Date;
   iso: string;
@@ -138,18 +142,24 @@ export function DateRangePicker({
   startName = "startDate",
   endName = "endDate",
   initialMonth,
+  initialStart = null,
+  initialEnd = null,
 }: {
   startName?: string;
   endName?: string;
-  /** Mois initialement affiché (la maquette ouvre sur juin 2026). */
+  /** Mois initialement affiché. Par défaut, le mois de la date d'arrivée
+   * pré-sélectionnée si fournie, sinon le mois en cours. */
   initialMonth?: Date;
+  /** Plage pré-sélectionnée (édition d'une demande existante). */
+  initialStart?: Date | null;
+  initialEnd?: Date | null;
 }) {
   const today = useMemo(() => new Date(), []);
   const [view, setView] = useState<Date>(
-    () => initialMonth ?? addMonths(today, 1),
+    () => initialMonth ?? startOfMonth(initialStart ?? today),
   );
-  const [start, setStart] = useState<Date | null>(null);
-  const [end, setEnd] = useState<Date | null>(null);
+  const [start, setStart] = useState<Date | null>(() => initialStart);
+  const [end, setEnd] = useState<Date | null>(() => initialEnd);
   const [hovered, setHovered] = useState<Date | null>(null);
 
   const nights = start && end ? daysBetween(start, end) : 0;
@@ -226,10 +236,11 @@ export function DateRangePicker({
             </p>
           ) : start ? (
             <p className="font-body text-sm text-cp-ink-soft">
-              Arrivée le <span className="font-semibold text-cp-ink">{frLabel(start)}</span>. Choisissez le départ.
+              Arrivée le <span className="font-semibold text-cp-ink">{frLabel(start)}</span>.{" "}
+              <span className="font-semibold text-cp-cobalt">Cliquez sur le jour de départ.</span>
             </p>
           ) : (
-            <p className="font-body text-sm italic text-cp-ink-soft">
+            <p className="font-body text-sm font-semibold text-cp-cobalt">
               Cliquez sur le jour d&apos;arrivée.
             </p>
           )}
@@ -265,11 +276,9 @@ export function DateRangePicker({
 
       {/* Légende */}
       <div className="flex flex-wrap items-center gap-x-5 gap-y-2 border-t border-cp-ink/20 pt-4">
-        <Legend label="Libre" />
-        <Legend label="Léger" tint="low" />
-        <Legend label="Plein" tint="medium" />
-        <Legend label="Comble" tint="high" />
-        <Legend label="Complet — non disponible" tint="full" />
+        <Legend label="Disponible" tint="ok" />
+        <Legend label="Dernière place restante" tint="last" />
+        <Legend label="Complet" tint="full" />
       </div>
 
       {start && (
@@ -356,35 +365,20 @@ function MonthCalendar({
                         // Passé / complet → mute
                         (cell.isPast || cell.isFull) && cell.isCurrentMonth &&
                           "text-cp-mute cursor-not-allowed",
-                        // Sélectionné start/end → paprika fill
-                        (isStart || isEnd) && "bg-cp-paprika text-cp-paper font-semibold",
-                        // Dans la plage → paprika light
-                        inRange && !isStart && !isEnd && "bg-cp-paprika-light text-cp-ink",
+                        // Sélectionné start/end → cobalt fill (bleu)
+                        (isStart || isEnd) && "bg-cp-cobalt text-cp-paper font-semibold",
+                        // Dans la plage → cobalt light
+                        inRange && !isStart && !isEnd && "bg-cp-cobalt-light text-cp-ink",
                         // Disponible (par défaut) → hover paper-deep
                         !disabled && !isStart && !isEnd && !inRange &&
                           "hover:bg-cp-paper-deep",
-                        // Occupation indicateur (fond gradué pour les non-sélectionnés)
+                        // Dernière place restante (1 seule chambre libre) → tint ambre
                         !isStart &&
                           !isEnd &&
                           !inRange &&
                           !disabled &&
-                          cell.occupancy >= 1 &&
-                          cell.occupancy <= 2 &&
-                          "bg-cp-paper",
-                        !isStart &&
-                          !isEnd &&
-                          !inRange &&
-                          !disabled &&
-                          cell.occupancy >= 3 &&
-                          cell.occupancy <= 4 &&
-                          "bg-cp-paper-deep",
-                        !isStart &&
-                          !isEnd &&
-                          !inRange &&
-                          !disabled &&
-                          cell.occupancy >= 5 &&
-                          cell.occupancy <= 6 &&
-                          "bg-cp-canari-light",
+                          cell.occupancy === CAPACITY - 1 &&
+                          "bg-cp-canari-light/60",
                       )}
                     >
                       <span className="font-mono text-xs font-semibold leading-none">
@@ -396,12 +390,10 @@ function MonthCalendar({
                           className={cn(
                             "h-0.5 w-6 rounded-full",
                             cell.isFull
-                              ? "bg-cp-paprika"
-                              : cell.occupancy >= 5
-                                ? "bg-cp-canari-deep"
-                                : cell.occupancy >= 3
-                                  ? "bg-cp-cobalt"
-                                  : "bg-cp-feuille",
+                              ? "bg-cp-paprika" // Complet
+                              : cell.occupancy === CAPACITY - 1
+                                ? "bg-cp-canari-deep" // Dernière place restante
+                                : "bg-cp-feuille", // Disponible
                           )}
                         />
                       )}
@@ -422,7 +414,7 @@ function Legend({
   tint,
 }: {
   label: string;
-  tint?: "low" | "medium" | "high" | "full";
+  tint: "ok" | "last" | "full";
 }) {
   return (
     <span className="flex items-center gap-2">
@@ -430,10 +422,8 @@ function Legend({
         aria-hidden
         className={cn(
           "inline-block size-3 rounded-sm border border-cp-ink/30",
-          !tint && "bg-cp-paper",
-          tint === "low" && "bg-cp-paper",
-          tint === "medium" && "bg-cp-paper-deep",
-          tint === "high" && "bg-cp-canari-light",
+          tint === "ok" && "bg-cp-feuille",
+          tint === "last" && "bg-cp-canari-deep",
           tint === "full" && "bg-cp-paprika",
         )}
       />

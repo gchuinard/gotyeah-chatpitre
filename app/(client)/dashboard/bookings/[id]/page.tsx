@@ -10,6 +10,7 @@ import { RuleDivider } from "@/components/rule-divider";
 import { RuledBox } from "@/components/ruled-box";
 import { SectionHeading } from "@/components/section-heading";
 import { StayJournal } from "@/components/stay-journal";
+import { buttonVariants } from "@/components/ui/button";
 import { getCurrentUser, isAdmin } from "@/lib/auth";
 import { CAT_REVIEW_BADGE, CAT_REVIEW_LABEL } from "@/lib/cat-review";
 import { extraUnitGloss } from "@/lib/extras";
@@ -42,6 +43,10 @@ export default async function BookingDetailPage({
   const cats = booking.cats.map((link) => link.cat);
   const nights = nightsBetween(booking.startDate, booking.endDate);
   const ref = displayRef(booking.id);
+  const extrasTotal = booking.extras.reduce(
+    (sum, extra) => sum + (extra.amount === null ? 0 : Number(extra.amount)),
+    0,
+  );
 
   // Le devis est posé par la maison lors du passage à ACCEPTED. Tant que
   // PENDING ou QUESTION_ASKED, on cache les chiffres et la facture PDF.
@@ -169,7 +174,13 @@ export default async function BookingDetailPage({
               <DetailTile
                 label="Tarif total"
                 value={`${Number(booking.totalAmount).toLocaleString("fr-FR")}€`}
-                gloss={`${Number(booking.pricePerFirstCat)}€ + ${Number(booking.pricePerExtraCat)}€ × ${cats.length - 1} · ${nights} nuits`}
+                gloss={totalGloss(
+                  Number(booking.pricePerFirstCat),
+                  Number(booking.pricePerExtraCat),
+                  cats.length,
+                  nights,
+                  extrasTotal,
+                )}
               />
               <DetailTile
                 label="Pensionnaires"
@@ -387,12 +398,46 @@ export default async function BookingDetailPage({
           ← Retour aux séjours
         </Link>
 
-        {["PENDING", "QUESTION_ASKED"].includes(booking.status) && (
-          <CancelBookingButton bookingId={booking.id} />
-        )}
+        {["PENDING", "QUESTION_ASKED"].includes(booking.status) ? (
+          <div className="flex flex-wrap items-center gap-3">
+            <Link
+              href={`/dashboard/bookings/${booking.id}/edit`}
+              className={buttonVariants({ variant: "outline", size: "sm" })}
+            >
+              Modifier la demande
+            </Link>
+            <CancelBookingButton bookingId={booking.id} />
+          </div>
+        ) : booking.status === "ACCEPTED" ? (
+          <p className="font-body text-sm text-cp-ink-soft">
+            Pour annuler un séjour accepté, contactez-nous.
+          </p>
+        ) : null}
       </footer>
     </article>
   );
+}
+
+/// Décompte lisible du « Tarif total » : séjour (nuitées) + suppléments,
+/// sans faire apparaître le dégressif quand il n'y a qu'un chat.
+function totalGloss(
+  pricePerFirstCat: number,
+  pricePerExtraCat: number,
+  catCount: number,
+  nights: number,
+  extrasTotal: number,
+): string {
+  const fmt = (n: number) => n.toLocaleString("fr-FR");
+  const nightly = pricePerFirstCat + pricePerExtraCat * (catCount - 1);
+  const stay = nightly * nights;
+  const nightlyLabel =
+    catCount > 1
+      ? `${fmt(pricePerFirstCat)}€ + ${fmt(pricePerExtraCat)}€ × ${catCount - 1} par nuit`
+      : `${fmt(pricePerFirstCat)}€ par nuit`;
+  const stayPart = `Séjour ${fmt(stay)}€ (${nightlyLabel} × ${nights} nuit${nights > 1 ? "s" : ""})`;
+  return extrasTotal > 0
+    ? `${stayPart} + suppléments ${fmt(extrasTotal)}€`
+    : stayPart;
 }
 
 function DetailTile({
