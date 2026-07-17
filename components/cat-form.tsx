@@ -133,14 +133,14 @@ export function CatForm({
         </Link>
         <span aria-hidden>/</span>
         <span className="text-cp-ink">
-          {isEdit ? `N° ${reference} — édition` : "Nouvelle fiche"}
+          {isEdit ? `N°${reference} — édition` : "Nouvelle fiche"}
         </span>
       </nav>
 
       <header className="space-y-5">
         <LibraryStamp boxed>
           {isEdit
-            ? `Fiche existante — N° ${reference}`
+            ? `Fiche existante — N°${reference}`
             : "Nouvelle fiche de pensionnaire"}
         </LibraryStamp>
         <h1 className="font-display text-5xl font-medium leading-[0.95] tracking-[-0.01em] text-cp-ink sm:text-6xl">

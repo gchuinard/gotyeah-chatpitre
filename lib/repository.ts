@@ -22,6 +22,7 @@ export {
   displayRef,
   formatDate,
   formatDateTime,
+  formatEuros,
   formatShortDate,
   nightsBetween,
   relativeTime,

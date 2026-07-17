@@ -113,7 +113,7 @@ export default async function AdminBookingsListPage() {
                       href={`/admin/bookings/${b.id}`}
                       className="font-mono text-sm font-bold uppercase tracking-[0.16em] text-cp-paprika hover:text-cp-ink"
                     >
-                      N° {ref}
+                      N°{ref}
                     </Link>
                   </Td>
                   <Td>

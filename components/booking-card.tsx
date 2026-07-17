@@ -8,8 +8,8 @@ import { LibraryStamp } from "@/components/library-stamp";
 import { cn } from "@/lib/utils";
 
 /// Carte séjour pour les listings (client et admin). Composition fiche
-/// catalogue : numéro de référence, dates, pensionnaires, total, statut,
-/// lien d'ouverture. Optionnellement compacte (admin tables).
+/// catalogue : numéro de référence, dates, pensionnaires, total, statut.
+/// La carte entière est un lien vers le détail. Optionnellement compacte.
 
 export type BookingCardProps = {
   reference: string;
@@ -45,19 +45,20 @@ export function BookingCard({
 }: BookingCardProps) {
   const compact = density === "compact";
   return (
-    <article
+    <Link
+      href={href}
       className={cn(
-        "flex flex-col border border-cp-ink bg-cp-paper text-cp-ink transition-shadow hover:shadow-[6px_6px_0_0_var(--color-cp-ink)]",
+        "flex flex-col border border-cp-ink bg-cp-paper text-cp-ink transition-shadow hover:shadow-[6px_6px_0_0_var(--color-cp-ink)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cp-cobalt focus-visible:ring-offset-2 focus-visible:ring-offset-cp-paper",
         className,
       )}
     >
-      <header className="flex items-start justify-between gap-3 border-b border-cp-ink px-5 py-3">
+      <div className="flex items-start justify-between gap-3 border-b border-cp-ink px-5 py-3">
         <LibraryStamp>
-          N° {reference}
+          N°{reference}
           {ownerLabel ? ` · ${ownerLabel}` : ""}
         </LibraryStamp>
         <BookingStatusBadge status={status} />
-      </header>
+      </div>
 
       <div className={cn("flex flex-col gap-3 px-5", compact ? "py-4" : "py-6")}>
         <p
@@ -78,7 +79,7 @@ export function BookingCard({
         )}
       </div>
 
-      <footer className="flex items-end justify-between gap-3 border-t border-cp-ink px-5 py-3">
+      <div className="flex items-end justify-between gap-3 border-t border-cp-ink px-5 py-3">
         <div className="flex flex-col gap-0.5">
           <span className="font-mono text-[0.6rem] font-bold uppercase tracking-[0.18em] text-cp-paprika">
             {total === null ? "Devis" : "Total"}
@@ -87,20 +88,12 @@ export function BookingCard({
             {total === null ? "—" : `${total}€`}
           </span>
         </div>
-        <div className="flex flex-col items-end gap-1">
-          {messageCount > 0 && (
-            <span className="font-mono text-[0.6rem] uppercase tracking-[0.18em] text-cp-ink-soft">
-              {messageCount} message{messageCount > 1 ? "s" : ""}
-            </span>
-          )}
-          <Link
-            href={href}
-            className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.22em] text-cp-ink underline-offset-4 decoration-[1.5px] decoration-cp-ink/40 hover:underline hover:text-cp-paprika hover:decoration-cp-paprika"
-          >
-            Ouvrir →
-          </Link>
-        </div>
-      </footer>
-    </article>
+        {messageCount > 0 && (
+          <span className="font-mono text-[0.6rem] uppercase tracking-[0.18em] text-cp-ink-soft">
+            {messageCount} message{messageCount > 1 ? "s" : ""}
+          </span>
+        )}
+      </div>
+    </Link>
   );
 }

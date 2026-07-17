@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import type { CatReviewStatus } from "@prisma/client";
 
 import { Button } from "@/components/ui/button";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { CAT_REVIEW_OPTIONS } from "@/lib/cat-review";
 
@@ -29,6 +30,7 @@ export function CatReviewControl({
   const [note, setNote] = useState(initialNote ?? "");
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
   const [pending, startTransition] = useTransition();
 
   function save() {
@@ -55,6 +57,9 @@ export function CatReviewControl({
       router.refresh();
     });
   }
+
+  const statusLabel =
+    CAT_REVIEW_OPTIONS.find((o) => o.value === status)?.label ?? status;
 
   return (
     <div className="mt-3 space-y-2 border-t border-cp-ink/30 pt-3">
@@ -88,7 +93,12 @@ export function CatReviewControl({
         placeholder="Ex. : RAS · non stérilisé mais à jour de vaccins · refusé : pas identifié"
       />
       <div className="flex items-center gap-3">
-        <Button type="button" size="sm" onClick={save} disabled={pending}>
+        <Button
+          type="button"
+          size="sm"
+          onClick={() => setConfirmOpen(true)}
+          disabled={pending}
+        >
           {pending ? "…" : "Enregistrer l'avis"}
         </Button>
         {saved && !pending && (
@@ -100,6 +110,16 @@ export function CatReviewControl({
           <span className="font-body text-xs text-cp-paprika">{error}</span>
         )}
       </div>
+
+      <ConfirmDialog
+        open={confirmOpen}
+        onOpenChange={setConfirmOpen}
+        title="Enregistrer cet avis ?"
+        description={`Vous allez enregistrer l'avis « ${statusLabel} » sur ce chat. Il sera visible par le client.`}
+        confirmLabel="Enregistrer l'avis"
+        cancelLabel="Revenir en arrière"
+        onConfirm={save}
+      />
     </div>
   );
 }

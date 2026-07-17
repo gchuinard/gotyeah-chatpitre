@@ -149,7 +149,7 @@ export default async function AdminDashboardPage() {
                   className="grid gap-3 border-b border-cp-ink/30 py-5 sm:grid-cols-[6rem_2fr_2fr_auto_auto] sm:items-center sm:gap-5"
                 >
                   <p className="font-mono text-sm font-bold uppercase tracking-[0.18em] text-cp-paprika">
-                    N° {displayRef(b.id)}
+                    N°{displayRef(b.id)}
                   </p>
                   <div className="space-y-0.5">
                     <p className="font-display text-lg italic leading-tight text-cp-ink">

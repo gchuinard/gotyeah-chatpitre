@@ -333,7 +333,7 @@ export function InvoicePdf({
     <Document
       title={`Facture ${ref} — Le Chat-Pitre`}
       author="Le Chat-Pitre"
-      subject={`Facture pour le séjour N° ${shortRef}`}
+      subject={`Facture pour le séjour N°${shortRef}`}
     >
       <Page size="A4" style={styles.page}>
         {/* HEADER */}
@@ -346,7 +346,7 @@ export function InvoicePdf({
           </View>
           <View style={styles.invoiceMeta}>
             <Text style={styles.invoiceWord}>FACTURE</Text>
-            <Text style={styles.invoiceNumber}>N° {ref}</Text>
+            <Text style={styles.invoiceNumber}>N°{ref}</Text>
             <Text style={styles.invoiceDate}>ÉMISE LE {issued.toUpperCase()}</Text>
           </View>
         </View>

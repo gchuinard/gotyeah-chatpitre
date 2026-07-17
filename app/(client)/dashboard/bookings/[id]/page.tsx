@@ -19,6 +19,7 @@ import {
   displayRef,
   formatDate,
   formatDateTime,
+  formatEuros,
   getAppointmentsForBooking,
   getBookingFor,
   nightsBetween,
@@ -84,14 +85,14 @@ export default async function BookingDetailPage({
           Séjours
         </Link>
         <span aria-hidden>/</span>
-        <span className="text-cp-ink">N° {ref}</span>
+        <span className="text-cp-ink">N°{ref}</span>
       </nav>
 
       {/* En-tête éditoriale */}
       <header className="space-y-6">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <LibraryStamp boxed>
-            Séjour N° {ref} — {nights} nuit{nights > 1 ? "s" : ""}
+            Séjour N°{ref} — {nights} nuit{nights > 1 ? "s" : ""}
           </LibraryStamp>
           <BookingStatusBadge status={booking.status} />
         </div>
@@ -155,7 +156,7 @@ export default async function BookingDetailPage({
                     <span className="font-mono text-sm font-bold whitespace-nowrap text-cp-cobalt">
                       {extra.amount === null
                         ? "à chiffrer"
-                        : `~ ${Number(extra.amount).toLocaleString("fr-FR")}€`}
+                        : `~ ${formatEuros(Number(extra.amount))}€`}
                     </span>
                   </li>
                 ))}
@@ -173,7 +174,7 @@ export default async function BookingDetailPage({
             <section className="grid gap-4 lg:grid-cols-3">
               <DetailTile
                 label="Tarif total"
-                value={`${Number(booking.totalAmount).toLocaleString("fr-FR")}€`}
+                value={`${formatEuros(Number(booking.totalAmount))}€`}
                 gloss={totalGloss(
                   Number(booking.pricePerFirstCat),
                   Number(booking.pricePerExtraCat),
@@ -189,7 +190,7 @@ export default async function BookingDetailPage({
               />
               <DetailTile
                 label="Acompte"
-                value={`${Number(booking.depositAmount).toLocaleString("fr-FR")}€`}
+                value={`${formatEuros(Number(booking.depositAmount))}€`}
                 gloss={`${booking.depositPercentage} % à la réservation`}
               />
             </section>
@@ -221,7 +222,7 @@ export default async function BookingDetailPage({
                       <span className="font-mono text-sm font-bold whitespace-nowrap text-cp-paprika">
                         {extra.amount === null
                           ? "à chiffrer"
-                          : `+${Number(extra.amount).toLocaleString("fr-FR")}€`}
+                          : `+${formatEuros(Number(extra.amount))}€`}
                       </span>
                     </li>
                   ))}
@@ -240,7 +241,7 @@ export default async function BookingDetailPage({
           kicker="L'avis de la maison sur chaque chat apparaît ici une fois la fiche étudiée."
           tone="cobalt"
         />
-        <ul className="grid gap-px overflow-hidden rounded-md border border-cp-ink bg-cp-ink sm:grid-cols-2">
+        <ul className="flex flex-wrap gap-px self-start overflow-hidden rounded-md border border-cp-ink bg-cp-ink [&>li]:grow [&>li]:basis-full [&>li]:bg-cp-paper sm:[&>li]:basis-[calc(50%-1px)]">
           {booking.cats.map((link) => (
             <li key={link.cat.id} className="flex flex-col gap-3 bg-cp-paper p-5">
               <header className="flex items-baseline justify-between gap-3">
@@ -248,7 +249,7 @@ export default async function BookingDetailPage({
                   {link.cat.name}
                 </p>
                 <p className="font-mono text-[0.6rem] font-bold uppercase tracking-[0.18em] text-cp-paprika">
-                  N° {displayRef(link.cat.id)}
+                  N°{displayRef(link.cat.id)}
                 </p>
               </header>
               <p className="font-body text-sm text-cp-ink-soft">
@@ -427,7 +428,7 @@ function totalGloss(
   nights: number,
   extrasTotal: number,
 ): string {
-  const fmt = (n: number) => n.toLocaleString("fr-FR");
+  const fmt = formatEuros;
   const nightly = pricePerFirstCat + pricePerExtraCat * (catCount - 1);
   const stay = nightly * nights;
   const nightlyLabel =
