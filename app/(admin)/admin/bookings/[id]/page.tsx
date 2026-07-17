@@ -54,6 +54,9 @@ export default async function AdminBookingDetailPage({
   const ref = displayRef(booking.id);
   const awaitingQuote = ["PENDING", "QUESTION_ASKED"].includes(booking.status);
   const hasQuote = booking.totalAmount !== null;
+  // Séjour annulé : plus aucune action admin possible. On grise et neutralise
+  // les contrôles encore présents (avis pensionnaires, télé-rendez-vous).
+  const isCancelled = booking.status === "CANCELLED";
   // Le carnet de séjour n'a de sens qu'une fois le séjour validé : masqué tant
   // que la demande n'est pas acceptée (ou terminée).
   const showJournal = ["ACCEPTED", "COMPLETED"].includes(booking.status);
@@ -96,13 +99,13 @@ export default async function AdminBookingDetailPage({
           Séjours
         </Link>
         <span aria-hidden>/</span>
-        <span className="text-cp-ink">N° {ref}</span>
+        <span className="text-cp-ink">N°{ref}</span>
       </nav>
 
       <header className="space-y-6">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <LibraryStamp boxed>
-            Séjour N° {ref} — {nights} nuit{nights > 1 ? "s" : ""}
+            Séjour N°{ref} — {nights} nuit{nights > 1 ? "s" : ""}
           </LibraryStamp>
           <BookingStatusBadge status={booking.status} />
         </div>
@@ -135,6 +138,18 @@ export default async function AdminBookingDetailPage({
             {booking.interviewTopic
               ? booking.interviewTopic
               : "Le client souhaite un échange avant le séjour. Recontactez-le pour caler un créneau."}
+          </p>
+        </aside>
+      )}
+
+      {isCancelled && (
+        <aside className="mt-6 rounded-md border border-cp-ink/30 bg-cp-paper-deep px-4 py-3">
+          <p className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.18em] text-cp-ink-soft">
+            Séjour annulé
+          </p>
+          <p className="mt-1 font-body text-sm text-cp-ink-soft">
+            Cette demande a été annulée par le client. Aucune action n&apos;est
+            plus possible sur ce séjour.
           </p>
         </aside>
       )}
@@ -200,7 +215,7 @@ export default async function AdminBookingDetailPage({
           title="Pensionnaires concernés"
           kicker={`${cats.length} fiche${cats.length > 1 ? "s" : ""} à valider avant l'arrivée.`}
         />
-        <ul className="grid gap-px overflow-hidden rounded-md border border-cp-ink bg-cp-ink sm:grid-cols-2">
+        <ul className="flex flex-wrap gap-px self-start overflow-hidden rounded-md border border-cp-ink bg-cp-ink [&>li]:grow [&>li]:basis-full [&>li]:bg-cp-paper sm:[&>li]:basis-[calc(50%-1px)]">
           {booking.cats.map((link) => (
             <li key={link.cat.id} className="flex flex-col gap-3 bg-cp-paper p-5">
               <header className="flex items-baseline justify-between gap-3">
@@ -208,7 +223,7 @@ export default async function AdminBookingDetailPage({
                   {link.cat.name}
                 </p>
                 <p className="font-mono text-[0.6rem] font-bold uppercase tracking-[0.18em] text-cp-paprika">
-                  N° {displayRef(link.cat.id)}
+                  N°{displayRef(link.cat.id)}
                 </p>
               </header>
               <p className="font-body text-sm text-cp-ink-soft">
@@ -226,12 +241,14 @@ export default async function AdminBookingDetailPage({
                 <Criterion ok={link.cat.vaccinesUpToDate} label="Vaccins" />
                 <Criterion ok={link.cat.isSociable} label="Sociable" />
               </ul>
-              <CatReviewControl
-                bookingId={booking.id}
-                catId={link.cat.id}
-                initialStatus={link.reviewStatus}
-                initialNote={link.reviewNote}
-              />
+              <ActionGate disabled={isCancelled}>
+                <CatReviewControl
+                  bookingId={booking.id}
+                  catId={link.cat.id}
+                  initialStatus={link.reviewStatus}
+                  initialNote={link.reviewNote}
+                />
+              </ActionGate>
             </li>
           ))}
         </ul>
@@ -357,16 +374,18 @@ export default async function AdminBookingDetailPage({
 
       {/* Télé-rendez-vous */}
       <RuleDivider className="my-16" label="Télé-rendez-vous" tone="feuille" />
-      <RdvScheduler
-        bookingId={booking.id}
-        appointments={appointments.map((a) => ({
-          id: a.id,
-          scheduledAt: a.scheduledAt.toISOString(),
-          durationMin: a.durationMin,
-          status: a.status,
-          title: a.title,
-        }))}
-      />
+      <ActionGate disabled={isCancelled}>
+        <RdvScheduler
+          bookingId={booking.id}
+          appointments={appointments.map((a) => ({
+            id: a.id,
+            scheduledAt: a.scheduledAt.toISOString(),
+            durationMin: a.durationMin,
+            status: a.status,
+            title: a.title,
+          }))}
+        />
+      </ActionGate>
 
       <RuleDivider className="my-16" tone="paprika" />
 
@@ -430,5 +449,27 @@ function Criterion({ ok, label }: { ok: boolean; label: string }) {
         {label}
       </span>
     </li>
+  );
+}
+
+/// Neutralise une zone d'actions admin (grisée + non interactive) quand le
+/// séjour est clôturé. `inert` coupe clic ET focus clavier sur tout le sous-arbre.
+function ActionGate({
+  disabled,
+  children,
+}: {
+  disabled: boolean;
+  children: React.ReactNode;
+}) {
+  return (
+    <div
+      inert={disabled}
+      aria-disabled={disabled || undefined}
+      className={
+        disabled ? "pointer-events-none opacity-50 select-none" : undefined
+      }
+    >
+      {children}
+    </div>
   );
 }

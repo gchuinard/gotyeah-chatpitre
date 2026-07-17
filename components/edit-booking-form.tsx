@@ -167,7 +167,7 @@ export function EditBookingForm({
           kicker="Cochez les chats à confier sur ce séjour."
           as="h2"
         />
-        <ul className="grid gap-px overflow-hidden rounded-md border border-cp-ink bg-cp-ink sm:grid-cols-2">
+        <ul className="flex flex-wrap gap-px self-start overflow-hidden rounded-md border border-cp-ink bg-cp-ink [&>li]:grow [&>li]:basis-full [&>li]:bg-cp-paper sm:[&>li]:basis-[calc(50%-1px)]">
           {cats.map((cat) => {
             const picked = pickCatIllustration(cat.name);
             const id = `edit-cat-${cat.id}`;
@@ -220,7 +220,7 @@ export function EditBookingForm({
                         {cat.name}
                       </span>
                       <span className="font-mono text-[0.6rem] font-bold uppercase tracking-[0.18em] text-cp-ink-soft">
-                        N° {displayRef(cat.id)}
+                        N°{displayRef(cat.id)}
                       </span>
                     </span>
                     <span className="font-body text-sm text-cp-ink-soft">

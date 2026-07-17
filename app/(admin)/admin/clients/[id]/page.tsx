@@ -66,7 +66,7 @@ export default async function AdminClientDetailPage({
       </nav>
 
       <header className="space-y-4">
-        <LibraryStamp boxed>Fiche N° {displayRef(client.id)}</LibraryStamp>
+        <LibraryStamp boxed>Fiche N°{displayRef(client.id)}</LibraryStamp>
         <h1 className="font-display text-5xl font-medium leading-[0.95] tracking-[-0.01em] text-cp-ink break-words sm:text-6xl">
           {client.firstName} {client.lastName}
         </h1>

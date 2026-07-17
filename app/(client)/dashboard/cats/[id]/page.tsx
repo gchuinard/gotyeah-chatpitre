@@ -77,7 +77,7 @@ export default async function CatDetailPage({
 
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div className="min-w-0 space-y-4">
-          <LibraryStamp boxed>Fiche N° {displayRef(cat.id)}</LibraryStamp>
+          <LibraryStamp boxed>Fiche N°{displayRef(cat.id)}</LibraryStamp>
           <h1 className="font-display text-5xl font-medium leading-[0.95] tracking-[-0.01em] text-cp-ink break-words sm:text-6xl">
             {cat.name}
           </h1>

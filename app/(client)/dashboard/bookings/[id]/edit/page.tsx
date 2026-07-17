@@ -58,7 +58,7 @@ export default async function EditBookingPage({
           href={`/dashboard/bookings/${booking.id}`}
           className="hover:text-cp-paprika"
         >
-          N° {ref}
+          N°{ref}
         </Link>
         <span aria-hidden>/</span>
         <span className="text-cp-ink">Modifier</span>

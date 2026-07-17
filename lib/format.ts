@@ -64,6 +64,16 @@ export function nightsBetween(start: Date, end: Date): number {
   return Math.round((end.getTime() - start.getTime()) / 86400000);
 }
 
+/// Montant en euros au format français : virgule décimale, et 2 décimales
+/// seulement quand il y en a (« 22,50 » mais « 66 »). Le symbole € est ajouté
+/// par l'appelant selon le contexte.
+export function formatEuros(amount: number): string {
+  return amount.toLocaleString("fr-FR", {
+    minimumFractionDigits: Number.isInteger(amount) ? 0 : 2,
+    maximumFractionDigits: 2,
+  });
+}
+
 /// Temps relatif depuis une date passée, en français : « il y a 2 h »,
 /// « hier », « il y a 3 j », ou date formatée pour les plus anciennes.
 export function relativeTime(from: Date, reference: Date = new Date()): string {

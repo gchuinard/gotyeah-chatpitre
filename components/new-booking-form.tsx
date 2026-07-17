@@ -154,7 +154,7 @@ export function NewBookingForm({
             </Link>
           </div>
         ) : (
-          <ul className="grid gap-px overflow-hidden rounded-md border border-cp-ink bg-cp-ink sm:grid-cols-2">
+          <ul className="flex flex-wrap gap-px self-start overflow-hidden rounded-md border border-cp-ink bg-cp-ink [&>li]:grow [&>li]:basis-full [&>li]:bg-cp-paper sm:[&>li]:basis-[calc(50%-1px)]">
             {cats.map((cat) => (
               <CatPickRow
                 key={cat.id}
@@ -184,7 +184,7 @@ export function NewBookingForm({
         </p>
 
         {presets.length > 0 && (
-          <ul className="grid gap-px overflow-hidden rounded-md border border-cp-ink bg-cp-ink sm:grid-cols-2">
+          <ul className="flex flex-wrap gap-px self-start overflow-hidden rounded-md border border-cp-ink bg-cp-ink [&>li]:grow [&>li]:basis-full [&>li]:bg-cp-paper sm:[&>li]:basis-[calc(50%-1px)]">
             {presets.map((preset) => (
               <ExtraPickRow
                 key={preset.id}
@@ -451,7 +451,7 @@ function CatPickRow({
               {name}
             </span>
             <span className="font-mono text-[0.6rem] font-bold uppercase tracking-[0.18em] text-cp-ink-soft">
-              N° {reference}
+              N°{reference}
             </span>
           </span>
           <span className="font-body text-sm text-cp-ink-soft">{detail}</span>

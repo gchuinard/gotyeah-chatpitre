@@ -81,13 +81,13 @@ export default async function DashboardPage() {
           <SectionHeading
             number="01"
             title="Prochain séjour"
-            kicker={`N° ${displayRef(upcoming.id)} — ${formatDate(upcoming.startDate)} → ${formatDate(upcoming.endDate)}`}
+            kicker={`N°${displayRef(upcoming.id)} — ${formatDate(upcoming.startDate)} → ${formatDate(upcoming.endDate)}`}
           />
           <article className="rounded-md border border-cp-ink bg-cp-paper-deep">
             <div className="flex flex-wrap items-start justify-between gap-4 border-b border-cp-ink px-6 py-4 sm:px-8">
               <div className="space-y-1">
                 <LibraryStamp>
-                  N° {displayRef(upcoming.id)} · {nightsBetween(upcoming.startDate, upcoming.endDate)} nuit
+                  N°{displayRef(upcoming.id)} · {nightsBetween(upcoming.startDate, upcoming.endDate)} nuit
                   {nightsBetween(upcoming.startDate, upcoming.endDate) > 1 ? "s" : ""}
                 </LibraryStamp>
                 <p className="font-display text-2xl italic leading-tight text-cp-ink sm:text-3xl">
@@ -107,7 +107,7 @@ export default async function DashboardPage() {
                     >
                       {link.cat.name}{" "}
                       <span className="font-mono text-[0.6rem] uppercase tracking-[0.18em] text-cp-ink-soft">
-                        · N° {displayRef(link.cat.id)}
+                        · N°{displayRef(link.cat.id)}
                       </span>
                     </li>
                   ))}
@@ -227,7 +227,7 @@ export default async function DashboardPage() {
                 className="grid gap-4 border-b border-cp-ink/30 py-5 sm:grid-cols-[6rem_2fr_3fr_auto] sm:items-center sm:gap-6"
               >
                 <p className="font-mono text-sm font-bold uppercase tracking-[0.18em] text-cp-paprika">
-                  N° {displayRef(b.id)}
+                  N°{displayRef(b.id)}
                 </p>
                 <p className="font-display text-lg italic leading-tight text-cp-ink">
                   {formatDate(b.startDate)} → {formatDate(b.endDate)}
