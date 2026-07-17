@@ -30,6 +30,7 @@ export function CancelBookingButton({ bookingId }: { bookingId: string }) {
         setError(data.error ?? "Échec de l'annulation.");
         return;
       }
+      router.push("/dashboard/bookings?cancelled=1");
       router.refresh();
     });
   }

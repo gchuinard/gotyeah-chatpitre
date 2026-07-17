@@ -66,15 +66,45 @@ export const bookingCreateSchema = z
       .array(z.string().trim().min(1).max(120))
       .max(10, "Pas plus de 10 demandes personnalisées.")
       .optional(),
+    // Entretien préalable souhaité (visio ou tél) pour un point précis.
+    interviewRequested: z.boolean().optional(),
+    interviewChannel: z.enum(["VIDEO", "PHONE"]).optional(),
+    interviewTopic: z.string().trim().max(500).optional(),
   })
   .refine((d) => differenceInCalendarDays(d.endDate, d.startDate) >= 1, {
     message: "Le séjour doit durer au moins une nuit.",
     path: ["endDate"],
+  })
+  .refine((d) => !d.interviewRequested || Boolean(d.interviewChannel), {
+    message: "Choisissez le format de l'entretien (visio ou téléphone).",
+    path: ["interviewChannel"],
   });
 
 export const bookingMessageSchema = z.object({
   content: z.string().trim().min(1, "Le message ne peut pas être vide."),
 });
+
+/// Modification d'une demande par le client (tant qu'elle est en attente).
+/// Dates, pensionnaires, note et entretien. Les suppléments ne sont pas
+/// modifiables ici (le modèle ne relie pas une ligne à son preset d'origine).
+export const bookingUpdateSchema = z
+  .object({
+    startDate: z.coerce.date(),
+    endDate: z.coerce.date(),
+    catIds: z.array(z.string().min(1)).min(1, "Sélectionnez au moins un chat."),
+    clientNotes: z.string().trim().optional(),
+    interviewRequested: z.boolean().optional(),
+    interviewChannel: z.enum(["VIDEO", "PHONE"]).optional(),
+    interviewTopic: z.string().trim().max(500).optional(),
+  })
+  .refine((d) => differenceInCalendarDays(d.endDate, d.startDate) >= 1, {
+    message: "Le séjour doit durer au moins une nuit.",
+    path: ["endDate"],
+  })
+  .refine((d) => !d.interviewRequested || Boolean(d.interviewChannel), {
+    message: "Choisissez le format de l'entretien (visio ou téléphone).",
+    path: ["interviewChannel"],
+  });
 
 // --- Admin ------------------------------------------------------------------
 

@@ -17,7 +17,12 @@ import {
 
 const CLOSED_STATUSES = ["COMPLETED", "CANCELLED", "REJECTED"] as const;
 
-export default async function BookingsListPage() {
+export default async function BookingsListPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ cancelled?: string }>;
+}) {
+  const { cancelled } = await searchParams;
   const user = await getCurrentUser();
   if (!user) return null;
 
@@ -42,6 +47,15 @@ export default async function BookingsListPage() {
         <span aria-hidden>/</span>
         <span className="text-cp-ink">Séjours</span>
       </nav>
+
+      {cancelled === "1" && (
+        <div
+          role="status"
+          className="mb-8 rounded-md border border-cp-paprika bg-cp-paprika-light/40 px-4 py-3 font-body text-sm text-cp-ink"
+        >
+          Séjour annulé. Votre demande a bien été retirée.
+        </div>
+      )}
 
       <header className="flex flex-wrap items-end justify-between gap-8">
         <div className="space-y-4">

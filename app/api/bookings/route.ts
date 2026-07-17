@@ -81,6 +81,13 @@ export function POST(req: NextRequest) {
         startDate: data.startDate,
         endDate: data.endDate,
         clientNotes: data.clientNotes ?? null,
+        interviewRequested: data.interviewRequested ?? false,
+        interviewChannel: data.interviewRequested
+          ? (data.interviewChannel ?? null)
+          : null,
+        interviewTopic: data.interviewRequested
+          ? (data.interviewTopic ?? null)
+          : null,
         cats: { create: cats.map((cat) => ({ catId: cat.id })) },
         ...(extraRows.length > 0 ? { extras: { create: extraRows } } : {}),
       },

@@ -164,6 +164,12 @@ enum ExtraUnit {
   FLAT
 }
 
+/// Canal souhaité pour un entretien préalable demandé par le client.
+enum InterviewChannel {
+  VIDEO // visioconférence
+  PHONE // téléphone
+}
+
 /// Demande de réservation d'un séjour pour un ou plusieurs chats.
 model Booking {
   id     String @id @default(cuid())
@@ -176,6 +182,19 @@ model Booking {
 
   clientNotes String? // notes du client à la demande
   adminNotes  String? // notes internes de l'admin
+
+  // Entretien souhaité par le client avant le séjour (visio ou tél), pour
+  // discuter d'un point précis. Visible côté admin ; peut déboucher sur un
+  // télé-rendez-vous (Appointment).
+  interviewRequested Boolean           @default(false)
+  interviewChannel   InterviewChannel?
+  interviewTopic     String?
+
+  // Édition en cours côté client (modification d'une demande en attente).
+  // Posé quand le client ouvre le formulaire d'édition, remis à null à
+  // l'enregistrement ou à l'abandon. L'admin affiche un avertissement tant que
+  // c'est récent (fenêtre de fraîcheur, pas un verrou dur).
+  editingStartedAt DateTime?
 
   // Tarification posée par l'admin au moment du devis (passage à ACCEPTED).
   // Reste null tant que la demande est PENDING / QUESTION_ASKED.

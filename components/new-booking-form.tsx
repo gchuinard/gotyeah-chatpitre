@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { Cat, ExtraUnit } from "@prisma/client";
 
+import { CatIllustration, pickCatIllustration } from "@/components/cat-illustration";
 import { DateRangePicker } from "@/components/date-range-picker";
 import { Field } from "@/components/field";
 import { RuleDivider } from "@/components/rule-divider";
@@ -43,6 +44,11 @@ export function NewBookingForm({
   // Demandes personnalisées (texte libre), gérées en état pour l'ajout /
   // suppression dynamique de lignes.
   const [customExtras, setCustomExtras] = useState<string[]>([]);
+  // Entretien préalable souhaité (visio / tél) — voir étape « Note ».
+  const [wantsInterview, setWantsInterview] = useState(false);
+  const [interviewChannel, setInterviewChannel] = useState<"VIDEO" | "PHONE">(
+    "VIDEO",
+  );
 
   function addCustomExtra() {
     setCustomExtras((prev) => [...prev, ""]);
@@ -68,6 +74,7 @@ export function NewBookingForm({
     const cleanCustomExtras = customExtras
       .map((v) => v.trim())
       .filter((v) => v.length > 0);
+    const interviewTopic = String(fd.get("interviewTopic") ?? "").trim();
 
     if (!startDate || !endDate) {
       setError("Sélectionnez une plage de dates dans le calendrier.");
@@ -89,6 +96,10 @@ export function NewBookingForm({
           clientNotes: clientNotes || undefined,
           extraPresetIds: extraPresetIds.length ? extraPresetIds : undefined,
           customExtras: cleanCustomExtras.length ? cleanCustomExtras : undefined,
+          interviewRequested: wantsInterview || undefined,
+          interviewChannel: wantsInterview ? interviewChannel : undefined,
+          interviewTopic:
+            wantsInterview && interviewTopic ? interviewTopic : undefined,
         }),
       });
       if (!res.ok) {
@@ -248,14 +259,93 @@ export function NewBookingForm({
             placeholder="Salami n'aime pas être déposé tôt le matin. Maestro vient d'avoir son rappel de typhus."
           />
         </Field>
+
+        <div className="space-y-4 rounded-md border border-cp-ink/40 bg-cp-paper-deep/40 p-5">
+          <label className="flex cursor-pointer items-start gap-3">
+            <input
+              type="checkbox"
+              checked={wantsInterview}
+              onChange={(e) => setWantsInterview(e.target.checked)}
+              className="peer sr-only"
+            />
+            <span
+              aria-hidden
+              className="mt-0.5 grid size-5 shrink-0 place-items-center border border-cp-ink bg-cp-paper text-cp-paper transition-colors peer-checked:bg-cp-ink"
+            >
+              <svg
+                viewBox="0 0 16 16"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="square"
+                strokeLinejoin="miter"
+                className="size-3.5"
+                aria-hidden
+              >
+                <path d="M3 8 L7 12 L13 4" />
+              </svg>
+            </span>
+            <span className="flex flex-col gap-1">
+              <span className="font-body text-base text-cp-ink">
+                Je souhaite un entretien avant le séjour
+              </span>
+              <span className="font-body text-sm text-cp-ink-soft">
+                Pour discuter d&apos;un point précis sur votre chat. Nous vous
+                recontactons pour caler le créneau.
+              </span>
+            </span>
+          </label>
+
+          {wantsInterview && (
+            <div className="space-y-4 border-t border-cp-ink/20 pt-4">
+              <div className="flex flex-col gap-2">
+                <span className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.18em] text-cp-ink-soft">
+                  Format
+                </span>
+                <div className="flex gap-2">
+                  {([["VIDEO", "Visio"], ["PHONE", "Téléphone"]] as const).map(
+                    ([value, label]) => (
+                      <button
+                        key={value}
+                        type="button"
+                        onClick={() => setInterviewChannel(value)}
+                        aria-pressed={interviewChannel === value}
+                        className={cn(
+                          "rounded-md border px-4 py-2 font-body text-sm transition-colors",
+                          interviewChannel === value
+                            ? "border-cp-cobalt bg-cp-cobalt text-cp-paper"
+                            : "border-cp-ink/40 bg-cp-paper text-cp-ink hover:bg-cp-paper-deep",
+                        )}
+                      >
+                        {label}
+                      </button>
+                    ),
+                  )}
+                </div>
+              </div>
+              <Field
+                label="Sujet à aborder (facultatif)"
+                htmlFor="interview-topic"
+              >
+                <Textarea
+                  id="interview-topic"
+                  name="interviewTopic"
+                  rows={2}
+                  placeholder="Ex. gestion de son traitement, anxiété en transport…"
+                />
+              </Field>
+            </div>
+          )}
+        </div>
       </FormSection>
 
       <RuleDivider />
 
       <footer className="flex flex-wrap items-center justify-between gap-4">
         <p className="font-body text-sm text-cp-ink-soft">
-          La maison confirme l&apos;acceptation et l&apos;acompte par retour
-          de fiche, sous 48h.
+          Nous confirmons l&apos;acceptation et l&apos;acompte par retour de
+          fiche, sous 48h. Si votre séjour nécessite des modalités
+          particulières, nous revenons vers vous pour les définir.
         </p>
         <div className="flex items-center gap-3">
           {error && (
@@ -308,6 +398,7 @@ function CatPickRow({
   reference: string;
   detail: string;
 }) {
+  const picked = pickCatIllustration(name);
   return (
     <li>
       <label
@@ -341,6 +432,17 @@ function CatPickRow({
           >
             <path d="M3 8 L7 12 L13 4" />
           </svg>
+        </span>
+
+        <span
+          aria-hidden
+          className="hidden size-14 shrink-0 overflow-hidden rounded-sm border border-cp-ink/40 sm:block"
+        >
+          <CatIllustration
+            variant={picked.variant}
+            pose={picked.pose}
+            className="size-full"
+          />
         </span>
 
         <span className="flex flex-col gap-1">
