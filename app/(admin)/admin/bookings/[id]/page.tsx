@@ -54,9 +54,13 @@ export default async function AdminBookingDetailPage({
   const ref = displayRef(booking.id);
   const awaitingQuote = ["PENDING", "QUESTION_ASKED"].includes(booking.status);
   const hasQuote = booking.totalAmount !== null;
-  // Séjour annulé : plus aucune action admin possible. On grise et neutralise
-  // les contrôles encore présents (avis pensionnaires, télé-rendez-vous).
+  // Séjour clôturé (annulé ou terminé) : la fiche passe en lecture seule. On
+  // grise et neutralise les contrôles admin, et le fil d'échanges ne permet
+  // plus d'écrire. Seule exception, l'encaissement d'un séjour TERMINÉ reste
+  // modifiable : le solde peut être réglé après le départ des chats, et rien
+  // dans l'interface ne permettrait de rouvrir le séjour pour le saisir.
   const isCancelled = booking.status === "CANCELLED";
+  const isClosed = isCancelled || booking.status === "COMPLETED";
   // Le carnet de séjour n'a de sens qu'une fois le séjour validé : masqué tant
   // que la demande n'est pas acceptée (ou terminée).
   const showJournal = ["ACCEPTED", "COMPLETED"].includes(booking.status);
@@ -102,6 +106,15 @@ export default async function AdminBookingDetailPage({
         <span className="text-cp-ink">N°{ref}</span>
       </nav>
 
+      {/* Retour direct en haut de page : le fil d'Ariane seul est trop discret
+          quand la fiche est longue. */}
+      <Link
+        href="/admin/bookings"
+        className={buttonVariants({ variant: "outline", className: "mb-6" })}
+      >
+        ← Retour à la liste des séjours
+      </Link>
+
       <header className="space-y-6">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <LibraryStamp boxed>
@@ -142,14 +155,15 @@ export default async function AdminBookingDetailPage({
         </aside>
       )}
 
-      {isCancelled && (
+      {isClosed && (
         <aside className="mt-6 rounded-md border border-cp-ink/30 bg-cp-paper-deep px-4 py-3">
           <p className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.18em] text-cp-ink-soft">
-            Séjour annulé
+            {isCancelled ? "Séjour annulé" : "Séjour terminé"}
           </p>
           <p className="mt-1 font-body text-sm text-cp-ink-soft">
-            Cette demande a été annulée par le client. Aucune action n&apos;est
-            plus possible sur ce séjour.
+            {isCancelled
+              ? "Cette demande a été annulée par le client. La fiche est en lecture seule, aucune action n'est plus possible."
+              : "Ce séjour est terminé. La fiche est en lecture seule, seul l'encaissement reste modifiable."}
           </p>
         </aside>
       )}
@@ -241,7 +255,7 @@ export default async function AdminBookingDetailPage({
                 <Criterion ok={link.cat.vaccinesUpToDate} label="Vaccins" />
                 <Criterion ok={link.cat.isSociable} label="Sociable" />
               </ul>
-              <ActionGate disabled={isCancelled}>
+              <ActionGate disabled={isClosed}>
                 <CatReviewControl
                   bookingId={booking.id}
                   catId={link.cat.id}
@@ -307,11 +321,15 @@ export default async function AdminBookingDetailPage({
           <p className="mb-3 mt-1 font-body text-sm text-cp-ink-soft">
             Ce qui a réellement été payé pour ce séjour (distinct du total facturé).
           </p>
-          <BookingPaymentControl
-            bookingId={booking.id}
-            total={Number(booking.totalAmount)}
-            initialPaid={booking.paidAmount === null ? null : Number(booking.paidAmount)}
-          />
+          {/* Verrouillé sur un séjour annulé seulement : sur un séjour terminé,
+              le solde peut encore être encaissé après le départ des chats. */}
+          <ActionGate disabled={isCancelled}>
+            <BookingPaymentControl
+              bookingId={booking.id}
+              total={Number(booking.totalAmount)}
+              initialPaid={booking.paidAmount === null ? null : Number(booking.paidAmount)}
+            />
+          </ActionGate>
         </section>
       )}
 
@@ -367,14 +385,14 @@ export default async function AdminBookingDetailPage({
               tone="cobalt"
             />
 
-            <StayJournal bookingId={booking.id} cats={cats} canAdd />
+            <StayJournal bookingId={booking.id} cats={cats} canAdd={!isClosed} />
           </section>
         </>
       )}
 
       {/* Télé-rendez-vous */}
       <RuleDivider className="my-16" label="Télé-rendez-vous" tone="feuille" />
-      <ActionGate disabled={isCancelled}>
+      <ActionGate disabled={isClosed}>
         <RdvScheduler
           bookingId={booking.id}
           appointments={appointments.map((a) => ({
@@ -403,6 +421,7 @@ export default async function AdminBookingDetailPage({
           initialMessages={messages}
           voice="admin"
           canRespond={awaitingQuote}
+          readOnly={isClosed}
         />
       </section>
 
@@ -411,7 +430,7 @@ export default async function AdminBookingDetailPage({
       <footer>
         <Link
           href="/admin/bookings"
-          className={buttonVariants({ variant: "ghost", size: "sm" })}
+          className={buttonVariants({ variant: "outline" })}
         >
           ← Retour à la liste des séjours
         </Link>

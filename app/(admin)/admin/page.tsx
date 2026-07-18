@@ -151,35 +151,35 @@ export default async function AdminDashboardPage() {
               const cats = b.cats.map((link) => link.cat);
               const nights = nightsBetween(b.startDate, b.endDate);
               return (
-                <li
-                  key={b.id}
-                  className="grid gap-3 border-b border-cp-ink/30 py-5 sm:grid-cols-[6rem_2fr_2fr_auto_auto] sm:items-center sm:gap-5"
-                >
-                  <p className="font-mono text-sm font-bold uppercase tracking-[0.18em] text-cp-paprika">
-                    N°{displayRef(b.id)}
-                  </p>
-                  <div className="space-y-0.5">
-                    <p className="font-display text-lg italic leading-tight text-cp-ink">
-                      {formatDate(b.startDate)} → {formatDate(b.endDate)}
-                    </p>
-                    <p className="font-body text-xs text-cp-ink-soft">
-                      {nights} nuit{nights > 1 ? "s" : ""} · {cats.map((c) => c.name).join(" · ")}
-                    </p>
-                  </div>
-                  <div className="space-y-0.5">
-                    <p className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.18em] text-cp-ink">
-                      {b.user.firstName} {b.user.lastName}
-                    </p>
-                    <p className="font-body text-xs text-cp-ink-soft">
-                      {b.user.email}
-                    </p>
-                  </div>
-                  <BookingStatusBadge status={b.status} />
+                <li key={b.id} className="border-b border-cp-ink/30">
+                  {/* Ligne entièrement cliquable. On garde un vrai lien plutôt
+                      qu'un gestionnaire de clic : le clavier, le ctrl-clic et le
+                      clic milieu marchent, et la page reste un composant
+                      serveur. */}
                   <Link
                     href={`/admin/bookings/${b.id}`}
-                    className={buttonVariants({ variant: "secondary", size: "sm" })}
+                    className="grid gap-3 py-5 transition-colors hover:bg-cp-paper-deep/40 sm:grid-cols-[6rem_2fr_2fr_auto] sm:items-center sm:gap-5"
                   >
-                    Ouvrir →
+                    <p className="font-mono text-sm font-bold uppercase tracking-[0.18em] text-cp-paprika">
+                      N°{displayRef(b.id)}
+                    </p>
+                    <div className="space-y-0.5">
+                      <p className="font-display text-lg italic leading-tight text-cp-ink">
+                        {formatDate(b.startDate)} → {formatDate(b.endDate)}
+                      </p>
+                      <p className="font-body text-xs text-cp-ink-soft">
+                        {nights} nuit{nights > 1 ? "s" : ""} · {cats.map((c) => c.name).join(" · ")}
+                      </p>
+                    </div>
+                    <div className="space-y-0.5">
+                      <p className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.18em] text-cp-ink">
+                        {b.user.firstName} {b.user.lastName}
+                      </p>
+                      <p className="font-body text-xs text-cp-ink-soft">
+                        {b.user.email}
+                      </p>
+                    </div>
+                    <BookingStatusBadge status={b.status} />
                   </Link>
                 </li>
               );

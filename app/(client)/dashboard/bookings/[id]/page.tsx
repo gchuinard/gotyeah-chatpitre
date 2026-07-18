@@ -56,6 +56,10 @@ export default async function BookingDetailPage({
   // Le carnet de séjour n'a de sens qu'une fois le séjour validé : on le
   // cache tant que la demande n'est pas acceptée (ou terminée).
   const showJournal = ["ACCEPTED", "COMPLETED"].includes(booking.status);
+  // Séjour clôturé : le fil passe en lecture seule, comme côté admin, pour ne
+  // pas laisser le client écrire à une pension qui ne peut plus lui répondre.
+  // « Refusé » en est exclu : l'échange continue après un refus.
+  const isClosed = ["CANCELLED", "COMPLETED"].includes(booking.status);
 
   // Mappe les messages Prisma vers le format attendu par ConversationView.
   const messages = booking.messages.map((m) => ({
@@ -385,6 +389,7 @@ export default async function BookingDetailPage({
           bookingId={booking.id}
           initialMessages={messages}
           voice="client"
+          readOnly={isClosed}
         />
       </section>
 
