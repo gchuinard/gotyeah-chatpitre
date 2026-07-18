@@ -2,7 +2,14 @@ import type { NextRequest } from "next/server";
 import { Prisma } from "@prisma/client";
 
 import { prisma } from "@/lib/db";
-import { handle, HttpError, json, parseJson, requireAdmin } from "@/lib/api";
+import {
+  assertBookingWritable,
+  handle,
+  HttpError,
+  json,
+  parseJson,
+  requireAdmin,
+} from "@/lib/api";
 import { catReviewSchema } from "@/lib/validations";
 import { createNotification } from "@/lib/notifications";
 import { CAT_REVIEW_LABEL } from "@/lib/cat-review";
@@ -16,6 +23,14 @@ export function PATCH(req: NextRequest, { params }: RouteContext) {
   return handle(async () => {
     await requireAdmin();
     const { id, catId } = await params;
+
+    const booking = await prisma.booking.findUnique({
+      where: { id },
+      select: { status: true },
+    });
+    if (!booking) throw new HttpError(404, "Séjour introuvable.");
+    assertBookingWritable(booking.status);
+
     const data = await parseJson(req, catReviewSchema);
 
     try {

@@ -90,9 +90,19 @@ export function PATCH(req: NextRequest, { params }: RouteContext) {
         "Cette réservation ne peut plus être annulée à ce stade.",
       );
     }
-    const updated = await prisma.booking.update({
-      where: { id: booking.id },
-      data: { status: "CANCELLED", editingStartedAt: null },
+    // Annuler un séjour annule les télé-rendez-vous qui lui sont liés : sans
+    // ça le créneau resterait « planifié », le client pourrait rejoindre un
+    // appel que la pension ne peut plus rejoindre depuis sa fiche verrouillée,
+    // et rien dans l'interface ne permet de solder un créneau devenu caduc.
+    const updated = await prisma.$transaction(async (tx) => {
+      await tx.appointment.updateMany({
+        where: { bookingId: booking.id, status: "SCHEDULED" },
+        data: { status: "CANCELLED" },
+      });
+      return tx.booking.update({
+        where: { id: booking.id },
+        data: { status: "CANCELLED", editingStartedAt: null },
+      });
     });
 
     // Préviens l'admin pour qu'il ne traite plus la demande.

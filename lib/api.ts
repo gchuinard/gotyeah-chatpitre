@@ -28,6 +28,26 @@ export class HttpError extends Error {
   }
 }
 
+/// Statuts pour lesquels un séjour est clôturé : la fiche passe en lecture
+/// seule et n'accepte plus d'écriture éditoriale (fil, avis pensionnaires,
+/// carnet, télé-rendez-vous). « Refusé » n'en fait volontairement PAS partie :
+/// après un refus l'échange continue, c'est ce que promet la confirmation de
+/// refus affichée à l'utilisateur.
+export const CLOSED_BOOKING_STATUSES = ["CANCELLED", "COMPLETED"] as const;
+
+export function isBookingClosed(status: string): boolean {
+  return (CLOSED_BOOKING_STATUSES as readonly string[]).includes(status);
+}
+
+/// Lève un 409 si le séjour est clôturé. À appeler dans TOUTE route qui écrit
+/// sur un séjour : le verrou d'interface est rendu au moment du rendu serveur,
+/// donc périmé dès qu'un onglet reste ouvert pendant que le statut change.
+export function assertBookingWritable(status: string): void {
+  if (isBookingClosed(status)) {
+    throw new HttpError(409, "Ce séjour est clôturé, il est en lecture seule.");
+  }
+}
+
 /// Renvoie l'utilisateur courant, ou lève une HttpError 401.
 export async function requireUser(): Promise<User> {
   const user = await getCurrentUser();

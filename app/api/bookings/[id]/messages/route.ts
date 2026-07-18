@@ -1,6 +1,13 @@
 import type { NextRequest } from "next/server";
 import { prisma } from "@/lib/db";
-import { handle, HttpError, json, parseJson, requireUser } from "@/lib/api";
+import {
+  assertBookingWritable,
+  handle,
+  HttpError,
+  json,
+  parseJson,
+  requireUser,
+} from "@/lib/api";
 import { isAdmin } from "@/lib/auth";
 import { bookingMessageSchema } from "@/lib/validations";
 import { createNotification, notifyAdmins } from "@/lib/notifications";
@@ -23,16 +30,7 @@ export function POST(req: NextRequest, { params }: RouteContext) {
       throw new HttpError(404, "Réservation introuvable.");
     }
 
-    // Séjour clôturé : le fil est en lecture seule des deux côtés. Le verrou
-    // vit ici et pas seulement dans l'interface, sinon il ne tient pas.
-    // « Refusé » n'en fait volontairement PAS partie : la demande est tranchée
-    // mais l'échange continue, c'est ce qu'annonce la confirmation de refus.
-    if (booking.status === "CANCELLED" || booking.status === "COMPLETED") {
-      throw new HttpError(
-        409,
-        "Ce séjour est clôturé, le fil est en lecture seule.",
-      );
-    }
+    assertBookingWritable(booking.status);
 
     const { content } = await parseJson(req, bookingMessageSchema);
 
