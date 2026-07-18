@@ -70,8 +70,7 @@ export default async function AdminClientDetailPage({
       <Link
         href="/admin/clients"
         className={buttonVariants({
-          variant: "ghost",
-          size: "sm",
+          variant: "outline",
           className: "mb-6",
         })}
       >
@@ -243,7 +242,7 @@ export default async function AdminClientDetailPage({
       <footer>
         <Link
           href="/admin/clients"
-          className={buttonVariants({ variant: "ghost", size: "sm" })}
+          className={buttonVariants({ variant: "outline" })}
         >
           ← Retour aux clients
         </Link>

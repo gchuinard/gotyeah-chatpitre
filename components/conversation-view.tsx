@@ -75,6 +75,7 @@ export function ConversationView({
   initialMessages,
   voice,
   canRespond = false,
+  readOnly = false,
 }: {
   bookingId: string;
   initialMessages: ConversationMessage[];
@@ -82,6 +83,9 @@ export function ConversationView({
   /** Admin uniquement, tant que la demande n'est pas tranchée : affiche les
    *  actions « Poser une question » (message + QUESTION_ASKED) et « Refuser ». */
   canRespond?: boolean;
+  /** Séjour clôturé (annulé ou terminé) : le fil reste lisible, mais on ne
+   *  peut plus y écrire. */
+  readOnly?: boolean;
 }) {
   const router = useRouter();
   const config = VOICE_CONFIG[voice];
@@ -170,17 +174,35 @@ export function ConversationView({
     });
   }
 
+  const thread = (
+    <MessageThread
+      messages={messages.map((m) => ({
+        id: m.id,
+        fromAdmin: m.fromAdmin,
+        authorLabel: m.authorLabel,
+        body: m.body,
+        sentAt: formatSentAt(m.sentAt),
+      }))}
+    />
+  );
+
+  // Séjour clôturé : on retire la zone de saisie plutôt que de la griser.
+  // L'historique reste pleinement lisible, c'est tout l'intérêt d'une fiche
+  // en lecture seule.
+  if (readOnly) {
+    return (
+      <div className="space-y-6">
+        {thread}
+        <p className="rounded-md border border-cp-ink/30 bg-cp-paper-deep px-4 py-3 font-mono text-[0.65rem] font-bold uppercase tracking-[0.18em] text-cp-ink-soft">
+          Séjour clôturé, le fil est en lecture seule.
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
-      <MessageThread
-        messages={messages.map((m) => ({
-          id: m.id,
-          fromAdmin: m.fromAdmin,
-          authorLabel: m.authorLabel,
-          body: m.body,
-          sentAt: formatSentAt(m.sentAt),
-        }))}
-      />
+      {thread}
 
       <form
         onSubmit={onSubmit}
