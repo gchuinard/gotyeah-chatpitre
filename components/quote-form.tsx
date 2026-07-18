@@ -126,11 +126,30 @@ export function QuoteForm({
 
   const extras = useMemo(() => Math.max(0, catsCount - 1), [catsCount]);
 
+  /// Lignes qui partiront réellement au serveur : l'envoi écarte celles dont le
+  /// libellé est vide. Le total affiché se calcule sur exactement cette liste,
+  /// sinon l'écran et la confirmation annoncent un montant que
+  /// l'enregistrement ne produira pas.
+  const billableLines = useMemo(
+    () => lines.filter((l) => l.label.trim().length > 0),
+    [lines],
+  );
+
+  /// Lignes chiffrées mais sans libellé. Plutôt que de les escamoter à l'envoi,
+  /// on bloque et on demande à l'admin de trancher.
+  const unlabelledLines = useMemo(
+    () =>
+      lines.filter(
+        (l) => l.label.trim().length === 0 && (Number(l.unitAmount) || 0) > 0,
+      ),
+    [lines],
+  );
+
   const { total, deposit, perNight, extrasTotal } = useMemo(() => {
     const first = Number(pricePerFirstCat) || 0;
     const extra = Number(pricePerExtraCat) || 0;
     const perNightCalc = first + extras * extra;
-    const extrasSum = lines.reduce(
+    const extrasSum = billableLines.reduce(
       (sum, l) =>
         sum +
         (extraLineTotalNumber(
@@ -150,7 +169,14 @@ export function QuoteForm({
       total: totalCalc,
       deposit: depositCalc,
     };
-  }, [pricePerFirstCat, pricePerExtraCat, depositPercentage, nights, extras, lines]);
+  }, [
+    pricePerFirstCat,
+    pricePerExtraCat,
+    depositPercentage,
+    nights,
+    extras,
+    billableLines,
+  ]);
 
   function addLine(): void {
     setLines((prev) => [
@@ -209,17 +235,39 @@ export function QuoteForm({
     setLines((prev) => prev.map((l) => (l.key === key ? { ...l, quantity } : l)));
   }
 
-  function submit(opts: { withAccept: boolean }): void {
+  /// Message bloquant s'il y en a un, sinon `null`. Partagé par l'envoi direct
+  /// et par l'ouverture de la confirmation, pour que la popup n'annonce jamais
+  /// un montant qu'on refusera ensuite d'enregistrer.
+  function blockingIssue(): string | null {
+    if (unlabelledLines.length > 0) {
+      return "Un supplément porte un montant sans libellé. Choisissez un supplément dans la liste, précisez-le, ou retirez la ligne.";
+    }
+    return null;
+  }
+
+  function askConfirm(): void {
+    const issue = blockingIssue();
+    if (issue) {
+      setError(issue);
+      return;
+    }
     setError(null);
-    // Filtre les lignes vides (label vide après trim → on les ignore).
-    const cleanExtras = lines
-      .map((l) => ({
-        label: l.label.trim(),
-        unit: l.unit,
-        unitAmount: Number(l.unitAmount) || 0,
-        quantity: Math.max(1, Math.round(Number(l.quantity) || 1)),
-      }))
-      .filter((e) => e.label.length > 0);
+    setConfirmOpen(true);
+  }
+
+  function submit(opts: { withAccept: boolean }): void {
+    const issue = blockingIssue();
+    if (issue) {
+      setError(issue);
+      return;
+    }
+    setError(null);
+    const cleanExtras = billableLines.map((l) => ({
+      label: l.label.trim(),
+      unit: l.unit,
+      unitAmount: Number(l.unitAmount) || 0,
+      quantity: Math.max(1, Math.round(Number(l.quantity) || 1)),
+    }));
 
     startTransition(async () => {
       const res = await fetch(`/api/admin/bookings/${bookingId}`, {
@@ -366,7 +414,7 @@ export function QuoteForm({
         <Button
           type="button"
           size="default"
-          onClick={() => setConfirmOpen(true)}
+          onClick={askConfirm}
           disabled={pending}
         >
           {pending ? "Envoi…" : "Envoyer le devis et accepter →"}

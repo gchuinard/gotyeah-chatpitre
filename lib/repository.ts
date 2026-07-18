@@ -322,7 +322,14 @@ export function getClientForAdmin(id: string) {
       cats: { orderBy: { name: "asc" } },
       bookings: {
         orderBy: { startDate: "desc" },
-        include: { cats: { include: { cat: { select: { id: true, name: true } } } } },
+        include: {
+          // Même ordre stable que `BOOKING_INCLUDE`, sinon la fiche client
+          // affiche les pensionnaires dans un ordre qui saute.
+          cats: {
+            include: { cat: { select: { id: true, name: true } } },
+            orderBy: { cat: { name: "asc" } },
+          },
+        },
       },
     },
   });

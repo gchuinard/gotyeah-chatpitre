@@ -51,7 +51,9 @@ export default async function AdminDashboardPage() {
       where: { status: { in: ["PENDING", "QUESTION_ASKED"] } },
       orderBy: { startDate: "asc" },
       include: {
-        cats: { include: { cat: true } },
+        // Même ordre stable que `BOOKING_INCLUDE` : sans `orderBy`, Postgres
+        // renvoie l'ordre physique des lignes, qui change à chaque mise à jour.
+        cats: { include: { cat: true }, orderBy: { cat: { name: "asc" } } },
         user: true,
       },
     }),
