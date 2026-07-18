@@ -209,13 +209,19 @@ function CopyMailButton({ email }: { email: string }) {
       type="button"
       onClick={(e) => {
         e.stopPropagation();
-        void navigator.clipboard
-          .writeText(email)
-          .then(() => {
+        // `navigator.clipboard` n'existe pas hors contexte sécurisé (accès
+        // direct au Pi en HTTP, hors du proxy). Le déréférencer lèverait avant
+        // que la chaîne `.then().catch()` n'existe, donc le `catch` ne pouvait
+        // rien rattraper : il faut un vrai try/catch autour de l'accès.
+        void (async () => {
+          try {
+            await navigator.clipboard.writeText(email);
             setCopied(true);
             setTimeout(() => setCopied(false), 1800);
-          })
-          .catch(() => {});
+          } catch {
+            // Sans presse-papier, l'adresse reste sélectionnable juste à côté.
+          }
+        })();
       }}
       aria-label={copied ? "Adresse copiée" : `Copier ${email}`}
       title={copied ? "Copié" : "Copier le mail"}

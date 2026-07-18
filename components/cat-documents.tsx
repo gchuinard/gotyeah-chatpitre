@@ -50,18 +50,21 @@ export function CatDocuments({
     doc: CatDocumentItem;
     status: "ACCEPTED" | "REJECTED";
   } | null>(null);
-  const [pendingId, setPendingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [, startTransition] = useTransition();
+  // Verrou tenu par le drapeau de `useTransition`, pas par un état maison :
+  // `router.refresh()` s'exécute dans la même transition, donc `pending` ne
+  // retombe qu'une fois le rendu serveur revenu. Un verrou relâché dès la fin
+  // du `fetch` rouvrait les boutons pendant l'aller-retour, avec l'ancien
+  // statut encore affiché. Il vaut pour toute la liste : une mutation à la
+  // fois, donc pas de course entre deux documents.
+  const [pending, startTransition] = useTransition();
 
   function confirmDelete() {
     const doc = toDelete;
     if (!doc) return;
     setError(null);
-    setPendingId(doc.id);
     startTransition(async () => {
       const res = await fetch(`/api/documents/${doc.id}`, { method: "DELETE" });
-      setPendingId(null);
       if (!res.ok) {
         setError("Échec de la suppression.");
         return;
@@ -74,14 +77,12 @@ export function CatDocuments({
     const pendingReview = toReview;
     if (!pendingReview) return;
     setError(null);
-    setPendingId(pendingReview.doc.id);
     startTransition(async () => {
       const res = await fetch(`/api/documents/${pendingReview.doc.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ reviewStatus: pendingReview.status }),
       });
-      setPendingId(null);
       if (!res.ok) {
         setError("Échec de la mise à jour du statut.");
         return;
@@ -92,10 +93,8 @@ export function CatDocuments({
 
   function setAsPortrait(doc: CatDocumentItem) {
     setError(null);
-    setPendingId(doc.id);
     startTransition(async () => {
       const res = await fetch(`/api/documents/${doc.id}/portrait`, { method: "POST" });
-      setPendingId(null);
       if (!res.ok) {
         setError("Échec de la mise à jour du portrait.");
         return;
@@ -118,7 +117,6 @@ export function CatDocuments({
                 ? doc.customLabel
                 : DOCUMENT_TYPE_LABEL[doc.type];
             const isImage = isImageMime(doc.mimeType);
-            const busy = pendingId === doc.id;
             return (
               <li key={doc.id} className="flex flex-wrap items-center gap-4 bg-cp-paper p-4">
                 <a
@@ -178,7 +176,7 @@ export function CatDocuments({
                       aria-label="Définir comme portrait du chat"
                       title="Définir comme portrait"
                       onClick={() => setAsPortrait(doc)}
-                      disabled={busy}
+                      disabled={pending}
                     >
                       <Star />
                     </Button>
@@ -192,7 +190,7 @@ export function CatDocuments({
                         aria-label="Accepter le document"
                         title="Accepter"
                         onClick={() => setToReview({ doc, status: "ACCEPTED" })}
-                        disabled={busy || doc.reviewStatus === "ACCEPTED"}
+                        disabled={pending || doc.reviewStatus === "ACCEPTED"}
                       >
                         <Check />
                       </Button>
@@ -203,7 +201,7 @@ export function CatDocuments({
                         aria-label="Refuser le document"
                         title="Refuser"
                         onClick={() => setToReview({ doc, status: "REJECTED" })}
-                        disabled={busy || doc.reviewStatus === "REJECTED"}
+                        disabled={pending || doc.reviewStatus === "REJECTED"}
                       >
                         <X />
                       </Button>
@@ -215,7 +213,7 @@ export function CatDocuments({
                     size="icon"
                     aria-label="Supprimer le document"
                     onClick={() => setToDelete(doc)}
-                    disabled={busy}
+                    disabled={pending}
                   >
                     <Trash2 />
                   </Button>
