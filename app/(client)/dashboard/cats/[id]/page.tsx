@@ -49,6 +49,7 @@ export default async function CatDetailPage({
     sizeBytes: d.sizeBytes,
     uploadedByLabel: d.uploadedById === user.id ? "Vous" : "Nous",
     documentDate: d.documentDate ? d.documentDate.toISOString() : null,
+    reviewStatus: d.reviewStatus,
   }));
 
   const criteria = [

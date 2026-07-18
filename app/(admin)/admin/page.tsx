@@ -74,7 +74,7 @@ export default async function AdminDashboardPage() {
         <p className="max-w-2xl font-display text-xl italic leading-snug text-cp-ink-soft">
           {pendingDecisions.length} décision{pendingDecisions.length > 1 ? "s" : ""}{" "}
           en attente, {acceptedActiveCount} séjour{acceptedActiveCount > 1 ? "s" : ""}{" "}
-          confirmé{acceptedActiveCount > 1 ? "s" : ""}. Ãa tourne.
+          confirmé{acceptedActiveCount > 1 ? "s" : ""}. Ça tourne.
         </p>
       </header>
 
@@ -88,7 +88,7 @@ export default async function AdminDashboardPage() {
         <StatTile
           label="À traiter"
           value={pendingDecisions.length.toString().padStart(2, "0")}
-          gloss="Pending + Question posée"
+          gloss="En attente + Question posée"
           accent
         />
         <StatTile
@@ -124,9 +124,14 @@ export default async function AdminDashboardPage() {
             kicker="À traiter en priorité, délai cible 48 h."
             className="flex-1"
           />
+          {/* Bouton plein plutôt que discret : c'est le raccourci le plus
+              utilisé depuis le tableau de bord. */}
           <Link
             href="/admin/bookings"
-            className={buttonVariants({ variant: "outline", size: "sm" })}
+            className={buttonVariants({
+              size: "default",
+              className: "shrink-0 px-6",
+            })}
           >
             Voir tous les séjours →
           </Link>

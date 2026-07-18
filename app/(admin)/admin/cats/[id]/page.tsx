@@ -48,6 +48,7 @@ export default async function AdminCatDetailPage({
           ? cat.owner.firstName
           : "Nous",
     documentDate: d.documentDate ? d.documentDate.toISOString() : null,
+    reviewStatus: d.reviewStatus,
   }));
 
   return (
@@ -127,7 +128,7 @@ export default async function AdminCatDetailPage({
           kicker="Carnet de vaccination, identification, certificats… Partagés avec le client."
           tone="feuille"
         />
-        <CatDocuments catId={cat.id} documents={docItems} />
+        <CatDocuments catId={cat.id} documents={docItems} canReview />
       </section>
 
       <RuleDivider className="my-12" />

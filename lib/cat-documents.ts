@@ -1,4 +1,4 @@
-import type { DocumentType } from "@prisma/client";
+import type { DocumentReviewStatus, DocumentType } from "@prisma/client";
 
 // Domaine des documents de chat : libellés, options du sélecteur, types MIME
 // acceptés, taille max et devine-type. Module PUR (aucune dépendance Prisma ni
@@ -41,6 +41,21 @@ export const DOCUMENT_TYPE_OPTIONS = DOCUMENT_TYPE_ORDER.map((value) => ({
   value,
   label: DOCUMENT_TYPE_LABEL[value],
 }));
+
+/// Libellés FR du contrôle d'un document par la maison.
+export const DOCUMENT_REVIEW_LABEL: Record<DocumentReviewStatus, string> = {
+  PENDING: "À vérifier",
+  ACCEPTED: "Accepté",
+  REJECTED: "Refusé",
+};
+
+/// Classes Tailwind (badge) par statut de contrôle : neutre tant que ce n'est
+/// pas regardé, feuille quand c'est bon, paprika quand c'est refusé.
+export const DOCUMENT_REVIEW_BADGE: Record<DocumentReviewStatus, string> = {
+  PENDING: "border-cp-mute text-cp-mute bg-cp-paper",
+  ACCEPTED: "border-cp-feuille bg-cp-feuille text-cp-paper",
+  REJECTED: "border-cp-paprika bg-cp-paprika text-cp-paper",
+};
 
 /// Classes Tailwind (badge outline) par type — tons du DA (santé = cobalt,
 /// identité = feuille, administratif = paprika, autre = mute).

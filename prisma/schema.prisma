@@ -112,6 +112,14 @@ enum DocumentType {
   OTHER // autre (libellé libre)
 }
 
+/// Contrôle d'un document par la maison : tant qu'il n'a pas été regardé il
+/// reste en attente, ensuite il est accepté ou refusé (visible du client).
+enum DocumentReviewStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
 /// Document associé à un chat (carnet de vaccination, certificat de santé…).
 /// Le fichier est stocké sur disque sous un nom OPAQUE (storageKey) et n'est
 /// servi que par une route authentifiée — jamais d'URL publique. Le nom
@@ -133,6 +141,11 @@ model CatDocument {
   mimeType     String
   sizeBytes    Int
   documentDate DateTime? // date du document (ex. vaccination) ; sinon createdAt
+
+  // Contrôle par la maison. On garde seulement le statut et sa date : le duo
+  // est petit, savoir « qui » a validé n'apporte rien pour l'instant.
+  reviewStatus DocumentReviewStatus @default(PENDING)
+  reviewedAt   DateTime?
 
   createdAt DateTime @default(now())
 

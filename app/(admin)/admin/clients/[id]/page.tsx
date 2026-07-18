@@ -65,6 +65,19 @@ export default async function AdminClientDetailPage({
         </span>
       </nav>
 
+      {/* Retour direct en haut de page : le fil d'Ariane seul est trop discret
+          quand la fiche est longue. */}
+      <Link
+        href="/admin/clients"
+        className={buttonVariants({
+          variant: "ghost",
+          size: "sm",
+          className: "mb-6",
+        })}
+      >
+        ← Retour aux clients
+      </Link>
+
       <header className="space-y-4">
         <LibraryStamp boxed>Fiche N°{displayRef(client.id)}</LibraryStamp>
         <h1 className="font-display text-5xl font-medium leading-[0.95] tracking-[-0.01em] text-cp-ink break-words sm:text-6xl">

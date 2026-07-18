@@ -57,6 +57,22 @@ const STATUS_CONFIG: Record<BookingStatus, Config> = {
   },
 };
 
+/// Libellés français des statuts, réutilisables hors du badge (filtres,
+/// sélecteurs) pour ne jamais réécrire ces chaînes ailleurs.
+export const BOOKING_STATUS_LABEL = Object.fromEntries(
+  Object.entries(STATUS_CONFIG).map(([key, cfg]) => [key, cfg.label]),
+) as Record<BookingStatus, string>;
+
+/// Ordre de traitement : ce qui demande une décision d'abord, le passé ensuite.
+export const BOOKING_STATUS_ORDER: BookingStatus[] = [
+  "QUESTION_ASKED",
+  "PENDING",
+  "ACCEPTED",
+  "COMPLETED",
+  "CANCELLED",
+  "REJECTED",
+];
+
 export function BookingStatusBadge({
   status,
   className,

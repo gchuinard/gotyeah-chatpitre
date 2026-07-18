@@ -1,6 +1,8 @@
 import { NextResponse, type NextRequest } from "next/server";
 
-import { apiError, handle, HttpError, json, requireUser } from "@/lib/api";
+import { z } from "zod";
+
+import { apiError, handle, HttpError, json, parseJson, requireUser } from "@/lib/api";
 import { getCurrentUser, isAdmin } from "@/lib/auth";
 import { DOCUMENT_TYPE_LABEL, extensionForMime } from "@/lib/cat-documents";
 import { prisma } from "@/lib/db";
@@ -49,6 +51,40 @@ export async function GET(req: NextRequest, { params }: RouteContext) {
       "Content-Disposition": disposition,
       "Cache-Control": "private, no-store",
     },
+  });
+}
+
+// Contrôle du document par la maison. Repasser en PENDING efface la date de
+// contrôle, pour que « à vérifier » reste vrai.
+const reviewSchema = z.object({
+  reviewStatus: z.enum(["PENDING", "ACCEPTED", "REJECTED"]),
+});
+
+// PATCH — accepter / refuser un document. Réservé à l'administration : le
+// client voit le statut mais ne le décide pas.
+export function PATCH(req: NextRequest, { params }: RouteContext) {
+  return handle(async () => {
+    const user = await requireUser();
+    if (!isAdmin(user)) {
+      throw new HttpError(403, "Action réservée à l'administration.");
+    }
+    const { id } = await params;
+
+    const doc = await prisma.catDocument.findUnique({
+      where: { id },
+      select: { id: true },
+    });
+    if (!doc) throw new HttpError(404, "Document introuvable.");
+
+    const { reviewStatus } = await parseJson(req, reviewSchema);
+    const updated = await prisma.catDocument.update({
+      where: { id },
+      data: {
+        reviewStatus,
+        reviewedAt: reviewStatus === "PENDING" ? null : new Date(),
+      },
+    });
+    return json({ document: updated });
   });
 }
 
