@@ -81,7 +81,7 @@ export default async function DashboardPage() {
           <SectionHeading
             number="01"
             title="Prochain séjour"
-            kicker={`N°${displayRef(upcoming.id)} — ${formatDate(upcoming.startDate)} → ${formatDate(upcoming.endDate)}`}
+            kicker={`N°${displayRef(upcoming.id)}, ${formatDate(upcoming.startDate)} → ${formatDate(upcoming.endDate)}`}
           />
           <article className="rounded-md border border-cp-ink bg-cp-paper-deep">
             <div className="flex flex-wrap items-start justify-between gap-4 border-b border-cp-ink px-6 py-4 sm:px-8">
@@ -131,7 +131,7 @@ export default async function DashboardPage() {
                     En cours d&apos;évaluation
                   </p>
                   <p className="mt-1 font-mono text-[0.6rem] uppercase tracking-[0.18em] text-cp-ink-soft">
-                    Réponse de la maison sous 48 h
+                    Notre réponse sous 48 h
                   </p>
                 </DetailField>
               )}
@@ -215,7 +215,7 @@ export default async function DashboardPage() {
         {bookings.length === 0 ? (
           <EmptyState
             label="Aucun séjour à ce jour"
-            description="Réservez votre premier séjour quand vous serez prêt — la maison vous répondra sous 48h."
+            description="Réservez votre premier séjour quand vous serez prêt, nous vous répondrons sous 48h."
             ctaHref="/dashboard/bookings/new"
             ctaLabel="Réserver un séjour"
           />

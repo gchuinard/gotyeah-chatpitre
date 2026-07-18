@@ -14,7 +14,7 @@ export function SiteHeader() {
       <div className="mx-auto flex w-full max-w-6xl items-center gap-6 px-6 py-4 sm:gap-10 sm:px-10">
         <Link
           href="/"
-          aria-label="Le Chat-Pitre — accueil"
+          aria-label="Le Chat-Pitre, accueil"
           className="shrink-0 transition-colors hover:text-cp-paprika focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-cp-paprika"
         >
           <Wordmark className="text-xl sm:text-2xl" />
@@ -24,7 +24,18 @@ export function SiteHeader() {
           aria-label="Sections du site"
           className="ml-auto hidden items-center gap-6 lg:flex"
         >
-          {NAV_LINKS.map((l) => (
+          {NAV_ACTION.map((l) => (
+            <Link
+              key={l.href}
+              href={l.href}
+              className="font-body text-sm font-semibold text-cp-ink-soft transition-colors hover:text-cp-paprika"
+            >
+              {l.label}
+            </Link>
+          ))}
+          {/* Filet vertical : sépare le bloc « action » du duo de présentation. */}
+          <span aria-hidden className="h-4 w-px shrink-0 bg-cp-ink/25" />
+          {NAV_PRESENTATION.map((l) => (
             <Link
               key={l.href}
               href={l.href}
@@ -51,18 +62,27 @@ export function SiteHeader() {
           >
             Réserver →
           </Link>
-          <MobileNav links={NAV_LINKS} />
+          <MobileNav
+            actionLinks={NAV_ACTION}
+            presentationLinks={NAV_PRESENTATION}
+          />
         </div>
       </div>
     </header>
   );
 }
 
-const NAV_LINKS: { href: string; label: string }[] = [
-  { href: "/le-lieu", label: "Le lieu" },
-  { href: "/a-propos", label: "À propos" },
+/// Bloc « action » : ce pour quoi on vient (conditions, tarif, déroulement,
+/// questions). Vient en premier, puis le duo de présentation du lieu, les
+/// deux séparés par un filet.
+const NAV_ACTION: { href: string; label: string }[] = [
   { href: "/#admission", label: "Admission" },
   { href: "/#tarif", label: "Tarif" },
   { href: "/#deroulement", label: "Déroulement" },
   { href: "/#questions", label: "Questions" },
+];
+
+const NAV_PRESENTATION: { href: string; label: string }[] = [
+  { href: "/le-lieu", label: "Le lieu" },
+  { href: "/a-propos", label: "À propos" },
 ];

@@ -18,7 +18,7 @@ export function SiteFooter() {
             <CatIllustration
               variant="canari"
               pose="sitting"
-              ariaLabel="Pensionnaire de la maison"
+              ariaLabel="Notre pensionnaire"
               className="size-28 shrink-0 rounded-md border border-cp-ink"
             />
             <div className="flex-1 space-y-4">
@@ -27,7 +27,7 @@ export function SiteFooter() {
                 Maison de villégiature pour félins de bonne compagnie.
               </p>
               <address className="not-italic font-body text-sm leading-relaxed text-cp-ink">
-                N° 047 — rue de la Chartreuse
+                N° 047, rue de la Chartreuse
                 <br />
                 33000 Bordeaux
                 <br />
@@ -42,9 +42,9 @@ export function SiteFooter() {
           </div>
 
           <div className="grid gap-10 sm:grid-cols-2">
-            <FooterColumn title="La maison" tone="cobalt">
+            <FooterColumn title="Nous" tone="cobalt">
               <FooterLink href="/le-lieu">Le lieu</FooterLink>
-              <FooterLink href="/a-propos">À propos · l&apos;humain</FooterLink>
+              <FooterLink href="/a-propos">À propos · les humains</FooterLink>
               <FooterLink href="/#admission">Conditions d&apos;admission</FooterLink>
               <FooterLink href="/#tarif">Tarif des séjours</FooterLink>
               <FooterLink href="/#questions">Questions</FooterLink>
@@ -65,7 +65,7 @@ export function SiteFooter() {
         <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
           <LibraryStamp tone="cobalt">colophon · établissement permanent</LibraryStamp>
           <p className="font-mono text-[0.7rem] font-semibold uppercase tracking-[0.16em] text-cp-ink-soft">
-            © {year} — Le Chat-Pitre
+            © {year}, Le Chat-Pitre
           </p>
         </div>
       </div>

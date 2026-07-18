@@ -79,7 +79,7 @@ export default async function AdminBookingDetailPage({
     body: m.content,
     fromAdmin: m.isFromAdmin,
     authorLabel: m.isFromAdmin
-      ? "La maison"
+      ? "Nous"
       : `${m.author.firstName}`,
     sentAt: m.createdAt.toISOString(),
   }));
@@ -105,7 +105,7 @@ export default async function AdminBookingDetailPage({
       <header className="space-y-6">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <LibraryStamp boxed>
-            Séjour N°{ref} — {nights} nuit{nights > 1 ? "s" : ""}
+            Séjour N°{ref}, {nights} nuit{nights > 1 ? "s" : ""}
           </LibraryStamp>
           <BookingStatusBadge status={booking.status} />
         </div>
@@ -117,7 +117,7 @@ export default async function AdminBookingDetailPage({
         </h1>
 
         <p className="max-w-2xl font-display text-xl italic leading-snug text-cp-ink-soft">
-          {cats.map((c) => c.name).join(" · ")} — confiés par{" "}
+          {cats.map((c) => c.name).join(" · ")}, confiés par{" "}
           {client.firstName} {client.lastName}.
         </p>
       </header>
@@ -363,7 +363,7 @@ export default async function AdminBookingDetailPage({
             <SectionHeading
               number="02"
               title="Carnet de séjour"
-              kicker="Une note photo quotidienne — c'est ce que voit le client."
+              kicker="Une note photo quotidienne, c'est ce que voit le client."
               tone="cobalt"
             />
 

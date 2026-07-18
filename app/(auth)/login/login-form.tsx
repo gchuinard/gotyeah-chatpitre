@@ -52,7 +52,7 @@ export function LoginForm({ next }: { next: string }) {
         </h1>
         <p className="max-w-sm font-display text-xl italic leading-snug text-cp-ink-soft">
           Reprenez la main sur vos séjours en cours, vos fiches félines et
-          vos échanges avec la maison.
+          vos échanges avec nous.
         </p>
       </header>
 

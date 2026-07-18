@@ -4,7 +4,7 @@ import { LibraryStamp } from "@/components/library-stamp";
 import { RuleDivider } from "@/components/rule-divider";
 
 export const metadata: Metadata = {
-  title: "Mentions légales — Le Chat-Pitre",
+  title: "Mentions légales, Le Chat-Pitre",
   description: "Mentions légales du site Le Chat-Pitre.",
 };
 
@@ -17,7 +17,7 @@ export default function MentionsLegalesPage() {
     <article className="mx-auto w-full max-w-3xl px-6 py-20 sm:px-10 sm:py-28">
       <header className="space-y-6">
         <LibraryStamp boxed>
-          N° 003 — Mentions légales — En vigueur depuis 2024
+          N° 003, Mentions légales, En vigueur depuis 2024
         </LibraryStamp>
         <h1 className="font-display text-5xl font-medium leading-[0.95] tracking-[-0.01em] text-cp-ink sm:text-6xl lg:text-7xl">
           Mentions
@@ -26,7 +26,7 @@ export default function MentionsLegalesPage() {
         </h1>
         <p className="max-w-2xl font-display text-xl italic leading-snug text-cp-ink-soft sm:text-2xl">
           Les informations exigées par la loi française à propos du présent
-          site et de la maison qui le porte.
+          site et de nous qui le portons.
         </p>
       </header>
 
@@ -35,11 +35,11 @@ export default function MentionsLegalesPage() {
       <div className="space-y-14">
         <Article number="01" title="Éditeur du site">
           <p>
-            Le présent site internet est édité par la maison « Le Chat-Pitre »,
+            Le présent site internet est édité par « Le Chat-Pitre »,
             entreprise individuelle, dont le siège est sis :
           </p>
           <p className="font-mono text-sm not-italic uppercase tracking-[0.12em] text-cp-ink-soft">
-            N° 047 — rue de la Chartreuse — 33000 Bordeaux
+            N° 047, rue de la Chartreuse, 33000 Bordeaux
           </p>
           <p>
             Téléphone : <em>à compléter</em> · SIRET : <em>à compléter</em> ·
@@ -74,7 +74,7 @@ export default function MentionsLegalesPage() {
         <Article number="05" title="Données personnelles">
           <p>
             Les données collectées via les formulaires du site (compte,
-            réservation, fiches félines) sont traitées par la maison aux
+            réservation, fiches félines) sont traitées par nous aux
             seules fins de gestion des séjours. Elles ne sont jamais cédées à
             des tiers.
           </p>
@@ -110,7 +110,7 @@ export default function MentionsLegalesPage() {
       <RuleDivider className="mt-16" />
 
       <p className="mt-10 font-mono text-[0.65rem] font-bold uppercase tracking-[0.22em] text-cp-ink-soft">
-        fin du document — version provisoire à compléter
+        fin du document, version provisoire à compléter
       </p>
     </article>
   );

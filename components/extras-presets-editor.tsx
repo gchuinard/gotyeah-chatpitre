@@ -63,7 +63,7 @@ export function ExtrasPresetsEditor({ presets }: { presets: ExtraPresetItem[] })
       <ul className="overflow-hidden rounded-md border border-cp-ink">
         {presets.length === 0 ? (
           <li className="bg-cp-paper p-6 text-center font-body text-sm text-cp-ink-soft">
-            Aucun préset pour l&apos;instant — ajoutez-en un ci-dessous.
+            Aucun préset pour l&apos;instant, ajoutez-en un ci-dessous.
           </li>
         ) : (
           presets.map((preset, idx) => (

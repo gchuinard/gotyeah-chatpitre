@@ -36,7 +36,7 @@ export default async function ClientRdvPage({
       <header className="space-y-4">
         <LibraryStamp boxed>Télé-rendez-vous</LibraryStamp>
         <h1 className="font-display text-4xl font-medium leading-[0.95] tracking-[-0.01em] text-cp-ink sm:text-5xl">
-          {appointment.title ?? "Appel vidéo avec la maison"}
+          {appointment.title ?? "Appel vidéo avec nous"}
         </h1>
         <p className="font-display text-xl italic leading-snug text-cp-ink-soft">
           Prévu le {formatDateTime(appointment.scheduledAt)} · {appointment.durationMin} min
@@ -52,7 +52,7 @@ export default async function ClientRdvPage({
           appointmentId={appointment.id}
           selfRole="client"
           selfName={user.firstName}
-          peerName="La maison"
+          peerName="Le Chat-Pitre"
           backHref={backHref}
         />
       </div>

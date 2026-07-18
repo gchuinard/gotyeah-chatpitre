@@ -107,7 +107,7 @@ export function NewStayUpdateForm({
       </Field>
 
       <p className="font-body text-xs italic text-cp-paper/70">
-        Photo réelle à venir — pour l&apos;instant le carnet pioche une
+        Photo réelle à venir, pour l&apos;instant le carnet pioche une
         illustration de chat au hasard.
       </p>
 

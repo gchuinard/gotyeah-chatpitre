@@ -24,12 +24,12 @@ import { Wordmark } from "@/components/wordmark";
 /// Page de référence du design system. Publique, hors `(public)` (donc sans
 /// chrome partagé).
 export const metadata: Metadata = {
-  title: "Styleguide — Le Chat-Pitre",
+  title: "Styleguide · Le Chat-Pitre",
   description: "Langage visuel du site : palette, typographies, composants.",
 };
 
 const PALETTE: { name: string; hex: string; usage: string }[] = [
-  { name: "cp-paper", hex: "#FFF4D9", usage: "Fond unique — crème chaud" },
+  { name: "cp-paper", hex: "#FFF4D9", usage: "Fond unique, crème chaud" },
   { name: "cp-paper-deep", hex: "#F7E7BA", usage: "Crème profond, sections alternées" },
   { name: "cp-ink", hex: "#0A0A0A", usage: "Texte principal" },
   { name: "cp-ink-soft", hex: "#2F2A26", usage: "Texte secondaire chaud" },
@@ -37,10 +37,10 @@ const PALETTE: { name: string; hex: string; usage: string }[] = [
 ];
 
 const ACCENTS: { name: string; hex: string; usage: string }[] = [
-  { name: "cp-cobalt", hex: "#1A4B8E", usage: "Primaire institutionnel — comptes, liens" },
-  { name: "cp-paprika", hex: "#C9532E", usage: "Accent festif — CTA, alerte, focus" },
-  { name: "cp-canari", hex: "#F4C20D", usage: "Soleil — highlights, joie pure" },
-  { name: "cp-feuille", hex: "#2E7D3D", usage: "Vert vif — statuts positifs" },
+  { name: "cp-cobalt", hex: "#1A4B8E", usage: "Primaire institutionnel : comptes, liens" },
+  { name: "cp-paprika", hex: "#C9532E", usage: "Accent festif : CTA, alerte, focus" },
+  { name: "cp-canari", hex: "#F4C20D", usage: "Soleil : highlights, joie pure" },
+  { name: "cp-feuille", hex: "#2E7D3D", usage: "Vert vif, statuts positifs" },
 ];
 
 const STATUSES: BookingStatus[] = [
@@ -73,7 +73,7 @@ export default function StyleguidePage() {
       <header className="space-y-10">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <LibraryStamp boxed>
-            Design system — Édition 2026
+            Design system, Édition 2026
           </LibraryStamp>
           <LibraryStamp tone="cobalt">Représentation permanente</LibraryStamp>
         </div>
@@ -87,7 +87,7 @@ export default function StyleguidePage() {
           className="cp-reveal max-w-2xl font-display text-2xl italic leading-snug text-cp-ink-soft sm:text-3xl"
           style={{ "--cp-delay": "120ms" } as React.CSSProperties}
         >
-          Langage visuel — mid-century illustré. Chats géométriques flat color
+          Langage visuel, mid-century illustré. Chats géométriques flat color
           à la Charley Harper sur palette saturée jewel-tone. Newsreader
           (serif chaud) + Manrope (body) + JetBrains Mono.
         </p>
@@ -105,7 +105,7 @@ export default function StyleguidePage() {
 
         <div className="space-y-5">
           <p className="font-mono text-[0.7rem] font-semibold uppercase tracking-[0.16em] text-cp-cobalt">
-            structurelles — partout
+            structurelles, partout
           </p>
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
             {PALETTE.map((c) => (
@@ -116,7 +116,7 @@ export default function StyleguidePage() {
 
         <div className="space-y-5">
           <p className="font-mono text-[0.7rem] font-semibold uppercase tracking-[0.16em] text-cp-paprika">
-            accents jewel-tone — les couleurs qui font la joie
+            accents jewel-tone, les couleurs qui font la joie
           </p>
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
             {ACCENTS.map((c) => (
@@ -150,7 +150,7 @@ export default function StyleguidePage() {
         />
 
         <FontSample
-          label="Display — Newsreader"
+          label="Display, Newsreader"
           variable="font-display"
           weight="variable + italique"
           usage="Hero, titres de section, noms de pensionnaires italiques."
@@ -167,7 +167,7 @@ export default function StyleguidePage() {
         />
 
         <FontSample
-          label="Body — Manrope"
+          label="Body, Manrope"
           variable="font-body"
           weight="variable"
           usage="Corps de texte, navigation, formulaires, étiquettes."
@@ -181,13 +181,13 @@ export default function StyleguidePage() {
         />
 
         <FontSample
-          label="Mono — JetBrains Mono"
+          label="Mono, JetBrains Mono"
           variable="font-mono"
           weight="400 / 700 + italique"
           usage="Mentions catalogue, numéros, métadonnées."
           sample={
             <p className="font-mono text-sm font-semibold uppercase tracking-[0.16em] text-cp-cobalt">
-              N° 047 — Rue de la Chartreuse — Bordeaux — Est. 2024
+              N° 047, Rue de la Chartreuse, Bordeaux, Est. 2024
             </p>
           }
         />
@@ -230,13 +230,13 @@ export default function StyleguidePage() {
         <SectionHeading
           number="04"
           title="Chats géométriques"
-          kicker="Quatre palettes × quatre poses, dérivées du nom du chat — chaque pensionnaire reçoit une combinaison stable."
+          kicker="Quatre palettes × quatre poses, dérivées du nom du chat : chaque pensionnaire reçoit une combinaison stable."
           tone="canari"
         />
 
         <div className="space-y-6">
           <p className="font-mono text-[0.7rem] font-semibold uppercase tracking-[0.16em] text-cp-paprika">
-            quatre palettes — pose assise
+            quatre palettes, pose assise
           </p>
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
             {CAT_VARIANTS.map((v) => (
@@ -260,7 +260,7 @@ export default function StyleguidePage() {
 
         <div className="space-y-6">
           <p className="font-mono text-[0.7rem] font-semibold uppercase tracking-[0.16em] text-cp-paprika">
-            quatre poses — palette cobalt
+            quatre poses, palette cobalt
           </p>
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
             {CAT_POSES.map((p) => (
@@ -290,7 +290,7 @@ export default function StyleguidePage() {
         <SectionHeading
           number="05"
           title="Statuts de séjour"
-          kicker="Les six états — chacun avec sa couleur signifiante."
+          kicker="Les six états, chacun avec sa couleur signifiante."
           tone="cobalt"
         />
         <div className="flex flex-wrap items-center gap-3">
@@ -372,7 +372,7 @@ export default function StyleguidePage() {
         <div className="grid gap-6 lg:grid-cols-2">
           <RuledBox variant="regular">
             <p className="font-mono text-[0.65rem] font-semibold uppercase tracking-[0.16em] text-cp-paprika">
-              regular — cadre encre sur paper
+              regular, cadre encre sur paper
             </p>
             <p className="mt-3 font-display text-xl italic text-cp-ink">
               « Le ronron est la musique de fond de cette maison. »
@@ -381,7 +381,7 @@ export default function StyleguidePage() {
 
           <RuledBox variant="cobalt">
             <p className="font-mono text-[0.65rem] font-semibold uppercase tracking-[0.16em] text-cp-paper/80">
-              cobalt — bloc institutionnel
+              cobalt, bloc institutionnel
             </p>
             <p className="mt-3 font-display text-xl italic text-cp-paper">
               Pour appeler à l&apos;ouverture d&apos;un compte ou à
@@ -391,7 +391,7 @@ export default function StyleguidePage() {
 
           <RuledBox variant="paprika">
             <p className="font-mono text-[0.65rem] font-semibold uppercase tracking-[0.16em] text-cp-paper/80">
-              paprika — moment fort
+              paprika, moment fort
             </p>
             <p className="mt-3 font-display text-xl italic text-cp-paper">
               Pour les CTA principaux, les alertes, les moments où il faut
@@ -401,7 +401,7 @@ export default function StyleguidePage() {
 
           <RuledBox variant="feuille">
             <p className="font-mono text-[0.65rem] font-semibold uppercase tracking-[0.16em] text-cp-paper/80">
-              feuille — confirmation positive
+              feuille, confirmation positive
             </p>
             <p className="mt-3 font-display text-xl italic text-cp-paper">
               Pour les acceptations, les validations, les « tout est bon ».
@@ -453,7 +453,7 @@ export default function StyleguidePage() {
       <footer className="flex flex-col gap-3 pb-8 text-center sm:flex-row sm:items-center sm:justify-between sm:text-left">
         <LibraryStamp>Fin du document</LibraryStamp>
         <p className="font-display text-sm italic text-cp-ink-soft">
-          Page de référence — supprimable une fois la DA validée.
+          Page de référence, supprimable une fois la DA validée.
         </p>
       </footer>
     </main>

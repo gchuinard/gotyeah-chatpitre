@@ -133,14 +133,14 @@ export function CatForm({
         </Link>
         <span aria-hidden>/</span>
         <span className="text-cp-ink">
-          {isEdit ? `N°${reference} — édition` : "Nouvelle fiche"}
+          {isEdit ? `N°${reference}, édition` : "Nouvelle fiche"}
         </span>
       </nav>
 
       <header className="space-y-5">
         <LibraryStamp boxed>
           {isEdit
-            ? `Fiche existante — N°${reference}`
+            ? `Fiche existante, N°${reference}`
             : "Nouvelle fiche de pensionnaire"}
         </LibraryStamp>
         <h1 className="font-display text-5xl font-medium leading-[0.95] tracking-[-0.01em] text-cp-ink sm:text-6xl">
@@ -211,7 +211,7 @@ export function CatForm({
         <FormSection
           number="02"
           title="Détails"
-          description="Race et année de naissance — utiles à la maison pour la chambre attribuée."
+          description="Race et année de naissance, utiles pour la chambre que nous attribuons."
         >
           <div className="grid gap-6 sm:grid-cols-[2fr_1fr]">
             <Field label="Race ou type" htmlFor="cat-breed">
@@ -246,7 +246,7 @@ export function CatForm({
         <FormSection
           number="03"
           title="Conditions d'admission"
-          description="Cochez ce qui est à jour. Une lacune n'est pas un refus automatique — c'est un sujet de conversation."
+          description="Cochez ce qui est à jour. Une lacune n'est pas un refus automatique, c'est un sujet de conversation."
         >
           <ul className="grid gap-px overflow-hidden rounded-md border border-cp-ink bg-cp-ink sm:grid-cols-2">
             <CriterionCheckbox
@@ -274,7 +274,7 @@ export function CatForm({
               id="crit-sociable"
               name="sociable"
               label="Sociable"
-              gloss="Avec ses congénères et les humains de la maison."
+              gloss="Avec ses congénères et nous."
               defaultChecked={c.sociable}
             />
           </ul>
@@ -285,8 +285,8 @@ export function CatForm({
         {/* Section 04 — Notes */}
         <FormSection
           number="04"
-          title="Notes pour la maison"
-          description="Manies, traitements, alimentation particulière — tout ce que la maison gagne à savoir."
+          title="Notes à notre intention"
+          description="Manies, traitements, alimentation particulière, tout ce que nous gagnons à savoir."
         >
           <Field label="Note libre" htmlFor="cat-notes">
             <Textarea

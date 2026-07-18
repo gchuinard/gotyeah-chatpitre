@@ -7,9 +7,9 @@ import { RuledBox } from "@/components/ruled-box";
 import { SectionHeading } from "@/components/section-heading";
 
 export const metadata: Metadata = {
-  title: "Le lieu — Le Chat-Pitre",
+  title: "Le lieu · Le Chat-Pitre",
   description:
-    "Une maison de villégiature à Bordeaux : sept chambres, un jardin clos, une cuisine, un humain.",
+    "Une maison de villégiature à Bordeaux : sept chambres, un jardin clos, une cuisine, deux humains.",
 };
 
 // CurrentResidentsWall lit la base (pensionnaires actuellement en séjour)
@@ -26,7 +26,7 @@ export default function LeLieuPage() {
       {/* En-tête éditoriale */}
       <header className="space-y-8">
         <LibraryStamp boxed>
-          N° 002 — Le lieu — Représentation permanente
+          N° 002, Le lieu, Représentation permanente
         </LibraryStamp>
         <h1 className="font-display text-5xl font-medium leading-[0.95] tracking-[-0.01em] text-cp-ink sm:text-7xl lg:text-8xl">
           Une maison,
@@ -51,7 +51,7 @@ export default function LeLieuPage() {
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-12">
           <PhotoTile
             label="La façade"
-            caption="N° 047 — vue depuis la rue, fin de matinée"
+            caption="N° 047, vue depuis la rue, fin de matinée"
             className="aspect-[4/5] lg:col-span-7 lg:row-span-2"
           />
           <PhotoTile
@@ -61,7 +61,7 @@ export default function LeLieuPage() {
           />
           <PhotoTile
             label="Une chambre"
-            caption="Chambre n° 03 — exposée au sud"
+            caption="Chambre n° 03, exposée au sud"
             className="aspect-[5/4] lg:col-span-5"
           />
           <PhotoTile
@@ -92,7 +92,7 @@ export default function LeLieuPage() {
             sur l&apos;arrière d&apos;une véranda et d&apos;un jardin clos. La
             distribution intérieure a été refaite en 2023 pour accueillir
             jusqu&apos;à sept chambres indépendantes, séparées par des cloisons
-            sourdes — chaque pensionnaire dort hors de la vue et hors du nez
+            sourdes, chaque pensionnaire dort hors de la vue et hors du nez
             des autres.
           </p>
           <p>
@@ -155,19 +155,19 @@ export default function LeLieuPage() {
       <section className="grid gap-12 lg:grid-cols-[1fr_2fr]">
         <SectionHeading
           number="04"
-          title="L'humain"
+          title="Les humains"
           kicker="Présent sept jours sur sept."
         />
         <div className="space-y-5 font-body text-base leading-relaxed text-cp-ink">
           <p>
             La maison est tenue par une seule personne, qui y habite. Pas de
             roulement d&apos;équipe, pas de relais. Les chats reconnaissent
-            une voix, une odeur, une heure des repas, et la maison s&apos;y
-            tient.
+            une voix, une odeur, une heure des repas, et nous nous y
+            tenons.
           </p>
           <p>
-            En cas d&apos;empêchement (rare), un remplaçant déjà connu de la
-            maison prend le relais — toujours avec passage de relais en
+            En cas d&apos;empêchement (rare), un remplaçant que nous
+            connaissons déjà prend le relais, toujours avec passage de relais en
             présence des chats.
           </p>
         </div>
@@ -187,19 +187,19 @@ export default function LeLieuPage() {
         />
         <div className="grid gap-px overflow-hidden border border-cp-ink bg-cp-ink sm:grid-cols-2">
           <PracticalTile title="Adresse">
-            N° 047 — rue de la Chartreuse
+            N° 047, rue de la Chartreuse
             <br />
             33000 Bordeaux
           </PracticalTile>
           <PracticalTile title="Accueil">
             Lundi → samedi
             <br />
-            9h30 — 12h30 · 16h00 — 19h00
+            9h30 à 12h30 · 16h00 à 19h00
             <br />
             Dimanche sur rendez-vous
           </PracticalTile>
           <PracticalTile title="Tram">
-            Ligne C — arrêt « Jardin botanique »
+            Ligne C, arrêt « Jardin botanique »
             <br />
             Trois minutes à pied
           </PracticalTile>
@@ -221,11 +221,11 @@ export default function LeLieuPage() {
       {/* Citation finale */}
       <RuledBox variant="deep" className="text-center">
         <p className="font-display text-2xl italic leading-snug text-cp-ink sm:text-3xl lg:text-4xl">
-          « La maison s&apos;organise autour du chat, pas l&apos;inverse.
+          « Nous nous organisons autour du chat, pas l&apos;inverse.
           C&apos;est la seule règle écrite qu&apos;on tienne à conserver. »
         </p>
         <p className="mt-6 font-mono text-[0.65rem] font-bold uppercase tracking-[0.22em] text-cp-paprika">
-          règle première — fondation 2024
+          règle première, fondation 2024
         </p>
       </RuledBox>
     </article>

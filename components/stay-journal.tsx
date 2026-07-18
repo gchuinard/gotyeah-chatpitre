@@ -17,7 +17,7 @@ export async function StayJournal({
   bookingId,
   cats,
   canAdd = false,
-  emptyLabel = "Aucune entrée pour l'instant. La maison postera une note dès l'arrivée.",
+  emptyLabel = "Aucune entrée pour l'instant. Nous posterons une note dès l'arrivée.",
 }: {
   bookingId: string;
   /** Chats concernés par le séjour — requis si `canAdd` (pour la sélection). */

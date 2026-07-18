@@ -18,7 +18,7 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
         <div className="relative flex items-center justify-between gap-3">
           <Link
             href="/"
-            aria-label="Le Chat-Pitre — accueil"
+            aria-label="Le Chat-Pitre, accueil"
             className="transition-colors hover:text-cp-canari focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-cp-canari"
           >
             <Wordmark className="text-base text-cp-paper sm:text-lg" />
@@ -48,7 +48,7 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
 
         <div className="relative hidden items-end justify-between gap-3 lg:flex">
           <p className="font-mono text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-cp-paper/70">
-            N° 047 — rue de la Chartreuse — Bordeaux
+            N° 047, rue de la Chartreuse, Bordeaux
           </p>
           <p className="font-mono text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-cp-paper/70">
             Établissement permanent

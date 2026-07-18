@@ -74,7 +74,7 @@ export default async function AdminDashboardPage() {
         <p className="max-w-2xl font-display text-xl italic leading-snug text-cp-ink-soft">
           {pendingDecisions.length} décision{pendingDecisions.length > 1 ? "s" : ""}{" "}
           en attente, {acceptedActiveCount} séjour{acceptedActiveCount > 1 ? "s" : ""}{" "}
-          confirmé{acceptedActiveCount > 1 ? "s" : ""}. La maison tourne.
+          confirmé{acceptedActiveCount > 1 ? "s" : ""}. Ãa tourne.
         </p>
       </header>
 
@@ -121,7 +121,7 @@ export default async function AdminDashboardPage() {
           <SectionHeading
             number="01"
             title="Décisions en attente"
-            kicker="À traiter en priorité — délai cible 48 h."
+            kicker="À traiter en priorité, délai cible 48 h."
             className="flex-1"
           />
           <Link
@@ -135,7 +135,7 @@ export default async function AdminDashboardPage() {
         {pendingDecisions.length === 0 ? (
           <RuledBox variant="deep">
             <p className="font-display text-2xl italic text-cp-ink">
-              Pas de décision à prendre — bien joué.
+              Pas de décision à prendre, bien joué.
             </p>
           </RuledBox>
         ) : (
@@ -188,7 +188,7 @@ export default async function AdminDashboardPage() {
         <SectionHeading
           number="02"
           title="Calendrier d'occupation"
-          kicker="Vue du mois courant — capacité maximale : 7 chambres."
+          kicker="Vue du mois courant, capacité maximale : 7 chambres."
         />
         <OccupancyCalendar
           monthLabel={monthLabel}

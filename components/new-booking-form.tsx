@@ -175,12 +175,12 @@ export function NewBookingForm({
       <FormSection
         number="03"
         title="Suppléments souhaités"
-        description="Options facultatives. Les tarifs sont indicatifs — la maison les confirme dans le devis."
+        description="Options facultatives. Les tarifs sont indicatifs, nous les confirmons dans le devis."
       >
         <p className="rounded-md border border-cp-cobalt bg-cp-cobalt-light/60 px-4 py-3 font-body text-sm text-cp-ink">
           Pour tout supplément, précisez le détail (médicament et posologie,
           régime alimentaire, fréquence du brossage…) dans la{" "}
-          <strong className="font-semibold">note pour la maison</strong> ci-dessous.
+          <strong className="font-semibold">note à notre intention</strong> ci-dessous.
         </p>
 
         {presets.length > 0 && (
@@ -237,8 +237,8 @@ export function NewBookingForm({
             </Button>
           )}
           <p className="font-body text-xs text-cp-ink-soft">
-            Pour une demande sur mesure, décrivez-la dans la note ci-dessous —
-            la maison vous proposera un tarif dans le devis.
+            Pour une demande sur mesure, décrivez-la dans la note ci-dessous,
+            nous vous proposerons un tarif dans le devis.
           </p>
         </div>
       </FormSection>
@@ -248,7 +248,7 @@ export function NewBookingForm({
       {/* 04 — Notes */}
       <FormSection
         number="04"
-        title="Note pour la maison"
+        title="Note à notre intention"
         description="Précisions sur les arrivées (transport, manies, allergies récentes…)."
       >
         <Field label="Note libre" htmlFor="booking-notes">

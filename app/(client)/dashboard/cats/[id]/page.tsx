@@ -47,7 +47,7 @@ export default async function CatDetailPage({
     originalName: d.originalName,
     mimeType: d.mimeType,
     sizeBytes: d.sizeBytes,
-    uploadedByLabel: d.uploadedById === user.id ? "Vous" : "La maison",
+    uploadedByLabel: d.uploadedById === user.id ? "Vous" : "Nous",
     documentDate: d.documentDate ? d.documentDate.toISOString() : null,
   }));
 
@@ -119,7 +119,7 @@ export default async function CatDetailPage({
           <section className="space-y-6">
             <SectionHeading
               number="01"
-              title="Avis de la maison"
+              title="Notre avis"
               kicker="Le verdict de la pension sur ce chat, séjour par séjour."
               tone="cobalt"
             />
@@ -164,7 +164,7 @@ export default async function CatDetailPage({
         <SectionHeading
           number={links.length > 0 ? "02" : "01"}
           title="Documents"
-          kicker="Carnet de vaccination, identification, certificats… Visibles par vous et la maison."
+          kicker="Carnet de vaccination, identification, certificats… Visibles par vous et nous."
           tone="feuille"
         />
         <CatDocuments catId={cat.id} documents={docItems} />

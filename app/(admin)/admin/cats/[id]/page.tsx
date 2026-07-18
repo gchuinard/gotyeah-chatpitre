@@ -46,7 +46,7 @@ export default async function AdminCatDetailPage({
         ? null
         : d.uploadedById === cat.ownerId
           ? cat.owner.firstName
-          : "La maison",
+          : "Nous",
     documentDate: d.documentDate ? d.documentDate.toISOString() : null,
   }));
 
@@ -73,7 +73,7 @@ export default async function AdminCatDetailPage({
           {cat.name}
         </h1>
         <p className="font-display text-xl italic leading-snug text-cp-ink-soft">
-          {cat.breed ?? "sans race"} · {ageLabel(cat.birthDate)} — confié par{" "}
+          {cat.breed ?? "sans race"} · {ageLabel(cat.birthDate)}, confié par{" "}
           {cat.owner.firstName} {cat.owner.lastName}
         </p>
       </header>
@@ -84,7 +84,7 @@ export default async function AdminCatDetailPage({
           <section className="space-y-6">
             <SectionHeading
               number="01"
-              title="Avis de la maison"
+              title="Notre avis"
               kicker="Le verdict sur ce chat, séjour par séjour."
               tone="cobalt"
             />

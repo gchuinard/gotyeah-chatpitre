@@ -33,7 +33,7 @@ const jetbrains = JetBrains_Mono({
 export const metadata: Metadata = {
   title: "Le Chat-Pitre",
   description:
-    "Maison de villégiature pour félins de bonne compagnie — réservation en ligne.",
+    "Maison de villégiature pour félins de bonne compagnie, réservation en ligne.",
 };
 
 export default function RootLayout({

@@ -34,7 +34,7 @@ export async function CurrentResidentsWall({
       >
         <LibraryStamp tone="cobalt">en séjour cette semaine</LibraryStamp>
         <p className="mt-4 font-display text-xl italic text-cp-ink-soft">
-          Personne en ce moment. La maison est en sommeil.
+          Personne en ce moment. Le lieu est en sommeil.
         </p>
       </div>
     );
@@ -47,11 +47,11 @@ export async function CurrentResidentsWall({
       <div className="flex flex-wrap items-baseline justify-between gap-3">
         <div>
           <LibraryStamp tone="cobalt">
-            En séjour cette semaine — {residents.length} pensionnaire{residents.length > 1 ? "s" : ""}
+            En séjour cette semaine, {residents.length} pensionnaire{residents.length > 1 ? "s" : ""}
           </LibraryStamp>
           {!isCompact && (
             <p className="mt-4 max-w-2xl font-display text-2xl italic leading-snug text-cp-ink-soft sm:text-3xl">
-              La maison vit. Voici qui dort, mange et joue ici en ce moment.
+              Le lieu vit. Voici qui dort, mange et joue ici en ce moment.
             </p>
           )}
         </div>

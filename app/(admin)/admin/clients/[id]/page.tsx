@@ -140,7 +140,7 @@ export default async function AdminClientDetailPage({
             Note interne
           </p>
           <p className="mb-3 mt-1 font-body text-sm text-cp-ink-soft">
-            Visible uniquement par la maison.
+            Visible uniquement par nous.
           </p>
           <ClientAdminNotes clientId={client.id} initialNotes={client.adminNotes} />
         </div>
@@ -151,7 +151,7 @@ export default async function AdminClientDetailPage({
         <SectionHeading
           number="01"
           title="Pensionnaires"
-          kicker="Les chats de ce client — clique pour ouvrir la fiche (et ses documents)."
+          kicker="Les chats de ce client, clique pour ouvrir la fiche (et ses documents)."
           tone="cobalt"
         />
         {client.cats.length === 0 ? (
@@ -189,7 +189,7 @@ export default async function AdminClientDetailPage({
         <SectionHeading
           number="02"
           title="Séjours"
-          kicker="L'historique de ce client — clique pour ouvrir le détail du séjour."
+          kicker="L'historique de ce client, clique pour ouvrir le détail du séjour."
           tone="paprika"
         />
         {client.bookings.length === 0 ? (

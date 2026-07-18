@@ -43,7 +43,7 @@ export default async function NewBookingPage() {
         </h1>
         <p className="max-w-2xl font-display text-xl italic leading-snug text-cp-ink-soft">
           Indiquez vos dates, choisissez les pensionnaires concernés, ajoutez
-          un mot si nécessaire. La maison répondra sous 48h.
+          un mot si nécessaire. Nous répondrons sous 48h.
         </p>
       </header>
 

@@ -51,17 +51,17 @@ const VOICE_CONFIG: Record<
     label: "Nouveau message",
     labelClass:
       "block font-mono text-[0.65rem] font-bold uppercase tracking-[0.22em] text-cp-paprika",
-    placeholder: "Écrivez votre réponse à la maison…",
+    placeholder: "Écrivez-nous votre réponse…",
     buttonClass: "",
   },
   admin: {
-    authorLabel: "La maison",
+    authorLabel: "Nous",
     fromAdmin: true,
     formClass:
       "rounded-md border border-cp-ink bg-cp-ink text-cp-paper p-6 sm:p-8",
     textareaClass:
       "border-cp-paper/40 bg-cp-ink text-cp-paper placeholder:text-cp-paper/50 focus-visible:outline-cp-paper",
-    label: "Réponse de la maison",
+    label: "Notre réponse",
     labelClass:
       "block font-mono text-[0.65rem] font-bold uppercase tracking-[0.22em] text-cp-paper/70",
     placeholder: "Écrivez votre réponse au client…",

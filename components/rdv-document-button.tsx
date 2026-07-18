@@ -37,7 +37,7 @@ export function RdvDocumentButton({ cats }: { cats: CatOption[] }) {
               Ajouter un document
             </Dialog.Title>
             <Dialog.Description className="mt-2 font-body text-sm leading-relaxed text-cp-ink-soft">
-              Il sera ajouté à la fiche du chat (visible par vous et la maison),
+              Il sera ajouté à la fiche du chat (visible par vous et nous),
               sans interrompre l&apos;appel.
             </Dialog.Description>
 

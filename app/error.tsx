@@ -29,7 +29,7 @@ export default function GlobalError({
       <header className="flex items-center justify-between">
         <Link
           href="/"
-          aria-label="Le Chat-Pitre — accueil"
+          aria-label="Le Chat-Pitre, accueil"
           className="transition-colors hover:text-cp-paprika"
         >
           <Wordmark className="text-xl sm:text-2xl" />
