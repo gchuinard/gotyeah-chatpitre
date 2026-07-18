@@ -13,10 +13,10 @@ export const metadata: Metadata = {
     "L'histoire de la maison, les humains qui la tiennent, et la méthode qui fait la différence.",
 };
 
-/// Page éditoriale « À propos / L'humain ». Trois sections (la maison,
-/// l'humain, la méthode) + un encart « pourquoi Chat-Pitre » pour le
-/// jeu de mots. Contenu éditorial chaleureux, à compléter par le client
-/// avec sa vraie histoire — le squelette tient la mise en page.
+/// Page éditoriale « À propos ». Trois sections : la maison, les humains,
+/// la méthode. Le texte de la section « Les humains » est un PLACEHOLDER
+/// FICTIF (duo inventé), à remplacer par la vraie histoire ; le squelette
+/// tient la mise en page.
 
 export default function AboutPage() {
   return (
@@ -143,24 +143,26 @@ export default function AboutPage() {
 
             <div className="space-y-5 font-body text-base leading-relaxed text-cp-ink">
               <p>
-                <strong className="font-semibold">Lou, fondateur·rice.</strong>{" "}
-                Ancienne carrière de bibliothécaire jeunesse, reconvertie
-                en accueillant·e de chats à plein temps. Sept ans de
-                bénévolat à l&apos;École du Chat, deux formations courtes
-                en comportement félin (Lille, 2022 ; Bordeaux, 2023).
+                <strong className="font-semibold">
+                  Nous sommes deux à tenir la maison.
+                </strong>{" "}
+                Deux parcours qui se complètent : la librairie jeunesse
+                d&apos;un côté, le soin animalier de l&apos;autre. Sept ans
+                de bénévolat à l&apos;École du Chat à nous deux, et deux
+                formations en comportement félin (Lille 2022, Bordeaux 2023).
               </p>
               <p>
-                La maison ne tourne pas en équipe : c&apos;est volontaire.
-                Les chats reconnaissent une voix, une odeur, une heure des
-                repas. Avoir une seule personne en référence, c&apos;est
-                ce qui fait que les nouveaux arrivants se calment en
-                deux ou trois jours plutôt qu&apos;en deux ou trois
-                semaines.
+                Être deux, c&apos;est ce qui nous permet de ne jamais laisser
+                la maison vide et de tenir le rythme de chaque pensionnaire :
+                même heure de repas, même façon d&apos;ouvrir la porte, même
+                endroit pour le panier. Les chats reconnaissent une voix, une
+                odeur, une habitude, alors nous nous accordons sur tout ce qui
+                les concerne.
               </p>
               <p>
-                En cas d&apos;empêchement (rare), un·e remplaçant·e déjà
-                connu·e des chats prend le relais, jamais sans passage
-                en présence des pensionnaires.
+                Chaque arrivée se prépare à deux : nous relisons ensemble la
+                fiche de votre chat avant le premier jour, et la personne qui
+                l&apos;accueille reste sa référence pendant tout le séjour.
               </p>
             </div>
           </div>
