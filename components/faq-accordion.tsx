@@ -16,32 +16,36 @@ export type FaqItem = {
 export function FaqAccordion({
   items,
   className,
+  startIndex = 0,
 }: {
   items: FaqItem[];
   className?: string;
+  /** Décalage de numérotation, pour garder une suite continue quand la FAQ
+      est scindée en deux colonnes. */
+  startIndex?: number;
 }) {
   return (
     <Accordion.Root
       className={cn("border-t border-cp-ink", className)}
     >
       {items.map((item, i) => {
-        const index = String(i + 1).padStart(2, "0");
+        const index = String(startIndex + i + 1).padStart(2, "0");
         return (
           <Accordion.Item
             key={item.question}
             className="border-b border-cp-ink"
           >
             <Accordion.Header>
-              <Accordion.Trigger className="group flex w-full items-baseline gap-6 py-7 text-left transition-colors hover:bg-cp-paper-deep/60 focus-visible:bg-cp-paper-deep/60 focus-visible:outline-none sm:py-8">
-                <span className="shrink-0 font-mono text-sm font-bold uppercase tracking-[0.18em] text-cp-paprika">
+              <Accordion.Trigger className="group flex w-full items-baseline gap-4 py-5 text-left transition-colors hover:bg-cp-paper-deep/60 focus-visible:bg-cp-paper-deep/60 focus-visible:outline-none sm:py-6">
+                <span className="shrink-0 font-mono text-xs font-bold uppercase tracking-[0.18em] text-cp-paprika">
                   {index}
                 </span>
-                <span className="flex-1 font-display text-2xl font-medium leading-snug text-cp-ink sm:text-3xl">
+                <span className="flex-1 font-display text-lg font-medium leading-snug text-cp-ink sm:text-xl">
                   {item.question}
                 </span>
                 <span
                   aria-hidden
-                  className="ml-auto shrink-0 self-center font-display text-3xl leading-none text-cp-paprika transition-transform duration-300 group-data-[panel-open]:rotate-45 sm:text-4xl"
+                  className="ml-auto shrink-0 self-center font-display text-2xl leading-none text-cp-paprika transition-transform duration-300 group-data-[panel-open]:rotate-45 sm:text-3xl"
                 >
                   +
                 </span>
@@ -52,8 +56,8 @@ export function FaqAccordion({
               className="overflow-hidden transition-[height] duration-300 ease-out data-[ending-style]:h-0 data-[starting-style]:h-0 [&[hidden]]:hidden"
               style={{ height: "var(--accordion-panel-height)" }}
             >
-              <div className="pb-8 pl-[4rem] pr-6">
-                <p className="max-w-2xl font-body text-base leading-relaxed text-cp-ink">
+              <div className="pb-6 pl-[3rem] pr-4">
+                <p className="max-w-2xl font-body text-sm leading-relaxed text-cp-ink">
                   {item.answer}
                 </p>
               </div>

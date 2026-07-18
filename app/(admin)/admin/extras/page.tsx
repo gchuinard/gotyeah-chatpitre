@@ -40,14 +40,14 @@ export default async function AdminExtrasPage() {
 
       <header className="space-y-4">
         <LibraryStamp boxed>
-          Catalogue — {presets.length} préset{presets.length > 1 ? "s" : ""}
+          Catalogue, {presets.length} préset{presets.length > 1 ? "s" : ""}
         </LibraryStamp>
         <h1 className="font-display text-5xl font-medium leading-[0.95] tracking-[-0.01em] text-cp-ink sm:text-6xl">
           Suppléments
         </h1>
         <p className="max-w-2xl font-display text-xl italic leading-snug text-cp-ink-soft">
           Le catalogue des suppléments disponibles dans le formulaire de
-          devis. Libellés et prix par défaut éditables — chaque ligne d&apos;un
+          devis. Libellés et prix par défaut éditables : chaque ligne d&apos;un
           devis déjà posé conserve le libellé et le prix d&apos;origine.
         </p>
       </header>

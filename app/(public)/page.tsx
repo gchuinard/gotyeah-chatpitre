@@ -12,9 +12,9 @@ import { buttonVariants } from "@/components/ui/button";
 import { Wordmark } from "@/components/wordmark";
 
 export const metadata: Metadata = {
-  title: "Le Chat-Pitre — Maison de villégiature pour félins",
+  title: "Le Chat-Pitre, Maison de villégiature pour félins",
   description:
-    "Pension féline à Bordeaux. Sept chambres, un jardin, une cuisine, un humain. Réservation en ligne.",
+    "Pension féline à Bordeaux. Sept chambres, un jardin, une cuisine, deux humains. Réservation en ligne.",
 };
 
 const STEPS: { number: string; title: string; gloss: string }[] = [
@@ -28,7 +28,7 @@ const STEPS: { number: string; title: string; gloss: string }[] = [
     number: "02",
     title: "Vous renseignez la fiche",
     gloss:
-      "Identité, vaccins, manies, sociabilité — les exigences de la maison sont là.",
+      "Identité, vaccins, manies, sociabilité, nos exigences sont là.",
   },
   {
     number: "03",
@@ -48,7 +48,7 @@ const FAQ: FaqItem[] = [
   {
     question: "Combien de chats accueillez-vous en même temps ?",
     answer:
-      "Sept chambres, donc sept chats — quatorze si plusieurs membres d'un même foyer partagent la chambre. Les espaces communs (jardin clos, cuisine) sont tournants pour éviter les rencontres non souhaitées.",
+      "Sept chambres, donc sept chats, quatorze si plusieurs membres d'un même foyer partagent la chambre. Les espaces communs (jardin clos, cuisine) sont tournants pour éviter les rencontres non souhaitées.",
   },
   {
     question: "Mon chat n'est pas vacciné contre la leucose. Est-ce un refus ?",
@@ -87,7 +87,7 @@ export default function HomePage() {
         <div className="mx-auto w-full max-w-6xl px-6 pt-16 pb-20 sm:px-10 sm:pt-24 sm:pb-28 lg:pt-28 lg:pb-32">
           <div className="cp-reveal mb-10 flex flex-wrap items-center justify-between gap-3">
             <LibraryStamp tone="cobalt">
-              N° 047 — rue de la Chartreuse — Bordeaux
+              N° 047, rue de la Chartreuse, Bordeaux
             </LibraryStamp>
             <LibraryStamp tone="paprika">Établissement permanent · Est. 2024</LibraryStamp>
           </div>
@@ -135,7 +135,7 @@ export default function HomePage() {
                     size: "lg",
                   })}
                 >
-                  Visiter la maison
+                  Visiter le lieu
                 </Link>
               </div>
             </div>
@@ -149,7 +149,7 @@ export default function HomePage() {
                 <CatIllustration
                   variant="canari"
                   pose="sitting"
-                  ariaLabel="Chat assis, pensionnaire de la maison"
+                  ariaLabel="Chat assis, pensionnaire chez nous"
                   className="aspect-square w-full"
                 />
               </div>
@@ -170,7 +170,7 @@ export default function HomePage() {
           <SectionHeading
             number="01"
             title="Conditions d'admission"
-            kicker="Quatre exigences. Pas une de plus."
+            kicker="Quatre exigences."
             tone="cobalt"
           />
           <div className="mt-12">
@@ -219,7 +219,7 @@ export default function HomePage() {
               unit="nuit"
               variant="feature"
               notes={[
-                "Chambre partagée — pour les frères et sœurs habitués.",
+                "Chambre partagée, pour les frères et sœurs habitués.",
                 "Repas et litière dédiés par pensionnaire.",
                 "Au-delà de deux chats : nous écrire pour un devis.",
               ]}
@@ -228,11 +228,11 @@ export default function HomePage() {
           <RuledBox className="mt-10 max-w-3xl">
             <p className="font-body text-base leading-relaxed text-cp-ink">
               <span className="font-mono text-xs font-bold uppercase tracking-[0.18em] text-cp-paprika">
-                Acompte —{" "}
+                Acompte :{" "}
               </span>
               30 % à la réservation par virement, solde au départ. Annulation
               gratuite jusqu&apos;à sept jours avant l&apos;arrivée ; au-delà,
-              l&apos;acompte reste acquis à la maison.
+              l&apos;acompte nous reste acquis.
             </p>
           </RuledBox>
         </div>
@@ -250,47 +250,33 @@ export default function HomePage() {
           <SectionHeading
             number="03"
             title="Déroulement"
-            kicker="Quatre étapes — un mois en avance, de préférence."
+            kicker="Quatre étapes, un mois en avance, de préférence."
             tone="feuille"
           />
 
-          <div className="mt-14 grid gap-10 lg:grid-cols-[7fr_5fr] lg:items-center">
-            <ol className="border-t border-cp-ink">
-              {STEPS.map((s, i) => (
-                <li
-                  key={s.number}
-                  className="cp-reveal grid grid-cols-[auto_1fr] items-baseline gap-x-6 gap-y-2 border-b border-cp-ink py-8 sm:gap-x-10"
-                  style={{ "--cp-delay": `${i * 80}ms` } as React.CSSProperties}
-                >
-                  <span className="font-display text-5xl font-semibold leading-none tracking-tight text-cp-feuille sm:text-6xl">
-                    {s.number}
-                  </span>
-                  <div className="space-y-2">
-                    <h3 className="font-display text-2xl font-semibold leading-tight text-cp-ink sm:text-3xl">
-                      {s.title}
-                    </h3>
-                    <p className="font-body text-base leading-relaxed text-cp-ink-soft">
-                      {s.gloss}
-                    </p>
-                  </div>
-                </li>
-              ))}
-            </ol>
-
-            <div
-              className="cp-reveal hidden lg:block"
-              style={{ "--cp-delay": "320ms" } as React.CSSProperties}
-            >
-              <div className="overflow-hidden rounded-md border-2 border-cp-ink shadow-[8px_8px_0_0_var(--color-cp-ink)]">
-                <CatIllustration
-                  variant="feuille"
-                  pose="watching"
-                  ariaLabel="Chat observant"
-                  className="aspect-square w-full"
-                />
-              </div>
-            </div>
-          </div>
+          {/* Deux colonnes et police resserrée : les quatre étapes tiennent
+              d'un coup d'œil, sans illustration qui étire la section. */}
+          <ol className="mt-12 grid gap-x-10 border-t border-cp-ink sm:grid-cols-2">
+            {STEPS.map((s, i) => (
+              <li
+                key={s.number}
+                className="cp-reveal grid grid-cols-[auto_1fr] items-baseline gap-x-5 gap-y-1.5 border-b border-cp-ink py-6"
+                style={{ "--cp-delay": `${i * 80}ms` } as React.CSSProperties}
+              >
+                <span className="font-display text-4xl font-semibold leading-none tracking-tight text-cp-feuille">
+                  {s.number}
+                </span>
+                <div className="space-y-1.5">
+                  <h3 className="font-display text-xl font-semibold leading-tight text-cp-ink sm:text-2xl">
+                    {s.title}
+                  </h3>
+                  <p className="font-body text-sm leading-relaxed text-cp-ink-soft">
+                    {s.gloss}
+                  </p>
+                </div>
+              </li>
+            ))}
+          </ol>
         </div>
       </section>
 
@@ -309,8 +295,13 @@ export default function HomePage() {
             kicker="Les réponses aux interrogations légitimes."
             tone="canari"
           />
-          <div className="mt-12">
-            <FaqAccordion items={FAQ} />
+          {/* Scindée en deux colonnes, numérotation continue via startIndex. */}
+          <div className="mt-12 grid gap-x-10 lg:grid-cols-2">
+            <FaqAccordion items={FAQ.slice(0, Math.ceil(FAQ.length / 2))} />
+            <FaqAccordion
+              items={FAQ.slice(Math.ceil(FAQ.length / 2))}
+              startIndex={Math.ceil(FAQ.length / 2)}
+            />
           </div>
         </div>
       </section>
@@ -326,7 +317,7 @@ export default function HomePage() {
                 rendez-vous
               </p>
               <p className="mt-6 max-w-3xl font-display text-4xl font-medium leading-[1.05] tracking-tight text-cp-paper sm:text-5xl lg:text-6xl">
-                Confiez-nous votre chat pour quelques nuits — il ne sera pas
+                Confiez-nous votre chat pour quelques nuits, il ne sera pas
                 seul, et vous saurez où il dort.
               </p>
               <div className="mt-10 flex flex-wrap items-center gap-5">

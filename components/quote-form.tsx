@@ -304,7 +304,7 @@ export function QuoteForm({
           </p>
           <p className="font-mono text-[0.6rem] uppercase tracking-[0.18em] text-cp-ink-soft">
             {lines.length === 0
-              ? "Aucun supplément — ajoutez-en si besoin."
+              ? "Aucun supplément, ajoutez-en si besoin."
               : `${lines.length} ligne${lines.length > 1 ? "s" : ""} · ${extrasTotal.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}€`}
           </p>
         </div>
@@ -430,7 +430,7 @@ function ExtraLineRow({
             onChange={(e) => onPresetChange(e.target.value)}
             className={SELECT_CLASS}
           >
-            <option value="">— Choisir un supplément —</option>
+            <option value="">Choisir un supplément…</option>
             {presets.map((p) => (
               <option key={p.id} value={p.id}>
                 {p.label} ({p.defaultAmount}€{unitShort(p.unit)})

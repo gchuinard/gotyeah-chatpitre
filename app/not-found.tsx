@@ -14,7 +14,7 @@ export default function NotFound() {
       <header className="flex items-center justify-between">
         <Link
           href="/"
-          aria-label="Le Chat-Pitre — accueil"
+          aria-label="Le Chat-Pitre, accueil"
           className="transition-colors hover:text-cp-paprika"
         >
           <Wordmark className="text-xl sm:text-2xl" />
@@ -36,7 +36,7 @@ export default function NotFound() {
           <p className="mt-4 max-w-lg font-body text-base leading-relaxed text-cp-ink-soft sm:text-lg">
             Le chat l&apos;a peut-être emportée derrière le canapé, ou
             l&apos;adresse n&apos;a jamais été correcte. Dans les deux cas,
-            la maison reste là.
+            nous restons là.
           </p>
 
           <div className="mt-10 flex flex-wrap items-center gap-4">
@@ -50,7 +50,7 @@ export default function NotFound() {
               href="/le-lieu"
               className={buttonVariants({ variant: "ghost", size: "lg" })}
             >
-              Visiter la maison
+              Visiter le lieu
             </Link>
           </div>
         </div>

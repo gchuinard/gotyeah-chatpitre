@@ -331,7 +331,7 @@ export function InvoicePdf({
 
   return (
     <Document
-      title={`Facture ${ref} — Le Chat-Pitre`}
+      title={`Facture ${ref}, Le Chat-Pitre`}
       author="Le Chat-Pitre"
       subject={`Facture pour le séjour N°${shortRef}`}
     >
@@ -356,7 +356,7 @@ export function InvoicePdf({
           <View style={styles.partyBlock}>
             <Text style={styles.partyLabel}>ÉMETTEUR</Text>
             <Text style={styles.partyName}>Le Chat-Pitre</Text>
-            <Text style={styles.partyLine}>N° 047 — rue de la Chartreuse</Text>
+            <Text style={styles.partyLine}>N° 047, rue de la Chartreuse</Text>
             <Text style={styles.partyLine}>33000 Bordeaux</Text>
             <Text style={styles.partyLine}>bonjour@chat-pitre.fr</Text>
             <Text style={[styles.partyLine, { marginTop: 6, color: COLORS.mute }]}>
@@ -410,7 +410,7 @@ export function InvoicePdf({
                 Repas, litière, ménage quotidien et observation incluse.
                 Carnet de séjour photo+note disponible en ligne pendant
                 toute la durée.
-                {booking.clientNotes ? ` — ${booking.clientNotes}` : ""}
+                {booking.clientNotes ? ` Note : ${booking.clientNotes}` : ""}
               </Text>
             </View>
             <Text style={[styles.amountText, styles.colQty]}>
@@ -495,7 +495,7 @@ export function InvoicePdf({
           <Text style={styles.conditionsText}>
             Paiement à réception par virement bancaire. Pénalités de retard :
             trois fois le taux d&apos;intérêt légal en vigueur. Indemnité
-            forfaitaire pour frais de recouvrement : 40 €. TVA non applicable —
+            forfaitaire pour frais de recouvrement : 40 €. TVA non applicable,
             article 293 B du Code général des impôts.
           </Text>
         </View>

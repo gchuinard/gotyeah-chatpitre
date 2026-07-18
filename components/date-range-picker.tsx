@@ -229,9 +229,9 @@ export function DateRangePicker({
             <p className="font-body text-sm text-cp-ink">
               <span className="font-semibold">
                 Du {frLabel(start)} au {frLabel(end)}
-              </span>{" "}
+              </span>
               <span className="text-cp-ink-soft">
-                — {nights} nuit{nights > 1 ? "s" : ""}
+                , {nights} nuit{nights > 1 ? "s" : ""}
               </span>
             </p>
           ) : start ? (

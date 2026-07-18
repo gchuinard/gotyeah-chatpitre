@@ -56,13 +56,13 @@ export default async function AdminBookingsListPage() {
 
       <header className="space-y-4">
         <LibraryStamp boxed>
-          Tous les séjours — {bookings.length} entrée{bookings.length > 1 ? "s" : ""}
+          Tous les séjours, {bookings.length} entrée{bookings.length > 1 ? "s" : ""}
         </LibraryStamp>
         <h1 className="font-display text-5xl font-medium leading-[0.95] tracking-[-0.01em] text-cp-ink sm:text-6xl">
           Séjours
         </h1>
         <p className="max-w-2xl font-display text-xl italic leading-snug text-cp-ink-soft">
-          Tous les séjours de la maison, ordonnés par priorité de traitement.
+          Tous nos séjours, ordonnés par priorité de traitement.
         </p>
       </header>
 

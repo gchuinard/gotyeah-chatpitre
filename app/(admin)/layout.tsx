@@ -43,13 +43,13 @@ export default async function AdminLayout({
 function Forbidden() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center gap-6 px-6 text-center">
-      <LibraryStamp boxed>403 — Accès refusé</LibraryStamp>
+      <LibraryStamp boxed>403, Accès refusé</LibraryStamp>
       <h1 className="font-display text-6xl font-medium leading-none tracking-tight text-cp-ink">
         403
       </h1>
       <Wordmark className="text-2xl" />
       <p className="max-w-md font-display text-xl italic text-cp-ink-soft">
-        Cet espace est réservé à l&apos;administration de la maison. Si vous
+        Cet espace est réservé à notre administration. Si vous
         pensez que c&apos;est une erreur, écrivez-nous.
       </p>
     </div>

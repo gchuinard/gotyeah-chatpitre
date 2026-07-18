@@ -53,7 +53,7 @@ export default async function AdminRdvPage({
         <VideoCall
           appointmentId={appointment.id}
           selfRole="admin"
-          selfName="La maison"
+          selfName="Le Chat-Pitre"
           peerName={client.firstName}
           backHref={backHref}
         />

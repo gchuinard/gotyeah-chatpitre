@@ -14,7 +14,7 @@ const CRITERIA: {
   {
     number: "01",
     label: "Stérilisé",
-    gloss: "Pour la quiétude de la maison et celle des autres pensionnaires.",
+    gloss: "Pour notre quiétude et celle des autres pensionnaires.",
     bg: "bg-cp-cobalt",
     text: "text-cp-paper",
   },
@@ -35,7 +35,7 @@ const CRITERIA: {
   {
     number: "04",
     label: "Sociable",
-    gloss: "Avec ses congénères et les humains de la maison.",
+    gloss: "Avec ses congénères et nous.",
     bg: "bg-cp-canari",
     text: "text-cp-ink",
   },

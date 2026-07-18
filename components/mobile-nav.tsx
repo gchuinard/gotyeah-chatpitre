@@ -15,7 +15,13 @@ import { Wordmark } from "@/components/wordmark";
 
 export type MobileNavLink = { href: string; label: string };
 
-export function MobileNav({ links }: { links: MobileNavLink[] }) {
+export function MobileNav({
+  actionLinks,
+  presentationLinks,
+}: {
+  actionLinks: MobileNavLink[];
+  presentationLinks: MobileNavLink[];
+}) {
   return (
     <Dialog.Root>
       <Dialog.Trigger
@@ -40,7 +46,24 @@ export function MobileNav({ links }: { links: MobileNavLink[] }) {
 
           <nav aria-label="Sections du site" className="flex-1">
             <ul className="space-y-1">
-              {links.map((l) => (
+              {actionLinks.map((l) => (
+                <li key={l.href}>
+                  <Dialog.Close
+                    render={<Link href={l.href} />}
+                    className="block rounded-md px-3 py-3 font-display text-2xl italic text-cp-ink transition-colors hover:bg-cp-paper-deep hover:text-cp-paprika"
+                  >
+                    {l.label}
+                  </Dialog.Close>
+                </li>
+              ))}
+            </ul>
+
+            {/* En pleine largeur le « | » n'a pas de sens : on marque la
+                séparation par un filet horizontal. */}
+            <div aria-hidden className="my-4 border-t border-cp-ink/25" />
+
+            <ul className="space-y-1">
+              {presentationLinks.map((l) => (
                 <li key={l.href}>
                   <Dialog.Close
                     render={<Link href={l.href} />}

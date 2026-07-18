@@ -58,7 +58,7 @@ export function ClientHeader({
       <div className="mx-auto flex w-full max-w-7xl items-center gap-6 px-6 py-3 sm:gap-8 sm:px-10">
         <Link
           href={isAdmin ? "/admin" : "/dashboard"}
-          aria-label="Le Chat-Pitre — accueil"
+          aria-label="Le Chat-Pitre, accueil"
           className="shrink-0 transition-colors hover:text-cp-paprika"
         >
           <Wordmark className="text-base sm:text-lg" />

@@ -240,7 +240,7 @@ export function EditBookingForm({
       <section className="grid gap-8 lg:grid-cols-[1fr_2fr] lg:gap-12">
         <SectionHeading
           number="03"
-          title="Note pour la maison"
+          title="Votre mot pour nous"
           kicker="Précisions sur les arrivées (transport, manies, allergies récentes…)."
           as="h2"
         />
@@ -339,7 +339,7 @@ export function EditBookingForm({
 
       <footer className="flex flex-wrap items-center justify-between gap-4">
         <p className="font-body text-sm text-cp-ink-soft">
-          Vos modifications repartent en revue par la maison.
+          Vos modifications repartent en revue chez nous.
         </p>
         <div className="flex items-center gap-3">
           {error && <p className="font-body text-sm text-cp-paprika">{error}</p>}

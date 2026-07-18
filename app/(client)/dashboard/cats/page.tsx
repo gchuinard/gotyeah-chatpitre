@@ -33,7 +33,7 @@ export default async function CatsListPage() {
       <header className="flex flex-wrap items-end justify-between gap-8">
         <div className="space-y-4">
           <LibraryStamp boxed>
-            La troupe — {cats.length} pensionnaire{cats.length > 1 ? "s" : ""}
+            La troupe, {cats.length} pensionnaire{cats.length > 1 ? "s" : ""}
           </LibraryStamp>
           <h1 className="font-display text-5xl font-medium leading-[0.95] tracking-[-0.01em] text-cp-ink sm:text-6xl">
             Mes pensionnaires
@@ -87,7 +87,7 @@ function EmptyTroop() {
       </p>
       <p className="max-w-md font-body text-base leading-relaxed text-cp-ink-soft">
         Avant de demander un premier séjour, déclarez la fiche d&apos;au
-        moins un chat — identité, critères d&apos;admission, manies.
+        moins un chat : identité, critères d&apos;admission, manies.
       </p>
       <Link
         href="/dashboard/cats/new"

@@ -63,7 +63,7 @@ export default async function BookingDetailPage({
     body: m.content,
     fromAdmin: m.isFromAdmin,
     authorLabel: m.isFromAdmin
-      ? "La maison"
+      ? "Nous"
       : m.author.firstName === user.firstName
         ? "Vous"
         : `${m.author.firstName}`,
@@ -92,7 +92,7 @@ export default async function BookingDetailPage({
       <header className="space-y-6">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <LibraryStamp boxed>
-            Séjour N°{ref} — {nights} nuit{nights > 1 ? "s" : ""}
+            Séjour N°{ref}, {nights} nuit{nights > 1 ? "s" : ""}
           </LibraryStamp>
           <BookingStatusBadge status={booking.status} />
         </div>
@@ -104,7 +104,7 @@ export default async function BookingDetailPage({
         </h1>
 
         <p className="max-w-2xl font-display text-xl italic leading-snug text-cp-ink-soft">
-          {cats.map((c) => c.name).join(" · ")} — {nights} nuit
+          {cats.map((c) => c.name).join(" · ")}, {nights} nuit
           {nights > 1 ? "s" : ""} pour {cats.length} pensionnaire
           {cats.length > 1 ? "s" : ""}.
         </p>
@@ -119,7 +119,7 @@ export default async function BookingDetailPage({
               Devis en cours d&apos;évaluation
             </p>
             <p className="mt-3 font-display text-2xl italic leading-snug text-cp-ink sm:text-3xl">
-              La maison étudie votre demande et vous reviendra avec un tarif
+              Nous étudions votre demande et vous reviendrons avec un tarif
               personnalisé sous 48 h.
             </p>
             <p className="mt-3 font-body text-sm text-cp-ink-soft">
@@ -162,7 +162,7 @@ export default async function BookingDetailPage({
                 ))}
               </ul>
               <p className="mt-3 font-body text-xs italic text-cp-ink-soft">
-                Tarifs indicatifs — la maison les confirme dans le devis final.
+                Tarifs indicatifs, nous les confirmons dans le devis final.
               </p>
             </RuledBox>
           )}
@@ -238,7 +238,7 @@ export default async function BookingDetailPage({
         <SectionHeading
           number="01"
           title="Pensionnaires"
-          kicker="L'avis de la maison sur chaque chat apparaît ici une fois la fiche étudiée."
+          kicker="Notre avis sur chaque chat apparaît ici une fois la fiche étudiée."
           tone="cobalt"
         />
         <ul className="flex flex-wrap gap-px self-start overflow-hidden rounded-md border border-cp-ink bg-cp-ink [&>li]:grow [&>li]:basis-full [&>li]:bg-cp-paper sm:[&>li]:basis-[calc(50%-1px)]">
@@ -335,7 +335,7 @@ export default async function BookingDetailPage({
           <RuleDivider className="my-16" label="Télé-rendez-vous" tone="feuille" />
           <section className="space-y-4">
             <p className="max-w-2xl font-display text-xl italic leading-snug text-cp-ink-soft">
-              La maison vous propose un appel vidéo. Rejoignez-le à l&apos;heure
+              Nous vous proposons un appel vidéo. Rejoignez-le à l&apos;heure
               dite depuis cette page.
             </p>
             <ul className="grid gap-px overflow-hidden rounded-md border border-cp-ink bg-cp-ink">
@@ -376,7 +376,7 @@ export default async function BookingDetailPage({
       <section aria-labelledby="thread-title" className="space-y-8">
         <SectionHeading
           number={showJournal ? "03" : "02"}
-          title="Échanges avec la maison"
+          title="Échanges avec nous"
           kicker={`${messages.length} message${messages.length > 1 ? "s" : ""} jusqu'ici.`}
           tone="paprika"
         />
