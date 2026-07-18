@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { AdminClientsTable } from "@/components/admin-clients-table";
 import { LibraryStamp } from "@/components/library-stamp";
 import { RuleDivider } from "@/components/rule-divider";
 import { prisma } from "@/lib/db";
@@ -15,6 +16,20 @@ export default async function AdminClientsListPage() {
   ]);
   const avgCats =
     clients.length > 0 ? (totalCats / clients.length).toFixed(1) : "0,0";
+
+  // Le tri et le filtre se font côté client sur la liste complète : on passe
+  // donc des lignes déjà formatées, plus une date ISO pour trier.
+  const rows = clients.map((c) => ({
+    id: c.id,
+    reference: displayRef(c.id),
+    name: `${c.firstName} ${c.lastName}`,
+    email: c.email,
+    phone: c.phone,
+    createdAtLabel: formatDate(c.createdAt),
+    createdAtISO: c.createdAt.toISOString(),
+    catCount: c.catCount,
+    bookingCount: c.bookingCount,
+  }));
 
   return (
     <div className="mx-auto w-full max-w-7xl px-6 py-12 sm:px-10 sm:py-16">
@@ -67,110 +82,13 @@ export default async function AdminClientsListPage() {
         />
       </section>
 
-      <div className="mt-14 overflow-x-auto rounded-md border border-cp-ink">
-        <table className="w-full min-w-[60rem] border-collapse text-left">
-          <thead className="bg-cp-paper-deep">
-            <tr>
-              <Th>N° fiche</Th>
-              <Th>Propriétaire</Th>
-              <Th>Contact</Th>
-              <Th>Inscrit le</Th>
-              <Th className="text-center">Pensionnaires</Th>
-              <Th className="text-center">Séjours</Th>
-            </tr>
-          </thead>
-          <tbody>
-            {clients.map((c) => (
-              <tr
-                key={c.id}
-                className="border-t border-cp-ink/20 transition-colors hover:bg-cp-paper-deep/40"
-              >
-                <Td>
-                  <Link
-                    href={`/admin/clients/${c.id}`}
-                    className="font-mono text-sm font-bold uppercase tracking-[0.16em] text-cp-paprika hover:underline hover:underline-offset-4"
-                  >
-                    {displayRef(c.id)}
-                  </Link>
-                </Td>
-                <Td>
-                  <Link
-                    href={`/admin/clients/${c.id}`}
-                    className="font-display text-2xl italic leading-tight text-cp-ink hover:text-cp-paprika"
-                  >
-                    {c.firstName} {c.lastName}
-                  </Link>
-                </Td>
-                <Td>
-                  <p className="font-body text-sm text-cp-ink">
-                    <a
-                      href={`mailto:${c.email}`}
-                      className="underline underline-offset-4 decoration-cp-ink/30 hover:decoration-cp-paprika hover:text-cp-paprika"
-                    >
-                      {c.email}
-                    </a>
-                  </p>
-                  {c.phone && (
-                    <p className="mt-1 font-mono text-[0.65rem] uppercase tracking-[0.14em] text-cp-ink-soft">
-                      {c.phone}
-                    </p>
-                  )}
-                </Td>
-                <Td>
-                  <p className="font-mono text-xs font-bold uppercase tracking-[0.14em] text-cp-ink">
-                    {formatDate(c.createdAt)}
-                  </p>
-                </Td>
-                <Td className="text-center">
-                  <p className="font-display text-2xl font-bold leading-none text-cp-ink">
-                    {c.catCount.toString().padStart(2, "0")}
-                  </p>
-                </Td>
-                <Td className="text-center">
-                  <p className="font-display text-2xl font-bold leading-none text-cp-ink">
-                    {c.bookingCount.toString().padStart(2, "0")}
-                  </p>
-                </Td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      <AdminClientsTable clients={rows} />
 
       <p className="mt-8 max-w-2xl font-body text-sm text-cp-ink-soft">
-        Clique sur un client pour ouvrir sa fiche : ses pensionnaires (et leurs
-        documents) et son historique de séjours.
+        Clique sur une ligne pour ouvrir la fiche du client : ses pensionnaires
+        (et leurs documents) et son historique de séjours.
       </p>
     </div>
-  );
-}
-
-function Th({
-  children,
-  className,
-}: {
-  children?: React.ReactNode;
-  className?: string;
-}) {
-  return (
-    <th
-      scope="col"
-      className={`border-b border-cp-ink px-4 py-3 font-mono text-[0.6rem] font-bold uppercase tracking-[0.22em] text-cp-ink-soft ${className ?? ""}`}
-    >
-      {children}
-    </th>
-  );
-}
-
-function Td({
-  children,
-  className,
-}: {
-  children: React.ReactNode;
-  className?: string;
-}) {
-  return (
-    <td className={`px-4 py-4 align-top ${className ?? ""}`}>{children}</td>
   );
 }
 

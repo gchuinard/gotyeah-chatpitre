@@ -69,7 +69,10 @@ export type BookingWithRelations = Booking & {
 };
 
 const BOOKING_INCLUDE = {
-  cats: { include: { cat: true } },
+  // Ordre stable et explicite : sans `orderBy`, Postgres renvoie les lignes
+  // dans leur ordre physique, qui change dès qu'on met une ligne à jour. Les
+  // cartes pensionnaires sautaient donc à chaque enregistrement d'avis.
+  cats: { include: { cat: true }, orderBy: { cat: { name: "asc" } } },
   extras: { orderBy: { sortOrder: "asc" } },
   user: true,
   messages: {
@@ -341,7 +344,7 @@ export async function getNotificationsFor(
   });
   return notifs.map((n) => ({
     id: n.id,
-    label: n.title + (n.body ? ` — ${n.body}` : ""),
+    label: n.title + (n.body ? ` : ${n.body}` : ""),
     timeAgo: _relativeTime(n.createdAt),
     unread: n.readAt === null,
     href: n.link ?? undefined,

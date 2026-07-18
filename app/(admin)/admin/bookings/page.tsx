@@ -1,7 +1,9 @@
 import Link from "next/link";
 
+import { AdminBookingsTable } from "@/components/admin-bookings-table";
 import {
   BookingStatusBadge,
+  BOOKING_STATUS_ORDER,
   type BookingStatus,
 } from "@/components/booking-status-badge";
 import { LibraryStamp } from "@/components/library-stamp";
@@ -10,22 +12,14 @@ import { SectionHeading } from "@/components/section-heading";
 import {
   displayRef,
   formatDate,
+  formatEuros,
   getAllBookings,
   nightsBetween,
 } from "@/lib/repository";
 
-// Ordre d'affichage : décisions en attente d'abord, puis acceptées,
-// puis le reste (terminées, annulées, refusées).
-const STATUS_ORDER: BookingStatus[] = [
-  "QUESTION_ASKED",
-  "PENDING",
-  "ACCEPTED",
-  "COMPLETED",
-  "CANCELLED",
-  "REJECTED",
-];
-
-/// Liste admin des séjours : tableau brutalist, tri par priorité de statut.
+/// Liste admin des séjours : tableau filtrable et triable, ordonné par
+/// priorité de traitement par défaut (l'ordre des statuts vit dans
+/// `booking-status-badge`, partagé avec les chips de comptage).
 
 export default async function AdminBookingsListPage() {
   const bookings = await getAllBookings();
@@ -39,6 +33,26 @@ export default async function AdminBookingsListPage() {
     COMPLETED: 0,
   };
   for (const b of bookings) counts[b.status] += 1;
+
+  // Filtre et tri se font côté client sur la liste complète : on passe des
+  // lignes déjà formatées, plus une date ISO et un total brut pour trier.
+  const rows = bookings.map((b) => {
+    const total = b.totalAmount === null ? null : Number(b.totalAmount);
+    return {
+      id: b.id,
+      reference: displayRef(b.id),
+      status: b.status,
+      clientName: `${b.user.firstName} ${b.user.lastName}`,
+      clientEmail: b.user.email,
+      startISO: b.startDate.toISOString(),
+      startLabel: formatDate(b.startDate),
+      endLabel: formatDate(b.endDate),
+      nights: nightsBetween(b.startDate, b.endDate),
+      catNames: b.cats.map((link) => link.cat.name).join(" · "),
+      total,
+      totalLabel: total === null ? null : `${formatEuros(total)}€`,
+    };
+  });
 
   return (
     <div className="mx-auto w-full max-w-7xl px-6 py-12 sm:px-10 sm:py-16">
@@ -73,7 +87,7 @@ export default async function AdminBookingsListPage() {
         aria-label="Répartition par statut"
         className="grid gap-px overflow-hidden rounded-md border border-cp-ink bg-cp-ink sm:grid-cols-3 lg:grid-cols-6"
       >
-        {STATUS_ORDER.map((s) => (
+        {BOOKING_STATUS_ORDER.map((s) => (
           <StatusChip key={s} status={s} count={counts[s]} />
         ))}
       </section>
@@ -81,126 +95,16 @@ export default async function AdminBookingsListPage() {
       <SectionHeading
         number="01"
         title="Tableau des séjours"
-        kicker="Ouvrez une ligne pour traiter la décision ou répondre."
+        kicker="Filtrez, triez, puis ouvrez une ligne pour traiter la décision."
         className="mt-14"
       />
 
-      <div className="mt-8 overflow-x-auto rounded-md border border-cp-ink">
-        <table className="w-full min-w-[60rem] border-collapse text-left">
-          <thead className="bg-cp-paper-deep">
-            <tr>
-              <Th>N°</Th>
-              <Th>Statut</Th>
-              <Th>Client</Th>
-              <Th>Dates</Th>
-              <Th>Pensionnaires</Th>
-              <Th className="text-right">Total</Th>
-              <Th></Th>
-            </tr>
-          </thead>
-          <tbody>
-            {bookings.map((b) => {
-              const cats = b.cats.map((link) => link.cat);
-              const nights = nightsBetween(b.startDate, b.endDate);
-              const ref = displayRef(b.id);
-              return (
-                <tr
-                  key={b.id}
-                  className="border-t border-cp-ink/20 transition-colors hover:bg-cp-paper-deep/40"
-                >
-                  <Td>
-                    <Link
-                      href={`/admin/bookings/${b.id}`}
-                      className="font-mono text-sm font-bold uppercase tracking-[0.16em] text-cp-paprika hover:text-cp-ink"
-                    >
-                      N°{ref}
-                    </Link>
-                  </Td>
-                  <Td>
-                    <BookingStatusBadge status={b.status} />
-                  </Td>
-                  <Td>
-                    <p className="font-display text-lg italic leading-tight text-cp-ink">
-                      {b.user.firstName} {b.user.lastName}
-                    </p>
-                    <p className="font-mono text-[0.6rem] uppercase tracking-[0.16em] text-cp-ink-soft">
-                      {b.user.email}
-                    </p>
-                  </Td>
-                  <Td>
-                    <p className="font-body text-sm leading-snug text-cp-ink">
-                      {formatDate(b.startDate)}
-                      <br />
-                      <span className="text-cp-ink-soft">→ {formatDate(b.endDate)}</span>
-                    </p>
-                    <p className="mt-1 font-mono text-[0.6rem] uppercase tracking-[0.16em] text-cp-ink-soft">
-                      {nights} nuit{nights > 1 ? "s" : ""}
-                    </p>
-                  </Td>
-                  <Td>
-                    <p className="font-body text-sm text-cp-ink">
-                      {cats.map((c) => c.name).join(" · ")}
-                    </p>
-                  </Td>
-                  <Td className="text-right">
-                    {b.totalAmount === null ? (
-                      <p className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.18em] text-cp-cobalt">
-                        Sur devis
-                      </p>
-                    ) : (
-                      <p className="font-display text-2xl font-bold leading-none text-cp-ink">
-                        {Number(b.totalAmount).toLocaleString("fr-FR")}€
-                      </p>
-                    )}
-                  </Td>
-                  <Td>
-                    <Link
-                      href={`/admin/bookings/${b.id}`}
-                      className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.22em] text-cp-ink-soft hover:text-cp-paprika"
-                    >
-                      Ouvrir →
-                    </Link>
-                  </Td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
+      <AdminBookingsTable bookings={rows} />
     </div>
   );
 }
 
 /* ----- Helpers -------------------------------------------------------- */
-
-function Th({
-  children,
-  className,
-}: {
-  children?: React.ReactNode;
-  className?: string;
-}) {
-  return (
-    <th
-      scope="col"
-      className={`border-b border-cp-ink px-4 py-3 font-mono text-[0.6rem] font-bold uppercase tracking-[0.22em] text-cp-ink-soft ${className ?? ""}`}
-    >
-      {children}
-    </th>
-  );
-}
-
-function Td({
-  children,
-  className,
-}: {
-  children: React.ReactNode;
-  className?: string;
-}) {
-  return (
-    <td className={`px-4 py-4 align-top ${className ?? ""}`}>{children}</td>
-  );
-}
 
 function StatusChip({
   status,

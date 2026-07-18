@@ -7,6 +7,7 @@ import type { ExtraUnit } from "@prisma/client";
 import { Field } from "@/components/field";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { EXTRA_UNIT_OPTIONS, extraLineTotalNumber } from "@/lib/extras";
 
 /// Formulaire de devis admin. L'admin saisit les tarifs unitaires, le
@@ -107,6 +108,8 @@ export function QuoteForm({
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  // Envoyer le devis accepte le séjour ET notifie le client : on confirme.
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   const [pricePerFirstCat, setPricePerFirstCat] = useState<string>(
     String(current.pricePerFirstCat ?? suggested.pricePerFirstCat),
@@ -363,7 +366,7 @@ export function QuoteForm({
         <Button
           type="button"
           size="default"
-          onClick={() => submit({ withAccept: true })}
+          onClick={() => setConfirmOpen(true)}
           disabled={pending}
         >
           {pending ? "Envoi…" : "Envoyer le devis et accepter →"}
@@ -378,6 +381,16 @@ export function QuoteForm({
           Enregistrer le brouillon
         </Button>
       </div>
+
+      <ConfirmDialog
+        open={confirmOpen}
+        onOpenChange={setConfirmOpen}
+        title="Envoyer le devis et accepter le séjour ?"
+        description={`Le séjour passera en « Accepté » et le client recevra le devis : ${total.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}€ au total, dont ${deposit.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}€ d'acompte (${depositPercentage} %). Vérifiez les montants avant d'envoyer.`}
+        confirmLabel="Envoyer et accepter"
+        cancelLabel="Revenir au devis"
+        onConfirm={() => submit({ withAccept: true })}
+      />
     </section>
   );
 }
