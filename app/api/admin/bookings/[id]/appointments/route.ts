@@ -1,6 +1,13 @@
 import type { NextRequest } from "next/server";
 
-import { handle, HttpError, json, parseJson, requireAdmin } from "@/lib/api";
+import {
+  assertBookingWritable,
+  handle,
+  HttpError,
+  json,
+  parseJson,
+  requireAdmin,
+} from "@/lib/api";
 import { prisma } from "@/lib/db";
 import { formatDateTime } from "@/lib/format";
 import { createNotification } from "@/lib/notifications";
@@ -18,6 +25,7 @@ export function POST(req: NextRequest, { params }: RouteContext) {
 
     const booking = await prisma.booking.findUnique({ where: { id: bookingId } });
     if (!booking) throw new HttpError(404, "Séjour introuvable.");
+    assertBookingWritable(booking.status);
 
     const input = await parseJson(req, appointmentCreateSchema);
 

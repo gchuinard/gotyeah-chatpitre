@@ -60,6 +60,10 @@ export default async function BookingDetailPage({
   // pas laisser le client écrire à une pension qui ne peut plus lui répondre.
   // « Refusé » en est exclu : l'échange continue après un refus.
   const isClosed = ["CANCELLED", "COMPLETED"].includes(booking.status);
+  // La facture n'est servie au client que sur un séjour accepté ou terminé,
+  // cf. app/api/invoices/[bookingId]/pdf/route.tsx.
+  const canDownloadInvoice =
+    hasQuote && ["ACCEPTED", "COMPLETED"].includes(booking.status);
 
   // Mappe les messages Prisma vers le format attendu par ConversationView.
   const messages = booking.messages.map((m) => ({
@@ -295,8 +299,11 @@ export default async function BookingDetailPage({
         </RuledBox>
       )}
 
-      {/* Facture PDF — uniquement quand le devis est posé. */}
-      {hasQuote && (
+      {/* Facture PDF — la route ne la sert au client que sur un séjour accepté
+          ou terminé. Ne proposons pas un bouton qu'elle refusera : sur un
+          séjour annulé déjà chiffré, il renvoyait du JSON brut dans un
+          onglet vide. */}
+      {canDownloadInvoice && (
         <aside className="mt-10 flex flex-wrap items-center justify-between gap-4 rounded-md border border-cp-cobalt bg-cp-cobalt p-5 text-cp-paper sm:p-6">
           <div>
             <p className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.18em] text-cp-canari">

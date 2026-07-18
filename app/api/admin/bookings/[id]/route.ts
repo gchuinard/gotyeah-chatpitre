@@ -8,7 +8,14 @@ import type {
 import { Prisma } from "@prisma/client";
 
 import { prisma } from "@/lib/db";
-import { handle, HttpError, json, parseJson, requireAdmin } from "@/lib/api";
+import {
+  handle,
+  HttpError,
+  isBookingClosed,
+  json,
+  parseJson,
+  requireAdmin,
+} from "@/lib/api";
 import { adminBookingUpdateSchema } from "@/lib/validations";
 import { extraLineTotal } from "@/lib/pricing";
 import { createNotification } from "@/lib/notifications";
@@ -59,6 +66,28 @@ export function PATCH(req: NextRequest, { params }: RouteContext) {
     if (!booking) throw new HttpError(404, "Réservation introuvable.");
 
     const data = await parseJson(req, adminBookingUpdateSchema);
+
+    // Séjour clôturé : lecture seule, en miroir de ce que la fiche admin
+    // affiche. Un séjour ANNULÉ est totalement figé ; sur un séjour TERMINÉ on
+    // laisse passer le seul encaissement, le solde pouvant être réglé après le
+    // départ des chats. Sans cette garde, « Poser une question » écrivait un
+    // message ET rouvrait le séjour en « Question posée », alors que le bouton
+    // « Envoyer » voisin était refusé.
+    if (isBookingClosed(booking.status)) {
+      const touched = Object.entries(data)
+        .filter(([, value]) => value !== undefined)
+        .map(([key]) => key);
+      const paymentOnly =
+        booking.status === "COMPLETED" &&
+        touched.length > 0 &&
+        touched.every((key) => key === "paidAmount");
+      if (!paymentOnly) {
+        throw new HttpError(
+          409,
+          "Ce séjour est clôturé, il est en lecture seule.",
+        );
+      }
+    }
 
     // État final du devis = valeur fournie ∪ valeur existante.
     const pricePerFirstCat =
@@ -176,6 +205,15 @@ export function PATCH(req: NextRequest, { params }: RouteContext) {
             isFromAdmin: true,
             content: data.questionMessage,
           },
+        });
+      }
+      // Clôturer un séjour emporte ses télé-rendez-vous : sinon le créneau
+      // resterait « planifié », que le client pourrait rejoindre alors que la
+      // fiche verrouillée ne le permet plus côté pension.
+      if (data.status && isBookingClosed(data.status)) {
+        await tx.appointment.updateMany({
+          where: { bookingId: id, status: "SCHEDULED" },
+          data: { status: "CANCELLED" },
         });
       }
       return tx.booking.update({ where: { id }, data: updateData });
