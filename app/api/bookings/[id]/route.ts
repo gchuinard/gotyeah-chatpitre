@@ -101,7 +101,11 @@ export function PATCH(req: NextRequest, { params }: RouteContext) {
       });
       return tx.booking.update({
         where: { id: booking.id },
-        data: { status: "CANCELLED", editingStartedAt: null },
+        // La date de clôture décide de l'archivage au bout de 30 jours. Elle se
+        // pose ici, au moment exact du changement de statut, et nulle part
+        // ailleurs : `updatedAt` ne conviendrait pas, il bouge à chaque
+        // écriture ultérieure.
+        data: { status: "CANCELLED", editingStartedAt: null, closedAt: new Date() },
       });
     });
 

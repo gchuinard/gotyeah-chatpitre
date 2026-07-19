@@ -50,13 +50,19 @@ export function POST(req: NextRequest, { params }: RouteContext) {
         userId: booking.userId,
         type: "MESSAGE_RECEIVED",
         title: "Nouveau message de la pension",
-        link: `/dashboard/bookings/${booking.id}`,
+        // Le fil vit dans l'onglet « Nouvelles » : sans le préciser, le lien
+        // ouvrirait l'onglet par défaut, où le message n'apparaît pas.
+        link: `/dashboard/bookings/${booking.id}?onglet=nouvelles`,
       });
     } else {
       await notifyAdmins({
         type: "MESSAGE_RECEIVED",
         title: "Nouveau message d'un client",
-        link: `/admin/bookings/${booking.id}`,
+        // L'onglet est OBLIGATOIRE dans le lien : le fil d'échanges vit dans
+        // « Contact client », et l'URL nue ouvre « Administratif ». Sans lui, la
+        // notification mènerait à une page où le message qui l'a déclenchée
+        // n'apparaît pas.
+        link: `/admin/bookings/${booking.id}?onglet=contact`,
       });
     }
 

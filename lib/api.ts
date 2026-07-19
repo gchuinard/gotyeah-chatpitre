@@ -39,6 +39,70 @@ export function isBookingClosed(status: string): boolean {
   return (CLOSED_BOOKING_STATUSES as readonly string[]).includes(status);
 }
 
+/// Statuts pour lesquels un séjour quitte la file de travail et part à
+/// l'archive au bout d'un délai. À NE PAS CONFONDRE avec les statuts clôturés
+/// ci-dessus : « Refusé » s'archive, parce qu'une demande refusée n'a plus rien
+/// à voir avec le travail courant, mais reste ÉCRIVABLE, parce que la
+/// confirmation de refus promet à l'utilisateur que l'échange continue. Ranger
+/// et verrouiller sont deux gestes différents.
+export const ARCHIVABLE_BOOKING_STATUSES = [
+  "CANCELLED",
+  "COMPLETED",
+  "REJECTED",
+] as const;
+
+export function isBookingArchivable(status: string): boolean {
+  return (ARCHIVABLE_BOOKING_STATUSES as readonly string[]).includes(status);
+}
+
+/// L'encaissement est le seul geste encore permis sur un séjour TERMINÉ : le
+/// solde peut être réglé après le départ des chats, et rien dans l'interface ne
+/// permettrait de rouvrir le séjour pour le saisir. Il reste refusé sur un
+/// séjour ANNULÉ, qui est totalement figé. On ne peut donc pas se contenter
+/// d'`assertBookingWritable` ici, qui refuserait les deux.
+export function assertPaymentWritable(status: string): void {
+  if (status === "CANCELLED") {
+    throw new HttpError(
+      409,
+      "Ce séjour est annulé, il n'accepte plus d'encaissement.",
+    );
+  }
+}
+
+/// Un télé-rendez-vous ne se rejoint que tant qu'il est PLANIFIÉ. Annulé ou
+/// déjà tenu, la salle doit rester fermée : sinon un lien de notification
+/// périmé, ou un onglet resté ouvert, laisse entrer dans un appel que l'autre
+/// partie ne peut plus rejoindre.
+export function assertAppointmentJoinable(status: string): void {
+  if (status !== "SCHEDULED") {
+    throw new HttpError(
+      409,
+      "Ce télé-rendez-vous n'est plus ouvert, la salle est fermée.",
+    );
+  }
+}
+
+/// Délai au-delà duquel un séjour clôturé quitte la liste de travail.
+export const ARCHIVE_AFTER_DAYS = 30;
+
+/// Vrai si le séjour est rangé à l'archive. Le décompte part de la DATE DE
+/// CLÔTURE et non de la date de fin du séjour ni de `updatedAt` : ce dernier
+/// bouge à chaque écriture, et l'encaissement d'un solde reste permis sur un
+/// séjour terminé, ce qui aurait fait ressortir de l'archive un séjour clos
+/// depuis des mois.
+///
+/// Sans date de clôture, le séjour reste VISIBLE. La règle échoue ainsi du bon
+/// côté : mieux vaut un séjour de trop dans la liste de travail qu'un séjour
+/// disparu de la vue.
+export function isBookingArchived(
+  status: string,
+  closedAt: Date | null,
+): boolean {
+  if (!isBookingArchivable(status)) return false;
+  if (!closedAt) return false;
+  return Date.now() - closedAt.getTime() > ARCHIVE_AFTER_DAYS * 86_400_000;
+}
+
 /// Lève un 409 si le séjour est clôturé. À appeler dans TOUTE route qui écrit
 /// sur un séjour : le verrou d'interface est rendu au moment du rendu serveur,
 /// donc périmé dès qu'un onglet reste ouvert pendant que le statut change.

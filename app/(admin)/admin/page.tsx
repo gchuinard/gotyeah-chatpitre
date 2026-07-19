@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { BookingPinToggle } from "@/components/booking-pin-toggle";
 import { BookingStatusBadge } from "@/components/booking-status-badge";
 import { CurrentResidentsWall } from "@/components/current-residents-wall";
 import { LibraryStamp } from "@/components/library-stamp";
@@ -48,13 +49,34 @@ export default async function AdminDashboardPage() {
     occupancies,
   ] = await Promise.all([
     prisma.booking.findMany({
-      where: { status: { in: ["PENDING", "QUESTION_ASKED"] } },
+      // La file rassemble tout ce qui demande une action : les demandes à
+      // trancher, les séjours portant un message client non lu, et ceux qu'on a
+      // épinglés pour y revenir. Un séjour clôturé n'y entre jamais, même avec
+      // un message non lu : sa fiche est en lecture seule, il n'y a rien à y
+      // traiter.
+      where: {
+        OR: [
+          { status: { in: ["PENDING", "QUESTION_ASKED"] } },
+          { pinnedForAdmin: true },
+          {
+            status: { notIn: ["CANCELLED", "COMPLETED"] },
+            messages: { some: { isFromAdmin: false, readAt: null } },
+          },
+        ],
+      },
       orderBy: { startDate: "asc" },
       include: {
         // Même ordre stable que `BOOKING_INCLUDE` : sans `orderBy`, Postgres
         // renvoie l'ordre physique des lignes, qui change à chaque mise à jour.
         cats: { include: { cat: true }, orderBy: { cat: { name: "asc" } } },
         user: true,
+        // Un seul message suffit à savoir qu'il y en a : inutile de tous les
+        // charger pour afficher une pastille.
+        messages: {
+          where: { isFromAdmin: false, readAt: null },
+          select: { id: true },
+          take: 1,
+        },
       },
     }),
     prisma.booking.count({ where: { status: "ACCEPTED" } }),
@@ -122,8 +144,8 @@ export default async function AdminDashboardPage() {
         <div className="flex flex-wrap items-end justify-between gap-4">
           <SectionHeading
             number="01"
-            title="Décisions en attente"
-            kicker="À traiter en priorité, délai cible 48 h."
+            title="À traiter"
+            kicker="Demandes à trancher, messages non lus, et ce que vous avez épinglé."
             className="flex-1"
           />
           {/* Bouton plein plutôt que discret : c'est le raccourci le plus
@@ -142,7 +164,7 @@ export default async function AdminDashboardPage() {
         {pendingDecisions.length === 0 ? (
           <RuledBox variant="deep">
             <p className="font-display text-2xl italic text-cp-ink">
-              Pas de décision à prendre, bien joué.
+              Rien à traiter, bien joué.
             </p>
           </RuledBox>
         ) : (
@@ -151,14 +173,22 @@ export default async function AdminDashboardPage() {
               const cats = b.cats.map((link) => link.cat);
               const nights = nightsBetween(b.startDate, b.endDate);
               return (
-                <li key={b.id} className="border-b border-cp-ink/30">
+                <li
+                  key={b.id}
+                  className="flex items-center gap-2 border-b border-cp-ink/30 pr-3"
+                >
                   {/* Ligne entièrement cliquable. On garde un vrai lien plutôt
                       qu'un gestionnaire de clic : le clavier, le ctrl-clic et le
                       clic milieu marchent, et la page reste un composant
-                      serveur. */}
+                      serveur. L'épingle est SŒUR du lien et non dedans : un
+                      bouton dans une ancre est du HTML invalide. */}
                   <Link
-                    href={`/admin/bookings/${b.id}`}
-                    className="grid gap-3 py-5 transition-colors hover:bg-cp-paper-deep/40 sm:grid-cols-[6rem_2fr_2fr_auto] sm:items-center sm:gap-5"
+                    href={
+                      b.messages.length > 0
+                        ? `/admin/bookings/${b.id}?onglet=contact`
+                        : `/admin/bookings/${b.id}`
+                    }
+                    className="grid min-w-0 flex-1 gap-3 py-5 pr-4 transition-colors hover:bg-cp-paper-deep/40 sm:grid-cols-[6rem_2fr_2fr_auto] sm:items-center sm:gap-5"
                   >
                     <p className="font-mono text-sm font-bold uppercase tracking-[0.18em] text-cp-paprika">
                       N°{displayRef(b.id)}
@@ -179,8 +209,16 @@ export default async function AdminDashboardPage() {
                         {b.user.email}
                       </p>
                     </div>
-                    <BookingStatusBadge status={b.status} />
+                    <div className="flex flex-wrap items-center gap-2">
+                      <BookingStatusBadge status={b.status} />
+                      {b.messages.length > 0 && (
+                        <span className="inline-flex items-center rounded-full border border-cp-paprika bg-cp-paprika px-2.5 py-0.5 font-mono text-[0.6rem] font-bold uppercase tracking-[0.16em] text-cp-paper">
+                          Message non lu
+                        </span>
+                      )}
+                    </div>
                   </Link>
+                  <BookingPinToggle bookingId={b.id} pinned={b.pinnedForAdmin} />
                 </li>
               );
             })}

@@ -34,6 +34,7 @@ model User {
   notifications Notification[]
   messages      BookingMessage[] // messages écrits par cet utilisateur
   stayUpdates   StayUpdate[] // entrées du carnet de séjour postées (admin)
+  paymentsRecorded BookingPayment[] // versements saisis (admin)
 
   appointments        Appointment[] @relation("AppointmentClient") // rdv où l'utilisateur est le client
   appointmentsCreated Appointment[] @relation("AppointmentCreatedBy") // rdv planifiés (admin)
@@ -218,6 +219,18 @@ model Booking {
   depositAmount     Decimal? @db.Decimal(10, 2) // depositPercentage % du total
   paidAmount        Decimal? @db.Decimal(10, 2) // montant réellement encaissé (saisi par l'admin)
 
+  // Date du passage en ANNULÉ ou TERMINÉ, remise à null à la réouverture.
+  // C'est elle, et pas updatedAt, qui décide de l'archivage au bout de 30
+  // jours : updatedAt bouge à chaque écriture, et l'encaissement d'un solde
+  // reste permis sur un séjour terminé, ce qui ferait ressortir de l'archive
+  // un séjour clos depuis des mois.
+  closedAt DateTime?
+
+  // Épinglé par la pension pour rester dans la file « À traiter » même quand
+  // plus rien ne l'y ferait entrer. État PARTAGÉ et non réglage personnel : les
+  // deux personnes qui tiennent la pension voient la même file.
+  pinnedForAdmin Boolean @default(false)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -227,6 +240,7 @@ model Booking {
   invoices     Invoice[]
   stayUpdates  StayUpdate[]
   appointments Appointment[]
+  payments     BookingPayment[]
 
   @@index([userId])
   @@index([status])
@@ -290,6 +304,46 @@ model BookingExtra {
   // par l'admin. Sert à l'affichage (indicatif vs confirmé) et au devis.
   requestedByClient Boolean   @default(false)
   sortOrder         Int       @default(0)
+
+  createdAt DateTime @default(now())
+
+  @@index([bookingId])
+}
+
+/// Moyen d'un versement. Liste fermée et non champ libre : une saisie libre
+/// rendrait tout total par moyen impossible et l'export comptable inexploitable.
+enum PaymentMethod {
+  CASH // espèces
+  CHEQUE // chèque
+  TRANSFER // virement
+  OTHER // autre
+}
+
+/// Versement encaissé sur un séjour. Plusieurs par séjour : un client peut
+/// régler en deux fois, par deux moyens différents, à deux dates.
+///
+/// `Booking.paidAmount` reste la SOMME de ces lignes, recalculée à chaque
+/// écriture. Les écrans qui n'ont besoin que du total (liste des séjours, fiche
+/// client) n'ont ainsi rien à agréger eux-mêmes, et l'ancien champ garde un
+/// sens pour tout code qui l'utilisait déjà.
+model BookingPayment {
+  id        String  @id @default(cuid())
+  bookingId String
+  booking   Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  amount Decimal       @db.Decimal(10, 2)
+  method PaymentMethod @default(OTHER)
+  // Date du VERSEMENT, pas de la saisie : un chèque reçu la semaine dernière
+  // se saisit aujourd'hui. Pré-remplie au jour courant dans le formulaire.
+  paidAt DateTime
+  // Numéro de chèque, référence de virement, mention manuscrite. Facultatif,
+  // sert au pointage d'un relevé bancaire.
+  reference String?
+
+  // Qui a saisi la ligne. SET NULL si le compte disparaît : le versement, lui,
+  // doit survivre à son auteur.
+  recordedById String?
+  recordedBy   User?   @relation(fields: [recordedById], references: [id], onDelete: SetNull)
 
   createdAt DateTime @default(now())
 
@@ -438,6 +492,7 @@ enum NotificationType {
   ARRIVAL_REMINDER // (admin) arrivée prévue le lendemain
   APPOINTMENT_SCHEDULED // (client) un télé-rendez-vous a été planifié
   APPOINTMENT_CANCELLED // (client) un télé-rendez-vous a été annulé
+  BOOKING_COMPLETED // (client) séjour terminé : facture et carnet à retrouver
 }
 
 /// Notification in-app destinée à un utilisateur.

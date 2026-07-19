@@ -1,18 +1,30 @@
-// Helpers de formatage pur — sans dépendance Prisma, donc importable
+// Helpers de formatage pur, sans dépendance Prisma, donc importable
 // depuis les Server Components ET les Client Components.
+//
+// La zone est FIXÉE à Europe/Paris et jamais laissée à l'environnement. Sans
+// elle, un même instant s'affichait différemment selon l'endroit où le code
+// tourne : le conteneur de production est en UTC (vérifié), le navigateur est
+// dans le fuseau du visiteur. Un composant client, rendu une fois sur le
+// serveur puis hydraté, pouvait donc afficher deux jours différents pour la
+// même date. La pension est à Bordeaux : ses dates se lisent à son heure,
+// d'où qu'on les regarde.
+const TIME_ZONE = "Europe/Paris";
 
 const dateFormatter = new Intl.DateTimeFormat("fr-FR", {
+  timeZone: TIME_ZONE,
   day: "numeric",
   month: "long",
   year: "numeric",
 });
 
 const shortDateFormatter = new Intl.DateTimeFormat("fr-FR", {
+  timeZone: TIME_ZONE,
   day: "2-digit",
   month: "short",
 });
 
 const dateTimeFormatter = new Intl.DateTimeFormat("fr-FR", {
+  timeZone: TIME_ZONE,
   day: "2-digit",
   month: "short",
   hour: "2-digit",
@@ -32,6 +44,27 @@ export function formatShortDate(date: Date): string {
 /// « 14 mars · 16h05 » — horodatage des messages et entrées de carnet.
 export function formatDateTime(date: Date): string {
   return dateTimeFormatter.format(date).replace(", ", " · ").replace(":", "h");
+}
+
+/// Date au format attendu par un champ `<input type="date">`, exprimée à Paris
+/// comme tout le reste. La locale en-CA produit nativement l'ordre
+/// année-mois-jour, ce qui évite de recomposer la chaîne à la main.
+const inputDateFormatter = new Intl.DateTimeFormat("en-CA", {
+  timeZone: TIME_ZONE,
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+});
+
+/// « 2026-07-19 » — pour pré-remplir un champ date.
+export function toInputDate(date: Date): string {
+  return inputDateFormatter.format(date);
+}
+
+/// Date du jour à Paris, au format d'un champ date. La lecture de l'heure vit
+/// ici et non dans un composant : un rendu doit rester pur.
+export function todayInputDate(): string {
+  return toInputDate(new Date());
 }
 
 /// « 2026-06-16 » — date ISO courte (UTC), pour les noms de fichiers.

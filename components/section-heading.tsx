@@ -14,7 +14,9 @@ export function SectionHeading({
   tone = "cobalt",
   className,
 }: {
-  number: string;
+  /// Facultatif : les sections rangées en onglets ne se numérotent plus, la
+  /// barre d'onglets porte déjà l'orientation.
+  number?: string;
   title: string;
   kicker?: string;
   align?: "left" | "center";
@@ -44,14 +46,16 @@ export function SectionHeading({
           align === "center" && "justify-center",
         )}
       >
-        <span
-          className={cn(
-            "inline-flex h-7 items-center justify-center rounded-sm px-2.5 font-mono text-xs font-bold uppercase tracking-[0.14em]",
-            chipClass,
-          )}
-        >
-          n° {number}
-        </span>
+        {number && (
+          <span
+            className={cn(
+              "inline-flex h-7 items-center justify-center rounded-sm px-2.5 font-mono text-xs font-bold uppercase tracking-[0.14em]",
+              chipClass,
+            )}
+          >
+            n° {number}
+          </span>
+        )}
         <span aria-hidden className="h-px flex-1 bg-cp-ink/30" />
       </div>
       <Tag className="font-display text-4xl font-medium leading-[1.02] tracking-tight text-cp-ink sm:text-5xl lg:text-6xl">

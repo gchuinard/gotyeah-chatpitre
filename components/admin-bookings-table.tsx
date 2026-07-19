@@ -11,6 +11,7 @@ import {
   type BookingStatus,
 } from "@/components/booking-status-badge";
 import { Input } from "@/components/ui/input";
+import { SortableTh, Th } from "@/components/ui/sortable-th";
 import { cn } from "@/lib/utils";
 
 /// Tableau des séjours côté admin : recherche, filtre par statut, tri par
@@ -31,9 +32,20 @@ export type AdminBookingRow = {
   catNames: string;
   total: number | null;
   totalLabel: string | null;
+  /// Somme des versements. `null` quand le séjour n'est pas chiffré : il n'y a
+  /// alors rien à devoir, donc rien à afficher.
+  paid: number | null;
+  paidLabel: string | null;
+  /// « reste 30€ », « soldé » ou « trop-perçu 10€ », déjà rédigé côté serveur.
+  balanceLabel: string | null;
+  balanceTone: "due" | "settled" | "over" | null;
 };
 
-type SortKey = "priority" | "status" | "client" | "dates" | "total";
+// Pas de clé « priorité de traitement » distincte : elle n'était exposée par
+// aucun en-tête, donc une fois qu'on avait cliqué ailleurs, l'ordre annoncé par
+// la page était perdu jusqu'au rechargement. Le tri par statut, départagé par
+// date de début, EST cet ordre : un clic sur « Statut » y ramène.
+type SortKey = "status" | "client" | "dates" | "total" | "paid";
 
 const SELECT_CLASS =
   "h-10 min-w-0 rounded-md border border-cp-ink bg-cp-paper px-3 font-body text-sm text-cp-ink transition-colors outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[3px] focus-visible:outline-cp-paprika";
@@ -42,7 +54,7 @@ export function AdminBookingsTable({ bookings }: { bookings: AdminBookingRow[] }
   const router = useRouter();
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState<BookingStatus | "ALL">("ALL");
-  const [sortKey, setSortKey] = useState<SortKey>("priority");
+  const [sortKey, setSortKey] = useState<SortKey>("status");
   const [asc, setAsc] = useState(true);
 
   const rows = useMemo(() => {
@@ -64,8 +76,6 @@ export function AdminBookingsTable({ bookings }: { bookings: AdminBookingRow[] }
     const dir = asc ? 1 : -1;
     return [...filtered].sort((a, b) => {
       switch (sortKey) {
-        case "status":
-          return dir * (priority(a.status) - priority(b.status));
         case "client":
           return dir * a.clientName.localeCompare(b.clientName, "fr");
         case "dates":
@@ -76,9 +86,20 @@ export function AdminBookingsTable({ bookings }: { bookings: AdminBookingRow[] }
           if (a.total === null) return 1;
           if (b.total === null) return -1;
           return dir * (a.total - b.total);
+        case "paid":
+          // Même traitement : un séjour sans devis n'a pas d'encaissement à
+          // comparer, il ne doit pas remonter en tête quand on trie.
+          if (a.paid === null && b.paid === null) return 0;
+          if (a.paid === null) return 1;
+          if (b.paid === null) return -1;
+          return dir * (a.paid - b.paid);
         default:
+          // Statut, et ordre par défaut de la page : priorité de traitement,
+          // puis date de début pour départager les ex æquo. Le départage reste
+          // croissant même quand on inverse le sens, pour que deux séjours de
+          // même statut gardent un ordre chronologique lisible.
           return (
-            priority(a.status) - priority(b.status) ||
+            dir * (priority(a.status) - priority(b.status)) ||
             a.startISO.localeCompare(b.startISO)
           );
       }
@@ -135,12 +156,13 @@ export function AdminBookingsTable({ bookings }: { bookings: AdminBookingRow[] }
               <SortableTh label="Dates" sortKey="dates" active={sortKey} asc={asc} onSort={toggleSort} />
               <Th>Pensionnaires</Th>
               <SortableTh label="Total" sortKey="total" active={sortKey} asc={asc} onSort={toggleSort} className="text-right" />
+              <SortableTh label="Encaissé" sortKey="paid" active={sortKey} asc={asc} onSort={toggleSort} className="text-right" />
             </tr>
           </thead>
           <tbody>
             {rows.length === 0 ? (
               <tr>
-                <td colSpan={6} className="px-4 py-12 text-center font-display text-xl italic text-cp-ink-soft">
+                <td colSpan={7} className="px-4 py-12 text-center font-display text-xl italic text-cp-ink-soft">
                   Aucun séjour ne correspond à ce filtre.
                 </td>
               </tr>
@@ -199,6 +221,29 @@ export function AdminBookingsTable({ bookings }: { bookings: AdminBookingRow[] }
                       </p>
                     )}
                   </Td>
+                  <Td className="text-right">
+                    {b.paidLabel === null ? (
+                      <p className="font-mono text-[0.6rem] uppercase tracking-[0.16em] text-cp-ink/30">
+                        —
+                      </p>
+                    ) : (
+                      <>
+                        <p className="font-display text-2xl font-bold leading-none text-cp-ink">
+                          {b.paidLabel}
+                        </p>
+                        <p
+                          className={cn(
+                            "mt-1 font-mono text-[0.6rem] font-bold uppercase tracking-[0.14em]",
+                            b.balanceTone === "due" && "text-cp-paprika",
+                            b.balanceTone === "settled" && "text-cp-feuille",
+                            b.balanceTone === "over" && "text-cp-cobalt",
+                          )}
+                        >
+                          {b.balanceLabel}
+                        </p>
+                      </>
+                    )}
+                  </Td>
                 </tr>
               ))
             )}
@@ -216,59 +261,6 @@ function isPlainRowClick(e: React.MouseEvent): boolean {
   if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return false;
   if (window.getSelection()?.toString()) return false;
   return true;
-}
-
-function SortableTh({
-  label,
-  sortKey,
-  active,
-  asc,
-  onSort,
-  className,
-}: {
-  label: string;
-  sortKey: SortKey;
-  active: SortKey;
-  asc: boolean;
-  onSort: (key: SortKey) => void;
-  className?: string;
-}) {
-  const isActive = active === sortKey;
-  return (
-    <Th className={className}>
-      <button
-        type="button"
-        onClick={() => onSort(sortKey)}
-        aria-label={`Trier par ${label}`}
-        className="inline-flex items-center gap-1.5 uppercase tracking-[0.22em] transition-colors hover:text-cp-paprika"
-      >
-        {label}
-        <span
-          aria-hidden
-          className={cn("text-[0.7rem]", isActive ? "text-cp-paprika" : "text-cp-ink/25")}
-        >
-          {isActive ? (asc ? "▲" : "▼") : "▲"}
-        </span>
-      </button>
-    </Th>
-  );
-}
-
-function Th({
-  children,
-  className,
-}: {
-  children?: React.ReactNode;
-  className?: string;
-}) {
-  return (
-    <th
-      scope="col"
-      className={`border-b border-cp-ink px-4 py-3 font-mono text-[0.6rem] font-bold uppercase tracking-[0.22em] text-cp-ink-soft ${className ?? ""}`}
-    >
-      {children}
-    </th>
-  );
 }
 
 function Td({

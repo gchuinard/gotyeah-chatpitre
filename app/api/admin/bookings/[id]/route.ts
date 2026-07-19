@@ -11,6 +11,7 @@ import { prisma } from "@/lib/db";
 import {
   handle,
   HttpError,
+  isBookingArchivable,
   isBookingClosed,
   json,
   parseJson,
@@ -18,17 +19,22 @@ import {
 } from "@/lib/api";
 import { adminBookingUpdateSchema } from "@/lib/validations";
 import { extraLineTotal } from "@/lib/pricing";
+import { formatDateTime } from "@/lib/format";
 import { createNotification } from "@/lib/notifications";
 import { differenceInCalendarDays } from "date-fns";
 
 type RouteContext = { params: Promise<{ id: string }> };
 
 // Notification envoyée au client selon le nouveau statut. Les statuts absents
-// de cette table (PENDING, CANCELLED, COMPLETED) ne déclenchent pas de notif —
-// l'énumération NotificationType ne prévoit pas de type dédié.
+// de cette table (PENDING, CANCELLED) ne déclenchent pas de notif.
 const STATUS_NOTIFICATION: Partial<
-  Record<BookingStatus, { type: NotificationType; title: string }>
+  Record<BookingStatus, { type: NotificationType; title: string; body?: string }>
 > = {
+  COMPLETED: {
+    type: "BOOKING_COMPLETED",
+    title: "Votre séjour est terminé",
+    body: "Retrouvez sa facture et le carnet de séjour de votre chat.",
+  },
   ACCEPTED: {
     type: "BOOKING_ACCEPTED",
     title: "Votre demande de réservation a été acceptée",
@@ -36,6 +42,13 @@ const STATUS_NOTIFICATION: Partial<
   REJECTED: {
     type: "BOOKING_REJECTED",
     title: "Votre demande de réservation a été refusée",
+  },
+  CANCELLED: {
+    // Pas d'enum dédié, on réutilise le plus proche. Une annulation par la
+    // pension ne déclenchait AUCUNE notification jusqu'ici : le client
+    // l'apprenait en rouvrant sa fiche, ou pas du tout.
+    type: "BOOKING_REJECTED",
+    title: "Votre séjour a été annulé",
   },
   QUESTION_ASKED: {
     type: "BOOKING_QUESTION",
@@ -67,26 +80,42 @@ export function PATCH(req: NextRequest, { params }: RouteContext) {
 
     const data = await parseJson(req, adminBookingUpdateSchema);
 
-    // Séjour clôturé : lecture seule, en miroir de ce que la fiche admin
-    // affiche. Un séjour ANNULÉ est totalement figé ; sur un séjour TERMINÉ on
-    // laisse passer le seul encaissement, le solde pouvant être réglé après le
-    // départ des chats. Sans cette garde, « Poser une question » écrivait un
-    // message ET rouvrait le séjour en « Question posée », alors que le bouton
-    // « Envoyer » voisin était refusé.
-    if (isBookingClosed(booking.status)) {
-      const touched = Object.entries(data)
-        .filter(([, value]) => value !== undefined)
-        .map(([key]) => key);
-      const paymentOnly =
-        booking.status === "COMPLETED" &&
-        touched.length > 0 &&
-        touched.every((key) => key === "paidAmount");
-      if (!paymentOnly) {
+    // Réouverture : sortie anticipée AVANT la garde de lecture seule, pour que
+    // celle-ci conserve sa règle simple (aucune écriture ordinaire sur un
+    // séjour clôturé) et que l'exception reste unique et nommée. Surtout, ne
+    // pas fondre cette branche dans le flux principal : elle y traverserait le
+    // recalcul du devis, l'annulation en cascade des rendez-vous et la table
+    // des notifications, et annoncerait au client « demande acceptée » à
+    // chaque réouverture.
+    if (data.reopen) {
+      if (!isBookingClosed(booking.status)) {
         throw new HttpError(
           409,
-          "Ce séjour est clôturé, il est en lecture seule.",
+          "Ce séjour n'est pas clôturé, il n'y a rien à rouvrir.",
         );
       }
+      const reopened = await prisma.booking.update({
+        where: { id },
+        // Un séjour TERMINÉ a forcément été accepté, il y retourne. Un séjour
+        // ANNULÉ repart en attente : rien en base ne dit s'il avait été
+        // accepté, et le total ne le prouve pas puisque le devis se saisit
+        // avant l'acceptation. Repasser par une acceptation explicite est peu
+        // coûteux et renotifie correctement le client.
+        data: {
+          status: booking.status === "COMPLETED" ? "ACCEPTED" : "PENDING",
+          closedAt: null,
+        },
+      });
+      return json({ booking: reopened });
+    }
+
+    // Séjour clôturé : lecture seule STRICTE. L'exception sensible aux champs
+    // qui vivait ici, pour laisser passer l'encaissement d'un séjour terminé,
+    // n'a plus d'objet : l'encaissement a sa propre route et sa propre garde
+    // depuis que les versements sont des lignes. La réouverture, elle, est
+    // sortie plus haut.
+    if (isBookingClosed(booking.status)) {
+      throw new HttpError(409, "Ce séjour est clôturé, il est en lecture seule.");
     }
 
     // État final du devis = valeur fournie ∪ valeur existante.
@@ -164,6 +193,16 @@ export function PATCH(req: NextRequest, { params }: RouteContext) {
       );
     }
 
+    // Un séjour ne se termine que depuis « accepté ». Sans cette garde, un
+    // appel direct pourrait clore une demande jamais acceptée, qui deviendrait
+    // alors définitivement en lecture seule.
+    if (data.status === "COMPLETED" && booking.status !== "ACCEPTED") {
+      throw new HttpError(
+        409,
+        "Seul un séjour accepté peut être marqué comme terminé.",
+      );
+    }
+
     const updateData: PrismaTypes.BookingUpdateInput = {
       status: data.status,
       adminNotes: data.adminNotes,
@@ -172,9 +211,27 @@ export function PATCH(req: NextRequest, { params }: RouteContext) {
       depositPercentage,
       totalAmount,
       depositAmount,
-      paidAmount:
-        data.paidAmount !== undefined ? new Prisma.Decimal(data.paidAmount) : undefined,
+      // paidAmount n'est PAS écrit ici : c'est la somme des versements, tenue
+      // par syncBookingPaidAmount. Un second chemin d'écriture la ferait
+      // diverger sans que rien ne le signale.
+      // `undefined` et NON `null` quand le statut n'est pas touché. Écrire
+      // `null` ici effacerait la date de clôture à chaque enregistrement
+      // d'encaissement sur un séjour terminé, seule écriture que la garde
+      // ci-dessus laisse passer : le séjour ressortirait alors définitivement
+      // de l'archive, des semaines plus tard, à cause d'une action sans
+      // rapport. Introuvable en recette.
+      closedAt:
+        data.status === undefined
+          ? undefined
+          : isBookingArchivable(data.status)
+            ? new Date()
+            : null,
     };
+
+    // Créneaux emportés par une clôture, relevés dans la transaction pour être
+    // notifiés ensuite : un client qui ne sait pas que son appel est tombé se
+    // connecte à l'heure dite pour rien.
+    let cancelledAppointments: { id: string; scheduledAt: Date }[] = [];
 
     // Update booking + remplace les extras + poste la question éventuelle,
     // le tout dans une transaction.
@@ -209,8 +266,13 @@ export function PATCH(req: NextRequest, { params }: RouteContext) {
       }
       // Clôturer un séjour emporte ses télé-rendez-vous : sinon le créneau
       // resterait « planifié », que le client pourrait rejoindre alors que la
-      // fiche verrouillée ne le permet plus côté pension.
+      // fiche verrouillée ne le permet plus côté pension. On les relève AVANT
+      // de les annuler, pour pouvoir prévenir le client de chacun.
       if (data.status && isBookingClosed(data.status)) {
+        cancelledAppointments = await tx.appointment.findMany({
+          where: { bookingId: id, status: "SCHEDULED" },
+          select: { id: true, scheduledAt: true },
+        });
         await tx.appointment.updateMany({
           where: { bookingId: id, status: "SCHEDULED" },
           data: { status: "CANCELLED" },
@@ -219,6 +281,19 @@ export function PATCH(req: NextRequest, { params }: RouteContext) {
       return tx.booking.update({ where: { id }, data: updateData });
     });
 
+    // Un créneau tombé se signale à part : la notification de statut du séjour
+    // ne dit pas qu'un appel était prévu, et c'est cet appel-là que le client
+    // risque d'honorer pour rien.
+    for (const appointment of cancelledAppointments) {
+      await createNotification({
+        userId: booking.userId,
+        type: "APPOINTMENT_CANCELLED",
+        title: "Votre télé-rendez-vous est annulé",
+        body: formatDateTime(appointment.scheduledAt),
+        link: `/dashboard/bookings/${booking.id}`,
+      });
+    }
+
     // Notification au client. Une question l'emporte sur la notif de statut
     // générique (évite de notifier deux fois pour un même geste).
     if (data.questionMessage) {
@@ -226,7 +301,8 @@ export function PATCH(req: NextRequest, { params }: RouteContext) {
         userId: booking.userId,
         type: "BOOKING_QUESTION",
         title: "La pension vous a posé une question",
-        link: `/dashboard/bookings/${booking.id}`,
+        // La question est un message : elle se lit dans l'onglet « Nouvelles ».
+        link: `/dashboard/bookings/${booking.id}?onglet=nouvelles`,
       });
     } else if (data.status && data.status !== booking.status) {
       const notif = STATUS_NOTIFICATION[data.status];
@@ -235,6 +311,7 @@ export function PATCH(req: NextRequest, { params }: RouteContext) {
           userId: booking.userId,
           type: notif.type,
           title: notif.title,
+          body: notif.body,
           link: `/dashboard/bookings/${booking.id}`,
         });
       }

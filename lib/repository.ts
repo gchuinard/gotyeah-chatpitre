@@ -11,6 +11,8 @@ import type {
   User,
 } from "@prisma/client";
 
+import { Prisma } from "@prisma/client";
+
 import type { CatCardProps } from "@/components/cat-card";
 import { prisma } from "@/lib/db";
 
@@ -26,6 +28,8 @@ export {
   formatShortDate,
   nightsBetween,
   relativeTime,
+  todayInputDate,
+  toInputDate,
 } from "@/lib/format";
 import {
   ageLabel as _ageLabel,
@@ -332,6 +336,46 @@ export function getClientForAdmin(id: string) {
         },
       },
     },
+  });
+}
+
+// =========================================================================
+// Encaissements
+// =========================================================================
+
+/// Recale `Booking.paidAmount` sur la somme des versements du séjour.
+///
+/// À appeler dans la MÊME transaction que toute écriture de versement : ce
+/// champ est un cache, il ne doit jamais diverger de sa source. On l'entretient
+/// plutôt que de le supprimer parce que la liste des séjours et la fiche client
+/// n'ont besoin que du total, et n'ont ainsi rien à agréger elles-mêmes.
+export async function syncBookingPaidAmount(
+  tx: Prisma.TransactionClient,
+  bookingId: string,
+): Promise<void> {
+  // Verrou de ligne AVANT l'agrégation. PostgreSQL est en « read committed » :
+  // sans lui, deux versements enregistrés au même instant calculeraient chacun
+  // leur somme sans voir l'insertion de l'autre, et le second commit écraserait
+  // le premier avec un total trop bas. On perdrait un versement à l'écran alors
+  // que sa ligne existe, et rien ne le signalerait.
+  await tx.$executeRaw`SELECT "id" FROM "Booking" WHERE "id" = ${bookingId} FOR UPDATE`;
+
+  const total = await tx.bookingPayment.aggregate({
+    where: { bookingId },
+    _sum: { amount: true },
+  });
+  await tx.booking.update({
+    where: { id: bookingId },
+    data: { paidAmount: total._sum.amount ?? new Prisma.Decimal(0) },
+  });
+}
+
+/// Versements d'un séjour, du plus récent au plus ancien.
+export function getPaymentsForBooking(bookingId: string) {
+  return prisma.bookingPayment.findMany({
+    where: { bookingId },
+    orderBy: [{ paidAt: "desc" }, { createdAt: "desc" }],
+    include: { recordedBy: { select: { firstName: true } } },
   });
 }
 

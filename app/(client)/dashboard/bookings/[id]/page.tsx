@@ -10,6 +10,7 @@ import { RuleDivider } from "@/components/rule-divider";
 import { RuledBox } from "@/components/ruled-box";
 import { SectionHeading } from "@/components/section-heading";
 import { StayJournal } from "@/components/stay-journal";
+import { resolveTab, UrlTabs, type UrlTabItem } from "@/components/url-tabs";
 import { buttonVariants } from "@/components/ui/button";
 import { getCurrentUser, isAdmin } from "@/lib/auth";
 import { CAT_REVIEW_BADGE, CAT_REVIEW_LABEL } from "@/lib/cat-review";
@@ -28,12 +29,22 @@ import {
 /// Détail d'un séjour côté client — lecture Prisma avec auth check, fil
 /// de discussion qui POST réellement, annulation qui PATCH le statut.
 
+/// « Nouvelles » plutôt qu'« Administratif » : cette page s'adresse au
+/// propriétaire du chat, pas à un service.
+const TABS: UrlTabItem<"sejour" | "nouvelles">[] = [
+  { value: "sejour", label: "Mon séjour" },
+  { value: "nouvelles", label: "Nouvelles" },
+];
+
 export default async function BookingDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ onglet?: string }>;
 }) {
   const { id } = await params;
+  const onglet = resolveTab((await searchParams).onglet, TABS);
   const user = await getCurrentUser();
   if (!user) return null;
 
@@ -118,8 +129,21 @@ export default async function BookingDetailPage({
         </p>
       </header>
 
+      <UrlTabs
+        items={TABS}
+        active={onglet}
+        basePath={`/dashboard/bookings/${booking.id}`}
+        ariaLabel="Sections de votre séjour"
+        className="mt-10"
+      />
+
       <RuleDivider className="my-12" />
 
+      {/* Le contenu des deux onglets garde son indentation d'origine : le
+          décaler aurait produit un diff presque entièrement blanc, qui aurait
+          masqué les vraies modifications. */}
+      {onglet === "sejour" && (
+        <>
       {awaitingQuote ? (
         <>
           <aside className="rounded-md border border-cp-cobalt bg-cp-paper-deep p-6 sm:p-8">
@@ -324,6 +348,11 @@ export default async function BookingDetailPage({
         </aside>
       )}
 
+        </>
+      )}
+
+      {onglet === "nouvelles" && (
+        <>
       {/* Carnet de séjour — masqué tant que le séjour n'est pas validé. */}
       {showJournal && (
         <>
@@ -399,6 +428,8 @@ export default async function BookingDetailPage({
           readOnly={isClosed}
         />
       </section>
+        </>
+      )}
 
       <RuleDivider className="my-16" />
 
