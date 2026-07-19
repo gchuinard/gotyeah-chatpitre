@@ -1,6 +1,13 @@
 import type { NextRequest } from "next/server";
 
-import { handle, HttpError, json, parseJson, requireUser } from "@/lib/api";
+import {
+  assertAppointmentJoinable,
+  handle,
+  HttpError,
+  json,
+  parseJson,
+  requireUser,
+} from "@/lib/api";
 import { isAdmin } from "@/lib/auth";
 import { getAppointmentFor } from "@/lib/repository";
 import { publishSignal } from "@/lib/signaling";
@@ -16,6 +23,9 @@ export function POST(req: NextRequest, { params }: RouteContext) {
     const user = await requireUser();
     const appointment = await getAppointmentFor(id, user.id, isAdmin(user));
     if (!appointment) throw new HttpError(404, "Rendez-vous introuvable.");
+    // La salle est le seul endroit où l'appel s'établit réellement : c'est ici
+    // que le verrou compte, pas seulement sur les boutons qui y mènent.
+    assertAppointmentJoinable(appointment.status);
 
     const { from, ...message } = await parseJson(req, rdvSignalSchema);
     publishSignal(id, from, message);

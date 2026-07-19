@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 
 import { BookingClosureControl } from "@/components/booking-closure-control";
 import { BookingPayments } from "@/components/booking-payments";
+import { BookingPinToggle } from "@/components/booking-pin-toggle";
+import { MarkMessagesRead } from "@/components/mark-messages-read";
 import { BookingStatusBadge } from "@/components/booking-status-badge";
 import { CatReviewControl } from "@/components/cat-review-control";
 import { ConversationView } from "@/components/conversation-view";
@@ -117,6 +119,13 @@ export default async function AdminBookingDetailPage({
       ])
     : [null, []];
 
+  // Un message du client non lu garde le séjour dans la file « À traiter ».
+  // L'ouverture de cette fiche le marque lu, mais depuis le NAVIGATEUR : Next
+  // précharge les liens, et le faire ici viderait la file au simple survol.
+  const hasUnreadFromClient = booking.messages.some(
+    (m) => !m.isFromAdmin && m.readAt === null,
+  );
+
   const messages = booking.messages.map((m) => ({
     id: m.id,
     body: m.content,
@@ -159,8 +168,15 @@ export default async function AdminBookingDetailPage({
           <LibraryStamp boxed>
             Séjour N°{ref}, {nights} nuit{nights > 1 ? "s" : ""}
           </LibraryStamp>
-          <BookingStatusBadge status={booking.status} />
+          <div className="flex items-center gap-3">
+            <BookingStatusBadge status={booking.status} />
+            {/* Visible ici aussi, pour comprendre pourquoi le séjour reste dans
+                la file « À traiter ». */}
+            <BookingPinToggle bookingId={booking.id} pinned={booking.pinnedForAdmin} />
+          </div>
         </div>
+
+        <MarkMessagesRead bookingId={booking.id} hasUnread={hasUnreadFromClient} />
 
         <h1 className="font-display text-5xl font-medium leading-[0.95] tracking-[-0.01em] text-cp-ink sm:text-6xl">
           Du {formatDate(booking.startDate)}

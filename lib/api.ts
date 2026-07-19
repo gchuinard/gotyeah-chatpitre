@@ -69,6 +69,19 @@ export function assertPaymentWritable(status: string): void {
   }
 }
 
+/// Un télé-rendez-vous ne se rejoint que tant qu'il est PLANIFIÉ. Annulé ou
+/// déjà tenu, la salle doit rester fermée : sinon un lien de notification
+/// périmé, ou un onglet resté ouvert, laisse entrer dans un appel que l'autre
+/// partie ne peut plus rejoindre.
+export function assertAppointmentJoinable(status: string): void {
+  if (status !== "SCHEDULED") {
+    throw new HttpError(
+      409,
+      "Ce télé-rendez-vous n'est plus ouvert, la salle est fermée.",
+    );
+  }
+}
+
 /// Délai au-delà duquel un séjour clôturé quitte la liste de travail.
 export const ARCHIVE_AFTER_DAYS = 30;
 

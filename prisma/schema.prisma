@@ -226,6 +226,11 @@ model Booking {
   // un séjour clos depuis des mois.
   closedAt DateTime?
 
+  // Épinglé par la pension pour rester dans la file « À traiter » même quand
+  // plus rien ne l'y ferait entrer. État PARTAGÉ et non réglage personnel : les
+  // deux personnes qui tiennent la pension voient la même file.
+  pinnedForAdmin Boolean @default(false)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

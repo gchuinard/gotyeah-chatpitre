@@ -50,7 +50,9 @@ export function POST(req: NextRequest, { params }: RouteContext) {
         userId: booking.userId,
         type: "MESSAGE_RECEIVED",
         title: "Nouveau message de la pension",
-        link: `/dashboard/bookings/${booking.id}`,
+        // Le fil vit dans l'onglet « Nouvelles » : sans le préciser, le lien
+        // ouvrirait l'onglet par défaut, où le message n'apparaît pas.
+        link: `/dashboard/bookings/${booking.id}?onglet=nouvelles`,
       });
     } else {
       await notifyAdmins({

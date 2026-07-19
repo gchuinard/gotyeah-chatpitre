@@ -47,15 +47,33 @@ export default async function ClientRdvPage({
         <RdvDocumentButton cats={cats} />
       </div>
 
-      <div className="mt-10">
-        <VideoCall
-          appointmentId={appointment.id}
-          selfRole="client"
-          selfName={user.firstName}
-          peerName="Le Chat-Pitre"
-          backHref={backHref}
-        />
-      </div>
+      {/* Salle fermée dès que le créneau n'est plus planifié. Un lien de
+          notification périmé, ou un onglet resté ouvert, ne doit pas faire
+          entrer dans un appel que la pension ne peut plus rejoindre. */}
+      {appointment.status === "SCHEDULED" ? (
+        <div className="mt-10">
+          <VideoCall
+            appointmentId={appointment.id}
+            selfRole="client"
+            selfName={user.firstName}
+            peerName="Le Chat-Pitre"
+            backHref={backHref}
+          />
+        </div>
+      ) : (
+        <aside className="mt-10 rounded-md border border-cp-ink/30 bg-cp-paper-deep p-6">
+          <p className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.18em] text-cp-ink-soft">
+            {appointment.status === "CANCELLED"
+              ? "Rendez-vous annulé"
+              : "Rendez-vous terminé"}
+          </p>
+          <p className="mt-2 font-body text-sm text-cp-ink">
+            {appointment.status === "CANCELLED"
+              ? "Ce créneau a été annulé, il n'y a plus d'appel à rejoindre. Écrivez-nous si vous souhaitez en recaler un."
+              : "Cet appel a déjà eu lieu."}
+          </p>
+        </aside>
+      )}
 
       <footer className="mt-12">
         <Link

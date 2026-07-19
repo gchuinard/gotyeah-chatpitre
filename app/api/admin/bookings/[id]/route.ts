@@ -19,6 +19,7 @@ import {
 } from "@/lib/api";
 import { adminBookingUpdateSchema } from "@/lib/validations";
 import { extraLineTotal } from "@/lib/pricing";
+import { formatDateTime } from "@/lib/format";
 import { createNotification } from "@/lib/notifications";
 import { differenceInCalendarDays } from "date-fns";
 
@@ -41,6 +42,13 @@ const STATUS_NOTIFICATION: Partial<
   REJECTED: {
     type: "BOOKING_REJECTED",
     title: "Votre demande de réservation a été refusée",
+  },
+  CANCELLED: {
+    // Pas d'enum dédié, on réutilise le plus proche. Une annulation par la
+    // pension ne déclenchait AUCUNE notification jusqu'ici : le client
+    // l'apprenait en rouvrant sa fiche, ou pas du tout.
+    type: "BOOKING_REJECTED",
+    title: "Votre séjour a été annulé",
   },
   QUESTION_ASKED: {
     type: "BOOKING_QUESTION",
@@ -220,6 +228,11 @@ export function PATCH(req: NextRequest, { params }: RouteContext) {
             : null,
     };
 
+    // Créneaux emportés par une clôture, relevés dans la transaction pour être
+    // notifiés ensuite : un client qui ne sait pas que son appel est tombé se
+    // connecte à l'heure dite pour rien.
+    let cancelledAppointments: { id: string; scheduledAt: Date }[] = [];
+
     // Update booking + remplace les extras + poste la question éventuelle,
     // le tout dans une transaction.
     const updated = await prisma.$transaction(async (tx) => {
@@ -253,8 +266,13 @@ export function PATCH(req: NextRequest, { params }: RouteContext) {
       }
       // Clôturer un séjour emporte ses télé-rendez-vous : sinon le créneau
       // resterait « planifié », que le client pourrait rejoindre alors que la
-      // fiche verrouillée ne le permet plus côté pension.
+      // fiche verrouillée ne le permet plus côté pension. On les relève AVANT
+      // de les annuler, pour pouvoir prévenir le client de chacun.
       if (data.status && isBookingClosed(data.status)) {
+        cancelledAppointments = await tx.appointment.findMany({
+          where: { bookingId: id, status: "SCHEDULED" },
+          select: { id: true, scheduledAt: true },
+        });
         await tx.appointment.updateMany({
           where: { bookingId: id, status: "SCHEDULED" },
           data: { status: "CANCELLED" },
@@ -263,6 +281,19 @@ export function PATCH(req: NextRequest, { params }: RouteContext) {
       return tx.booking.update({ where: { id }, data: updateData });
     });
 
+    // Un créneau tombé se signale à part : la notification de statut du séjour
+    // ne dit pas qu'un appel était prévu, et c'est cet appel-là que le client
+    // risque d'honorer pour rien.
+    for (const appointment of cancelledAppointments) {
+      await createNotification({
+        userId: booking.userId,
+        type: "APPOINTMENT_CANCELLED",
+        title: "Votre télé-rendez-vous est annulé",
+        body: formatDateTime(appointment.scheduledAt),
+        link: `/dashboard/bookings/${booking.id}`,
+      });
+    }
+
     // Notification au client. Une question l'emporte sur la notif de statut
     // générique (évite de notifier deux fois pour un même geste).
     if (data.questionMessage) {
@@ -270,7 +301,8 @@ export function PATCH(req: NextRequest, { params }: RouteContext) {
         userId: booking.userId,
         type: "BOOKING_QUESTION",
         title: "La pension vous a posé une question",
-        link: `/dashboard/bookings/${booking.id}`,
+        // La question est un message : elle se lit dans l'onglet « Nouvelles ».
+        link: `/dashboard/bookings/${booking.id}?onglet=nouvelles`,
       });
     } else if (data.status && data.status !== booking.status) {
       const notif = STATUS_NOTIFICATION[data.status];

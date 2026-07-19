@@ -78,7 +78,8 @@ export function POST(req: NextRequest, { params }: RouteContext) {
       userId: booking.userId,
       type: "MESSAGE_RECEIVED",
       title: "Nouvelle note de la maison sur votre séjour",
-      link: `/dashboard/bookings/${booking.id}`,
+      // Le carnet vit dans l'onglet « Nouvelles ».
+      link: `/dashboard/bookings/${booking.id}?onglet=nouvelles`,
     });
 
     return json({ update }, 201);

@@ -52,15 +52,32 @@ export default async function AdminRdvPage({
         <RdvDocumentButton cats={cats} />
       </div>
 
-      <div className="mt-10">
-        <VideoCall
-          appointmentId={appointment.id}
-          selfRole="admin"
-          selfName="Le Chat-Pitre"
-          peerName={client.firstName}
-          backHref={backHref}
-        />
-      </div>
+      {/* Même verrou que côté client : la salle ferme dès que le créneau n'est
+          plus planifié. */}
+      {appointment.status === "SCHEDULED" ? (
+        <div className="mt-10">
+          <VideoCall
+            appointmentId={appointment.id}
+            selfRole="admin"
+            selfName="Le Chat-Pitre"
+            peerName={client.firstName}
+            backHref={backHref}
+          />
+        </div>
+      ) : (
+        <aside className="mt-10 rounded-md border border-cp-ink/30 bg-cp-paper-deep p-6">
+          <p className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.18em] text-cp-ink-soft">
+            {appointment.status === "CANCELLED"
+              ? "Rendez-vous annulé"
+              : "Rendez-vous terminé"}
+          </p>
+          <p className="mt-2 font-body text-sm text-cp-ink">
+            {appointment.status === "CANCELLED"
+              ? "Ce créneau a été annulé, souvent parce que le séjour l'a été. Il n'y a plus d'appel à rejoindre."
+              : "Cet appel a déjà eu lieu."}
+          </p>
+        </aside>
+      )}
 
       <footer className="mt-12">
         <Link
