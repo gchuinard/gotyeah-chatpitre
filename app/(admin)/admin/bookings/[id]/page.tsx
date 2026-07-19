@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 
 import { BookingClosureControl } from "@/components/booking-closure-control";
 import { BookingPayments } from "@/components/booking-payments";
-import { BookingTaskControl } from "@/components/booking-task-control";
+import { BookingNoteControl } from "@/components/booking-note-control";
 import { MarkMessagesRead } from "@/components/mark-messages-read";
 import { BookingStatusBadge } from "@/components/booking-status-badge";
 import { CatReviewControl } from "@/components/cat-review-control";
@@ -139,7 +139,35 @@ export default async function AdminBookingDetailPage({
   }));
 
   return (
-    <article className="mx-auto w-full max-w-5xl px-6 py-12 sm:px-10 sm:py-16">
+    // La note se pose dans la marge, pas dans le contenu : la colonne de
+    // lecture garde très exactement sa largeur, c'est le conteneur extérieur qui
+    // s'élargit pour occuper le blanc déjà présent de part et d'autre. En
+    // dessous de 1440px ce blanc n'existe pas, la grille retombe donc en une
+    // colonne et la note passe simplement au-dessus de la fiche.
+    //
+    // Le contenu de l'article n'a PAS été réindenté en l'enveloppant : deux
+    // niveaux de plus sur quatre cents lignes auraient noyé le vrai changement
+    // dans un diff illisible.
+    <div className="mx-auto w-full max-w-[92rem] px-6 py-12 sm:px-10 sm:py-16">
+      <div className="grid gap-8 min-[1440px]:grid-cols-[minmax(0,1fr)_18rem]">
+        {/* Avant l'article dans le DOM pour arriver en tête sur écran étroit,
+            renvoyée à droite en CSS dès qu'il y a la place. `self-start` et non
+            `items-start` sur la grille : seule la note a besoin de ne pas
+            s'étirer, sans quoi `sticky` n'aurait aucune marge où coller. */}
+        <aside className="min-w-0 min-[1440px]:sticky min-[1440px]:top-8 min-[1440px]:col-start-2 min-[1440px]:row-start-1 min-[1440px]:self-start">
+          <BookingNoteControl
+            bookingId={booking.id}
+            active={booking.pinnedForAdmin}
+            note={booking.pinnedNote}
+          />
+        </aside>
+
+        {/* 59rem et non max-w-5xl : l'ancien article était large de 64rem
+            PADDING COMPRIS, soit 59rem de texte. Le padding vivant désormais sur
+            le conteneur extérieur, c'est cette valeur-là qu'il faut reprendre
+            pour que la colonne de lecture garde exactement sa largeur, à tous
+            les formats d'écran. */}
+        <article className="mx-auto w-full min-w-0 max-w-[59rem] min-[1440px]:col-start-1 min-[1440px]:row-start-1">
       {/* Fil d'Ariane */}
       <nav
         aria-label="Fil d'Ariane"
@@ -465,86 +493,66 @@ export default async function AdminBookingDetailPage({
       )}
 
       {onglet === "contact" && (
-        // Deux colonnes à partir de lg : le travail à gauche, le pense-bête à
-        // droite. `items-start` n'est pas décoratif : sans lui la colonne
-        // s'étire sur toute la hauteur de la grille et il ne reste aucune marge
-        // dans laquelle `sticky` puisse coller.
-        <div className="mt-12 grid gap-10 lg:grid-cols-[minmax(0,1fr)_19rem] lg:items-start">
-          {/* Placé AVANT la colonne principale dans le DOM pour arriver en tête
-              sur mobile, où la grille retombe en une colonne : un pense-bête
-              relégué sous trente messages ne se lit jamais. Les positions
-              explicites le renvoient à droite dès qu'il y a la place. */}
-          <aside className="lg:sticky lg:top-8 lg:col-start-2 lg:row-start-1">
-            <BookingTaskControl
-              bookingId={booking.id}
-              active={booking.pinnedForAdmin}
-              note={booking.pinnedNote}
-            />
-          </aside>
-
-          {/* min-w-0 : sans ça une ligne longue dans le fil élargit la colonne
-              au lieu de se replier, et pousse l'aside hors de l'écran. */}
-          <div className="min-w-0 lg:col-start-1 lg:row-start-1">
-            {/* Carnet de séjour — masqué tant que le séjour n'est pas validé ET
-                pas commencé : avant l'arrivée des chats, il n'y a rien à
-                raconter. */}
-            {showJournal && (
-              <>
-                <section aria-labelledby="journal-title" className="space-y-8">
-                  <SectionHeading
-                    title="Carnet de séjour"
-                    kicker="Une note photo quotidienne, c'est ce que voit le client."
-                    tone="cobalt"
-                  />
-
-                  <StayJournal bookingId={booking.id} cats={cats} canAdd={!isClosed} />
-                </section>
-
-                <RuleDivider className="my-16" tone="feuille" />
-              </>
-            )}
-
-            <section className="space-y-8">
-              <SectionHeading
-                title="Télé-rendez-vous"
-                kicker="Un créneau vidéo avec le client, avant ou pendant le séjour."
-                tone="feuille"
-              />
-
-              <ActionGate disabled={isClosed}>
-                <RdvScheduler
-                  bookingId={booking.id}
-                  appointments={appointments.map((a) => ({
-                    id: a.id,
-                    scheduledAt: a.scheduledAt.toISOString(),
-                    durationMin: a.durationMin,
-                    status: a.status,
-                    title: a.title,
-                  }))}
+        <>
+          {/* Carnet de séjour — masqué tant que le séjour n'est pas validé ET
+              pas commencé : avant l'arrivée des chats, il n'y a rien à
+              raconter. */}
+          {showJournal && (
+            <>
+              <section aria-labelledby="journal-title" className="mt-12 space-y-8">
+                <SectionHeading
+                  title="Carnet de séjour"
+                  kicker="Une note photo quotidienne, c'est ce que voit le client."
+                  tone="cobalt"
                 />
-              </ActionGate>
-            </section>
 
-            <RuleDivider className="my-16" tone="paprika" />
+                <StayJournal bookingId={booking.id} cats={cats} canAdd={!isClosed} />
+              </section>
 
-            {/* Fil — POST réel */}
-            <section aria-labelledby="thread-title" className="space-y-8">
-              <SectionHeading
-                title="Échanges avec le client"
-                kicker={`${messages.length} message${messages.length > 1 ? "s" : ""} échangé${messages.length > 1 ? "s" : ""} jusqu'ici.`}
-                tone="paprika"
-              />
+              <RuleDivider className="my-16" tone="feuille" />
+            </>
+          )}
 
-              <ConversationView
+          <section className={showJournal ? "space-y-8" : "mt-12 space-y-8"}>
+            <SectionHeading
+              title="Télé-rendez-vous"
+              kicker="Un créneau vidéo avec le client, avant ou pendant le séjour."
+              tone="feuille"
+            />
+
+            <ActionGate disabled={isClosed}>
+              <RdvScheduler
                 bookingId={booking.id}
-                initialMessages={messages}
-                voice="admin"
-                canRespond={awaitingQuote}
-                readOnly={isClosed}
+                appointments={appointments.map((a) => ({
+                  id: a.id,
+                  scheduledAt: a.scheduledAt.toISOString(),
+                  durationMin: a.durationMin,
+                  status: a.status,
+                  title: a.title,
+                }))}
               />
-            </section>
-          </div>
-        </div>
+            </ActionGate>
+          </section>
+
+          <RuleDivider className="my-16" tone="paprika" />
+
+          {/* Fil — POST réel */}
+          <section aria-labelledby="thread-title" className="space-y-8">
+            <SectionHeading
+              title="Échanges avec le client"
+              kicker={`${messages.length} message${messages.length > 1 ? "s" : ""} échangé${messages.length > 1 ? "s" : ""} jusqu'ici.`}
+              tone="paprika"
+            />
+
+            <ConversationView
+              bookingId={booking.id}
+              initialMessages={messages}
+              voice="admin"
+              canRespond={awaitingQuote}
+              readOnly={isClosed}
+            />
+          </section>
+        </>
       )}
 
       <RuleDivider className="my-16" />
@@ -557,7 +565,9 @@ export default async function AdminBookingDetailPage({
           ← Retour à la liste des séjours
         </Link>
       </footer>
-    </article>
+        </article>
+      </div>
+    </div>
   );
 }
 

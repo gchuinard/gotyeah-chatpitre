@@ -207,8 +207,8 @@ export default async function AdminDashboardPage() {
                         <BookingStatusBadge status={b.status} />
                         {b.messages.length > 0 && <RowTag>Message non lu</RowTag>}
                         {/* Cadre plein pour le message non lu, cadre creux pour
-                            la tâche : l'un vient du client, l'autre de nous. */}
-                        {b.pinnedForAdmin && <RowTag hollow>Tâche à faire</RowTag>}
+                            la note : l'un vient du client, l'autre de nous. */}
+                        {b.pinnedForAdmin && <RowTag hollow>Note</RowTag>}
                       </div>
                     </div>
 
@@ -253,7 +253,7 @@ export default async function AdminDashboardPage() {
 }
 
 /// Pastille de ligne, dans la même famille que `BookingStatusBadge` mais pour
-/// ce qui n'est pas un statut : un message non lu, une tâche à faire.
+/// ce qui n'est pas un statut : un message non lu, une note de la pension.
 function RowTag({
   children,
   hollow = false,

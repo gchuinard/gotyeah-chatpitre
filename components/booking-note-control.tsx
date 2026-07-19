@@ -7,22 +7,22 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 
-/// Marque un séjour comme « tâche à faire » et y attache un mot.
+/// Note de la pension sur un séjour, qui le garde aussi dans la file « À
+/// traiter ».
 ///
 /// C'est l'ancienne épingle, devenue une vraie note. Une épingle nue disait
 /// seulement « revenez ici » sans dire pourquoi : au bout de trois séjours
 /// épinglés, l'information était perdue. La note voyage jusqu'au tableau de
-/// bord et s'y affiche en clair, ce qui rend la file « À traiter » lisible sans
-/// ouvrir chaque fiche.
+/// bord et s'y affiche en clair, ce qui rend la file lisible sans ouvrir chaque
+/// fiche.
 ///
-/// En base le drapeau reste `pinnedForAdmin` et la note `pinnedNote` : seul le
-/// vocabulaire visible a changé, pas les colonnes.
+/// En base, le drapeau reste `pinnedForAdmin` et le texte `pinnedNote`.
 
-/// Doit tenir sur une ligne de tableau : au-delà, ce n'est plus un pense-bête,
-/// c'est un message, et sa place est dans le fil.
-export const TASK_NOTE_MAX = 200;
+/// Doit tenir sur une ligne de tableau : au-delà, ce n'est plus une note, c'est
+/// un message, et sa place est dans le fil.
+export const NOTE_MAX = 200;
 
-export function BookingTaskControl({
+export function BookingNoteControl({
   bookingId,
   active,
   note,
@@ -79,24 +79,24 @@ export function BookingTaskControl({
     >
       <div className="space-y-1">
         <p className="font-mono text-[0.7rem] font-bold uppercase tracking-[0.16em] text-cp-paprika">
-          Tâche à faire
+          Note
         </p>
         <p className="font-body text-sm text-cp-ink-soft">
           {active
-            ? "Ce séjour reste en tête de la file « À traiter », avec ce mot affiché."
-            : "Gardez ce séjour dans la file « À traiter » et notez ce qu'il reste à régler."}
+            ? "Ce séjour reste en tête de la file à traiter, avec cette note affichée."
+            : "Gardez ce séjour dans la file à traiter et notez ce qu'il reste à régler."}
         </p>
       </div>
 
       <Textarea
-        id={`task-note-${bookingId}`}
+        id={`booking-note-${bookingId}`}
         rows={2}
         // Le Textarea part à min-h-28, trop haut pour deux lignes de pense-bête.
         className="min-h-20"
-        maxLength={TASK_NOTE_MAX}
+        maxLength={NOTE_MAX}
         value={draft}
         onChange={(e) => setDraft(e.target.value)}
-        aria-label="Ce qu'il reste à faire sur ce séjour"
+        aria-label="Note sur ce séjour"
         placeholder="La personne demande si elle peut déposer son chat à 9h, à confirmer avec Camille."
       />
 
@@ -110,7 +110,7 @@ export function BookingTaskControl({
                 disabled={pending}
                 onClick={() => send({ pinned: true, note: trimmed })}
               >
-                Enregistrer le mot
+                Enregistrer
               </Button>
             )}
             <Button
@@ -120,7 +120,7 @@ export function BookingTaskControl({
               disabled={pending}
               onClick={() => send({ pinned: false })}
             >
-              Tâche réglée
+              Retirer la note
             </Button>
           </>
         ) : (
@@ -130,14 +130,14 @@ export function BookingTaskControl({
             disabled={pending}
             onClick={() => send({ pinned: true, note: trimmed })}
           >
-            Marquer une tâche à faire
+            Ajouter la note
           </Button>
         )}
 
         <p className="font-mono text-[0.65rem] uppercase tracking-[0.16em] text-cp-ink-soft">
           {error
             ? "Échec de l'enregistrement, réessayez."
-            : `${draft.length} / ${TASK_NOTE_MAX}`}
+            : `${draft.length} / ${NOTE_MAX}`}
         </p>
       </div>
     </div>
