@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 
 import { BookingClosureControl } from "@/components/booking-closure-control";
 import { BookingPayments } from "@/components/booking-payments";
-import { BookingPinToggle } from "@/components/booking-pin-toggle";
+import { BookingTaskControl } from "@/components/booking-task-control";
 import { MarkMessagesRead } from "@/components/mark-messages-read";
 import { BookingStatusBadge } from "@/components/booking-status-badge";
 import { CatReviewControl } from "@/components/cat-review-control";
@@ -52,9 +52,11 @@ function hasBookingStarted(startDate: Date): boolean {
 /// Les pensionnaires restent hors onglets, sur la page : c'est ce qu'on
 /// consulte le plus souvent, ça ne doit coûter aucun clic. Seules les deux
 /// zones lourdes se rangent.
-const TABS: UrlTabItem<"administratif" | "contact">[] = [
-  { value: "administratif", label: "Administratif" },
+// Contact client en PREMIER, donc par défaut : c'est l'onglet le plus consulté,
+// il ne doit pas coûter un clic à chaque ouverture de fiche.
+const TABS: UrlTabItem<"contact" | "administratif">[] = [
   { value: "contact", label: "Contact client" },
+  { value: "administratif", label: "Administratif" },
 ];
 
 export default async function AdminBookingDetailPage({
@@ -168,12 +170,7 @@ export default async function AdminBookingDetailPage({
           <LibraryStamp boxed>
             Séjour N°{ref}, {nights} nuit{nights > 1 ? "s" : ""}
           </LibraryStamp>
-          <div className="flex items-center gap-3">
-            <BookingStatusBadge status={booking.status} />
-            {/* Visible ici aussi, pour comprendre pourquoi le séjour reste dans
-                la file « À traiter ». */}
-            <BookingPinToggle bookingId={booking.id} pinned={booking.pinnedForAdmin} />
-          </div>
+          <BookingStatusBadge status={booking.status} />
         </div>
 
         <MarkMessagesRead bookingId={booking.id} hasUnread={hasUnreadFromClient} />
@@ -507,6 +504,15 @@ export default async function AdminBookingDetailPage({
               title="Échanges avec le client"
               kicker={`${messages.length} message${messages.length > 1 ? "s" : ""} échangé${messages.length > 1 ? "s" : ""} jusqu'ici.`}
               tone="paprika"
+            />
+
+            {/* Au niveau du fil, et non dans l'en-tête : neuf fois sur dix la
+                tâche naît de ce qu'on vient de lire ici, et on la note dans la
+                foulée sans remonter la page. */}
+            <BookingTaskControl
+              bookingId={booking.id}
+              active={booking.pinnedForAdmin}
+              note={booking.pinnedNote}
             />
 
             <ConversationView

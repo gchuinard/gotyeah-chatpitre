@@ -64,6 +64,10 @@ export function UrlTabs<T extends string>({
             <li key={item.value}>
               <Link
                 href={href}
+                // Sans ça, changer d'onglet renvoie en haut de la page : on
+                // travaille dans le second onglet, et chaque aller-retour
+                // oblige à redescendre. Ici la barre reste sous les yeux.
+                scroll={false}
                 aria-current={isActive ? "page" : undefined}
                 className={cn(
                   "-mb-px inline-flex items-baseline gap-2 border-b-2 px-1 py-3 font-mono text-[0.7rem] font-bold uppercase tracking-[0.18em] transition-colors",

@@ -231,6 +231,12 @@ model Booking {
   // deux personnes qui tiennent la pension voient la même file.
   pinnedForAdmin Boolean @default(false)
 
+  // Ce qu'il reste à faire sur ce séjour, affiché tel quel dans la file « À
+  // traiter ». Sans lui, l'épingle disait « revenez ici » sans dire pourquoi, et
+  // l'information se perdait dès le troisième séjour épinglé. Vidé en même temps
+  // que le drapeau : une note orpheline réapparaîtrait au prochain épinglage.
+  pinnedNote String?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

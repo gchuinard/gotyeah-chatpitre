@@ -1,6 +1,6 @@
 import Link from "next/link";
+import type { ReactNode } from "react";
 
-import { BookingPinToggle } from "@/components/booking-pin-toggle";
 import { BookingStatusBadge } from "@/components/booking-status-badge";
 import { CurrentResidentsWall } from "@/components/current-residents-wall";
 import { LibraryStamp } from "@/components/library-stamp";
@@ -173,52 +173,55 @@ export default async function AdminDashboardPage() {
               const cats = b.cats.map((link) => link.cat);
               const nights = nightsBetween(b.startDate, b.endDate);
               return (
-                <li
-                  key={b.id}
-                  className="flex items-center gap-2 border-b border-cp-ink/30 pr-3"
-                >
+                <li key={b.id} className="border-b border-cp-ink/30">
                   {/* Ligne entièrement cliquable. On garde un vrai lien plutôt
                       qu'un gestionnaire de clic : le clavier, le ctrl-clic et le
                       clic milieu marchent, et la page reste un composant
-                      serveur. L'épingle est SŒUR du lien et non dedans : un
-                      bouton dans une ancre est du HTML invalide. */}
+                      serveur. Plus aucun bouton ici : l'épingle se règle depuis
+                      la fiche, la ligne n'a donc qu'une seule destination. */}
                   <Link
-                    href={
-                      b.messages.length > 0
-                        ? `/admin/bookings/${b.id}?onglet=contact`
-                        : `/admin/bookings/${b.id}`
-                    }
-                    className="grid min-w-0 flex-1 gap-3 py-5 pr-4 transition-colors hover:bg-cp-paper-deep/40 sm:grid-cols-[6rem_2fr_2fr_auto] sm:items-center sm:gap-5"
+                    href={`/admin/bookings/${b.id}`}
+                    className="block py-5 pr-4 transition-colors hover:bg-cp-paper-deep/40"
                   >
-                    <p className="font-mono text-sm font-bold uppercase tracking-[0.18em] text-cp-paprika">
-                      N°{displayRef(b.id)}
-                    </p>
-                    <div className="space-y-0.5">
-                      <p className="font-display text-lg italic leading-tight text-cp-ink">
-                        {formatDate(b.startDate)} → {formatDate(b.endDate)}
+                    <div className="grid min-w-0 gap-3 sm:grid-cols-[6rem_2fr_2fr_auto] sm:items-center sm:gap-5">
+                      <p className="font-mono text-sm font-bold uppercase tracking-[0.18em] text-cp-paprika">
+                        N°{displayRef(b.id)}
                       </p>
-                      <p className="font-body text-xs text-cp-ink-soft">
-                        {nights} nuit{nights > 1 ? "s" : ""} · {cats.map((c) => c.name).join(" · ")}
-                      </p>
+                      <div className="space-y-0.5">
+                        <p className="font-display text-lg italic leading-tight text-cp-ink">
+                          {formatDate(b.startDate)} → {formatDate(b.endDate)}
+                        </p>
+                        <p className="font-body text-xs text-cp-ink-soft">
+                          {nights} nuit{nights > 1 ? "s" : ""} · {cats.map((c) => c.name).join(" · ")}
+                        </p>
+                      </div>
+                      <div className="space-y-0.5">
+                        <p className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.18em] text-cp-ink">
+                          {b.user.firstName} {b.user.lastName}
+                        </p>
+                        <p className="font-body text-xs text-cp-ink-soft">
+                          {b.user.email}
+                        </p>
+                      </div>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <BookingStatusBadge status={b.status} />
+                        {b.messages.length > 0 && <RowTag>Message non lu</RowTag>}
+                        {/* Cadre plein pour le message non lu, cadre creux pour
+                            la tâche : l'un vient du client, l'autre de nous. */}
+                        {b.pinnedForAdmin && <RowTag hollow>Tâche à faire</RowTag>}
+                      </div>
                     </div>
-                    <div className="space-y-0.5">
-                      <p className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.18em] text-cp-ink">
-                        {b.user.firstName} {b.user.lastName}
+
+                    {/* Le mot est affiché en clair plutôt qu'au survol : un
+                        survol n'existe pas au doigt, et l'information ne
+                        servirait à rien s'il fallait ouvrir la fiche pour la
+                        lire. */}
+                    {b.pinnedNote && (
+                      <p className="mt-3 border-l-2 border-cp-paprika pl-3 font-body text-sm italic text-cp-ink-soft">
+                        {b.pinnedNote}
                       </p>
-                      <p className="font-body text-xs text-cp-ink-soft">
-                        {b.user.email}
-                      </p>
-                    </div>
-                    <div className="flex flex-wrap items-center gap-2">
-                      <BookingStatusBadge status={b.status} />
-                      {b.messages.length > 0 && (
-                        <span className="inline-flex items-center rounded-full border border-cp-paprika bg-cp-paprika px-2.5 py-0.5 font-mono text-[0.6rem] font-bold uppercase tracking-[0.16em] text-cp-paper">
-                          Message non lu
-                        </span>
-                      )}
-                    </div>
+                    )}
                   </Link>
-                  <BookingPinToggle bookingId={b.id} pinned={b.pinnedForAdmin} />
                 </li>
               );
             })}
@@ -246,6 +249,26 @@ export default async function AdminDashboardPage() {
         />
       </section>
     </div>
+  );
+}
+
+/// Pastille de ligne, dans la même famille que `BookingStatusBadge` mais pour
+/// ce qui n'est pas un statut : un message non lu, une tâche à faire.
+function RowTag({
+  children,
+  hollow = false,
+}: {
+  children: ReactNode;
+  hollow?: boolean;
+}) {
+  return (
+    <span
+      className={`inline-flex items-center rounded-full border border-cp-paprika px-2.5 py-0.5 font-mono text-[0.6rem] font-bold uppercase tracking-[0.16em] ${
+        hollow ? "text-cp-paprika" : "bg-cp-paprika text-cp-paper"
+      }`}
+    >
+      {children}
+    </span>
   );
 }
 

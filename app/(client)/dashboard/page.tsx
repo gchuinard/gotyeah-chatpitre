@@ -222,30 +222,30 @@ export default async function DashboardPage() {
         ) : (
           <ul className="border-t border-cp-ink">
             {bookings.slice(0, 5).map((b) => (
-              <li
-                key={b.id}
-                className="grid gap-4 border-b border-cp-ink/30 py-5 sm:grid-cols-[6rem_2fr_3fr_auto] sm:items-center sm:gap-6"
-              >
-                <p className="font-mono text-sm font-bold uppercase tracking-[0.18em] text-cp-paprika">
-                  N°{displayRef(b.id)}
-                </p>
-                <p className="font-display text-lg italic leading-tight text-cp-ink">
-                  {formatDate(b.startDate)} → {formatDate(b.endDate)}
-                </p>
-                <p className="font-body text-sm text-cp-ink-soft">
-                  {b.cats.map((link) => link.cat.name).join(" · ")} ·{" "}
-                  {nightsBetween(b.startDate, b.endDate)} nuit
-                  {nightsBetween(b.startDate, b.endDate) > 1 ? "s" : ""}
-                </p>
-                <div className="flex items-center justify-between gap-4 sm:justify-end">
-                  <BookingStatusBadge status={b.status} />
-                  <Link
-                    href={`/dashboard/bookings/${b.id}`}
-                    className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.22em] text-cp-ink-soft hover:text-cp-paprika"
-                  >
-                    Ouvrir →
-                  </Link>
-                </div>
+              <li key={b.id} className="border-b border-cp-ink/30">
+                {/* Toute la ligne est cliquable, comme dans les tableaux de
+                    l'admin : un lien « Ouvrir » en bout de ligne oblige à viser
+                    une cible minuscule alors que la ligne entière ne mène qu'à
+                    un seul endroit. */}
+                <Link
+                  href={`/dashboard/bookings/${b.id}`}
+                  className="grid gap-4 py-5 transition-colors hover:bg-cp-paper-deep/40 sm:grid-cols-[6rem_2fr_3fr_auto] sm:items-center sm:gap-6"
+                >
+                  <p className="font-mono text-sm font-bold uppercase tracking-[0.18em] text-cp-paprika">
+                    N°{displayRef(b.id)}
+                  </p>
+                  <p className="font-display text-lg italic leading-tight text-cp-ink">
+                    {formatDate(b.startDate)} → {formatDate(b.endDate)}
+                  </p>
+                  <p className="font-body text-sm text-cp-ink-soft">
+                    {b.cats.map((link) => link.cat.name).join(" · ")} ·{" "}
+                    {nightsBetween(b.startDate, b.endDate)} nuit
+                    {nightsBetween(b.startDate, b.endDate) > 1 ? "s" : ""}
+                  </p>
+                  <div className="flex items-center sm:justify-end">
+                    <BookingStatusBadge status={b.status} />
+                  </div>
+                </Link>
               </li>
             ))}
           </ul>
