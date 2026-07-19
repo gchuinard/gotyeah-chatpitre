@@ -174,9 +174,14 @@ export function ConversationView({
     });
   }
 
+  // Le fil se lit du plus récent au plus ancien. Sur un séjour bavard,
+  // l'information utile est toujours la dernière : la mettre en bas obligeait à
+  // faire défiler tout l'historique pour la trouver. On inverse à l'affichage
+  // seulement, l'état reste chronologique pour que l'ajout optimiste continue
+  // de s'empiler à la fin.
   const thread = (
     <MessageThread
-      messages={messages.map((m) => ({
+      messages={[...messages].reverse().map((m) => ({
         id: m.id,
         fromAdmin: m.fromAdmin,
         authorLabel: m.authorLabel,
@@ -192,18 +197,20 @@ export function ConversationView({
   if (readOnly) {
     return (
       <div className="space-y-6">
-        {thread}
+        {/* Le bandeau prend la place qu'occuperait le formulaire, en tête : il
+            explique l'absence de zone de saisie là où on la cherche. */}
         <p className="rounded-md border border-cp-ink/30 bg-cp-paper-deep px-4 py-3 font-mono text-[0.65rem] font-bold uppercase tracking-[0.18em] text-cp-ink-soft">
           Séjour clôturé, le fil est en lecture seule.
         </p>
+        {thread}
       </div>
     );
   }
 
   return (
     <div className="space-y-6">
-      {thread}
-
+      {/* Écrire d'abord, lire ensuite : la zone de saisie est ce qu'on vient
+          chercher, elle ne doit pas se mériter au bout de trente messages. */}
       <form
         onSubmit={onSubmit}
         className={cn("space-y-4", config.formClass)}
@@ -264,6 +271,8 @@ export function ConversationView({
         </div>
       </form>
 
+      {thread}
+
       {canRespond && (
         <ConfirmDialog
           open={rejectOpen}
@@ -281,6 +290,10 @@ export function ConversationView({
 }
 
 const sentAtFormatter = new Intl.DateTimeFormat("fr-FR", {
+  // Même raison que dans lib/format.ts : sans fuseau explicite, le serveur
+  // formate en UTC et le navigateur à l'heure locale, donc le même message
+  // s'affichait à deux heures différentes selon le moment du rendu.
+  timeZone: "Europe/Paris",
   day: "2-digit",
   month: "short",
   hour: "2-digit",

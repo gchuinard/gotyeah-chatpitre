@@ -229,7 +229,9 @@ export default async function DashboardPage() {
                     un seul endroit. */}
                 <Link
                   href={`/dashboard/bookings/${b.id}`}
-                  className="grid gap-4 py-5 transition-colors hover:bg-cp-paper-deep/40 sm:grid-cols-[6rem_2fr_3fr_auto] sm:items-center sm:gap-6"
+                  // pr-4 : sans lui le statut vient se coller au bord droit du
+                  // tableau, sans respiration face au trait de séparation.
+                  className="grid gap-4 py-5 pr-4 transition-colors hover:bg-cp-paper-deep/40 sm:grid-cols-[6rem_2fr_3fr_auto] sm:items-center sm:gap-6"
                 >
                   <p className="font-mono text-sm font-bold uppercase tracking-[0.18em] text-cp-paprika">
                     N°{displayRef(b.id)}
