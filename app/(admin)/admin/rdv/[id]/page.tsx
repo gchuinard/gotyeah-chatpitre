@@ -28,8 +28,11 @@ export default async function AdminRdvPage({
 
   const client = appointment.client;
   const cats = await getCatsForBookingOrOwner(appointment.bookingId, appointment.clientId);
+  // Onglet « Contact client » explicite : c'est là que vivent les
+  // télé-rendez-vous depuis le passage de la fiche séjour en onglets, et l'URL
+  // nue ouvrirait « Administratif ».
   const backHref = appointment.bookingId
-    ? `/admin/bookings/${appointment.bookingId}`
+    ? `/admin/bookings/${appointment.bookingId}?onglet=contact`
     : "/admin";
 
   return (

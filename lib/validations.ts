@@ -154,7 +154,19 @@ export const adminBookingUpdateSchema = z.object({
   // Lignes de suppléments — quand le champ est fourni, il remplace
   // intégralement les lignes existantes (un array vide vide les suppléments).
   extras: z.array(bookingExtraInputSchema).optional(),
-});
+  // Réouverture d'un séjour clôturé. Drapeau dédié plutôt qu'un simple
+  // `status` : c'est la SEULE écriture admise sur un séjour clôturé hors
+  // encaissement, elle doit donc être nommée et repérable, pas déduite de la
+  // valeur d'un champ ordinaire que le formulaire de devis et le fil
+  // d'échanges envoient tous les deux.
+  reopen: z.literal(true).optional(),
+})
+  .refine(
+    (d) =>
+      !d.reopen ||
+      Object.values(d).filter((v) => v !== undefined).length === 1,
+    { message: "La réouverture ne se combine avec aucune autre modification." },
+  );
 
 /// Avis de l'admin sur un chat d'un séjour (état + note libre).
 export const catReviewSchema = z.object({

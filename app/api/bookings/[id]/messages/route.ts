@@ -56,7 +56,11 @@ export function POST(req: NextRequest, { params }: RouteContext) {
       await notifyAdmins({
         type: "MESSAGE_RECEIVED",
         title: "Nouveau message d'un client",
-        link: `/admin/bookings/${booking.id}`,
+        // L'onglet est OBLIGATOIRE dans le lien : le fil d'échanges vit dans
+        // « Contact client », et l'URL nue ouvre « Administratif ». Sans lui, la
+        // notification mènerait à une page où le message qui l'a déclenchée
+        // n'apparaît pas.
+        link: `/admin/bookings/${booking.id}?onglet=contact`,
       });
     }
 

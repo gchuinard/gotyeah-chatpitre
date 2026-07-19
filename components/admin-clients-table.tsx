@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { Check, Copy } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
+import { SortableTh, Th } from "@/components/ui/sortable-th";
 import { cn } from "@/lib/utils";
 
 /// Tableau des comptes clients : recherche, tri par colonne, ligne entièrement
@@ -100,19 +101,15 @@ export function AdminClientsTable({ clients }: { clients: AdminClientRow[] }) {
             <tr>
               <Th>N° fiche</Th>
               {SORTABLE.map((col) => (
-                <Th key={col.key} className={col.align === "center" ? "text-center" : undefined}>
-                  <button
-                    type="button"
-                    onClick={() => toggleSort(col.key)}
-                    aria-label={`Trier par ${col.label}`}
-                    className="inline-flex items-center gap-1.5 uppercase tracking-[0.22em] transition-colors hover:text-cp-paprika"
-                  >
-                    {col.label}
-                    <span aria-hidden className={cn("text-[0.7rem]", sortKey === col.key ? "text-cp-paprika" : "text-cp-ink/25")}>
-                      {sortKey === col.key ? (asc ? "▲" : "▼") : "▲"}
-                    </span>
-                  </button>
-                </Th>
+                <SortableTh
+                  key={col.key}
+                  label={col.label}
+                  sortKey={col.key}
+                  active={sortKey}
+                  asc={asc}
+                  onSort={toggleSort}
+                  className={col.align === "center" ? "text-center" : undefined}
+                />
               ))}
               <Th>Contact</Th>
             </tr>
@@ -238,23 +235,6 @@ function CopyMailButton({ email }: { email: string }) {
         <Copy className="size-3.5" strokeWidth={1.8} aria-hidden />
       )}
     </button>
-  );
-}
-
-function Th({
-  children,
-  className,
-}: {
-  children?: React.ReactNode;
-  className?: string;
-}) {
-  return (
-    <th
-      scope="col"
-      className={`border-b border-cp-ink px-4 py-3 font-mono text-[0.6rem] font-bold uppercase tracking-[0.22em] text-cp-ink-soft ${className ?? ""}`}
-    >
-      {children}
-    </th>
   );
 }
 

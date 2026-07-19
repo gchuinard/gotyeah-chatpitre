@@ -9,6 +9,8 @@ import {
 import { LibraryStamp } from "@/components/library-stamp";
 import { RuleDivider } from "@/components/rule-divider";
 import { SectionHeading } from "@/components/section-heading";
+import { resolveTab, UrlTabs, type UrlTabItem } from "@/components/url-tabs";
+import { ARCHIVE_AFTER_DAYS, isBookingArchived } from "@/lib/api";
 import {
   displayRef,
   formatDate,
@@ -21,9 +23,32 @@ import {
 /// priorité de traitement par défaut (l'ordre des statuts vit dans
 /// `booking-status-badge`, partagé avec les chips de comptage).
 
-export default async function AdminBookingsListPage() {
-  const bookings = await getAllBookings();
+export default async function AdminBookingsListPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ onglet?: string }>;
+}) {
+  const all = await getAllBookings();
 
+  // L'archive est un FILTRE CALCULÉ, pas un statut stocké. Un statut aurait dû
+  // être posé par quelque chose : le projet n'a aucune tâche planifiée, et
+  // personne n'irait cliquer « archiver » sur des séjours vieux de trente
+  // jours. Calculé, le rangement est juste dès l'ouverture de la page.
+  const archived: typeof all = [];
+  const current: typeof all = [];
+  for (const b of all) {
+    (isBookingArchived(b.status, b.closedAt) ? archived : current).push(b);
+  }
+
+  const tabs: UrlTabItem<"courants" | "archive">[] = [
+    { value: "courants", label: "Séjours courants", count: current.length },
+    { value: "archive", label: "Archive", count: archived.length },
+  ];
+  const onglet = resolveTab((await searchParams).onglet, tabs);
+  const bookings = onglet === "archive" ? archived : current;
+
+  // Les compteurs suivent l'onglet actif : calculés sur la totalité, ils
+  // mentiraient au-dessus d'une liste qui n'en montre qu'une partie.
   const counts: Record<BookingStatus, number> = {
     PENDING: 0,
     QUESTION_ASKED: 0,
@@ -70,15 +95,25 @@ export default async function AdminBookingsListPage() {
 
       <header className="space-y-4">
         <LibraryStamp boxed>
-          Tous les séjours, {bookings.length} entrée{bookings.length > 1 ? "s" : ""}
+          {bookings.length} entrée{bookings.length > 1 ? "s" : ""}
         </LibraryStamp>
         <h1 className="font-display text-5xl font-medium leading-[0.95] tracking-[-0.01em] text-cp-ink sm:text-6xl">
           Séjours
         </h1>
         <p className="max-w-2xl font-display text-xl italic leading-snug text-cp-ink-soft">
-          Tous nos séjours, ordonnés par priorité de traitement.
+          {onglet === "archive"
+            ? `Annulés, refusés ou terminés depuis plus de ${ARCHIVE_AFTER_DAYS} jours. Ils restent consultables, et une demande refusée reste ouverte à l'échange.`
+            : "Tous nos séjours, ordonnés par priorité de traitement."}
         </p>
       </header>
+
+      <UrlTabs
+        items={tabs}
+        active={onglet}
+        basePath="/admin/bookings"
+        ariaLabel="Séjours courants ou archivés"
+        className="mt-10"
+      />
 
       <RuleDivider className="my-12" />
 
@@ -93,13 +128,14 @@ export default async function AdminBookingsListPage() {
       </section>
 
       <SectionHeading
-        number="01"
         title="Tableau des séjours"
         kicker="Filtrez, triez, puis ouvrez une ligne pour traiter la décision."
         className="mt-14"
       />
 
-      <AdminBookingsTable bookings={rows} />
+      {/* `key` sur l'onglet : recherche, tri et filtre du tableau sont un état
+          interne, et doivent repartir à zéro quand on change de liste. */}
+      <AdminBookingsTable key={onglet} bookings={rows} />
     </div>
   );
 }

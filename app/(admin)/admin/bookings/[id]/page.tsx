@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { BookingClosureControl } from "@/components/booking-closure-control";
 import { BookingPaymentControl } from "@/components/booking-payment-control";
 import { BookingStatusBadge } from "@/components/booking-status-badge";
 import { CatReviewControl } from "@/components/cat-review-control";
@@ -13,6 +14,7 @@ import { RuledBox } from "@/components/ruled-box";
 import { SectionHeading } from "@/components/section-heading";
 import { StayJournal } from "@/components/stay-journal";
 import { buttonVariants } from "@/components/ui/button";
+import { resolveTab, UrlTabs, type UrlTabItem } from "@/components/url-tabs";
 import { getCurrentUser, isAdmin } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { computeBookingPricing } from "@/lib/pricing";
@@ -35,12 +37,30 @@ function isEditingRecent(startedAt: Date | null): boolean {
   return Date.now() - startedAt.getTime() < 15 * 60_000;
 }
 
+/// Vrai une fois la date d'arrivée atteinte. Comme isEditingRecent, la lecture
+/// de l'heure courante vit dans une fonction à part : le rendu d'un composant
+/// doit rester pur, et le lint React le vérifie.
+function hasBookingStarted(startDate: Date): boolean {
+  return startDate.getTime() <= Date.now();
+}
+
+/// Les pensionnaires restent hors onglets, sur la page : c'est ce qu'on
+/// consulte le plus souvent, ça ne doit coûter aucun clic. Seules les deux
+/// zones lourdes se rangent.
+const TABS: UrlTabItem<"administratif" | "contact">[] = [
+  { value: "administratif", label: "Administratif" },
+  { value: "contact", label: "Contact client" },
+];
+
 export default async function AdminBookingDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ onglet?: string }>;
 }) {
   const { id } = await params;
+  const onglet = resolveTab((await searchParams).onglet, TABS);
   const user = await getCurrentUser();
   if (!user || !isAdmin(user)) return null;
 
@@ -63,7 +83,12 @@ export default async function AdminBookingDetailPage({
   const isClosed = isCancelled || booking.status === "COMPLETED";
   // Le carnet de séjour n'a de sens qu'une fois le séjour validé : masqué tant
   // que la demande n'est pas acceptée (ou terminée).
-  const showJournal = ["ACCEPTED", "COMPLETED"].includes(booking.status);
+  // …et une fois le séjour COMMENCÉ : avant l'arrivée des chats, le carnet
+  // s'affichait parfois des semaines à l'avance alors qu'il n'y a rien à
+  // raconter.
+  const showJournal =
+    hasBookingStarted(booking.startDate) &&
+    ["ACCEPTED", "COMPLETED"].includes(booking.status);
   const extrasTotal = booking.extras.reduce(
     (sum, e) => sum + Number(e.amount ?? 0),
     0,
@@ -165,6 +190,12 @@ export default async function AdminBookingDetailPage({
               ? "Cette demande a été annulée par le client. La fiche est en lecture seule, aucune action n'est plus possible."
               : "Ce séjour est terminé. La fiche est en lecture seule, seul l'encaissement reste modifiable."}
           </p>
+          {/* Hors ActionGate, et c'est voulu : ce bandeau reste sur la page
+              principale, donc le seul contrôle qui doit rester actif sur une
+              fiche verrouillée y est naturellement à sa place. */}
+          <div className="mt-4">
+            <BookingClosureControl bookingId={booking.id} mode="reopen" />
+          </div>
         </aside>
       )}
 
@@ -290,140 +321,173 @@ export default async function AdminBookingDetailPage({
         </RuledBox>
       )}
 
-      {/* Facture PDF — uniquement quand le devis est posé. */}
-      {hasQuote && (
-        <aside className="mt-10 flex flex-wrap items-center justify-between gap-4 rounded-md border border-cp-cobalt bg-cp-paper-deep p-5 sm:p-6">
-          <div>
-            <p className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.18em] text-cp-cobalt">
-              Facture du séjour
-            </p>
-            <p className="mt-1 font-display text-xl italic text-cp-ink">
-              Aperçu de la facture PDF envoyée au client.
-            </p>
-          </div>
-          <a
-            href={`/api/invoices/${booking.id}/pdf`}
-            target="_blank"
-            rel="noopener"
-            className="inline-flex items-center gap-2 rounded-md border border-cp-cobalt bg-cp-cobalt px-5 py-2.5 font-body text-sm font-semibold text-cp-paper transition-colors hover:bg-cp-cobalt-deep"
-          >
-            Ouvrir la facture PDF ↓
-          </a>
-        </aside>
-      )}
+      <UrlTabs
+        items={TABS}
+        active={onglet}
+        basePath={`/admin/bookings/${booking.id}`}
+        ariaLabel="Sections du séjour"
+        className="mt-14"
+      />
 
-      {/* Encaissement — montant réellement payé (distinct du total facturé). */}
-      {hasQuote && (
-        <section className="mt-6 rounded-md border border-cp-ink bg-cp-paper p-5 sm:p-6">
-          <p className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.22em] text-cp-paprika">
-            Encaissement
-          </p>
-          <p className="mb-3 mt-1 font-body text-sm text-cp-ink-soft">
-            Ce qui a réellement été payé pour ce séjour (distinct du total facturé).
-          </p>
-          {/* Verrouillé sur un séjour annulé seulement : sur un séjour terminé,
-              le solde peut encore être encaissé après le départ des chats. */}
-          <ActionGate disabled={isCancelled}>
-            <BookingPaymentControl
-              bookingId={booking.id}
-              total={Number(booking.totalAmount)}
-              initialPaid={booking.paidAmount === null ? null : Number(booking.paidAmount)}
-            />
-          </ActionGate>
-        </section>
-      )}
-
-      {/* Devis + actions — uniquement tant que PENDING ou QUESTION_ASKED. */}
-      {awaitingQuote && suggested && (
+      {onglet === "administratif" && (
         <>
-          <QuoteForm
-            bookingId={booking.id}
-            nights={nights}
-            catsCount={cats.length}
-            current={{
-              pricePerFirstCat:
-                booking.pricePerFirstCat === null
-                  ? null
-                  : Number(booking.pricePerFirstCat),
-              pricePerExtraCat:
-                booking.pricePerExtraCat === null
-                  ? null
-                  : Number(booking.pricePerExtraCat),
-              depositPercentage: booking.depositPercentage,
-              extras: booking.extras.map((e) => ({
-                label: e.label,
-                unit: e.unit,
-                unitAmount: e.unitAmount === null ? null : Number(e.unitAmount),
-                quantity: e.quantity,
-                requestedByClient: e.requestedByClient,
-              })),
-            }}
-            suggested={{
-              pricePerFirstCat: Number(suggested.pricePerFirstCat),
-              pricePerExtraCat: Number(suggested.pricePerExtraCat),
-              depositPercentage: suggested.depositPercentage,
-            }}
-            presets={presets.map((p) => ({
-              id: p.id,
-              label: p.label,
-              unit: p.unit,
-              defaultAmount: Number(p.defaultAmount),
-            }))}
-          />
+          {/* Facture PDF — uniquement quand le devis est posé. */}
+          {hasQuote && (
+            <aside className="mt-10 flex flex-wrap items-center justify-between gap-4 rounded-md border border-cp-cobalt bg-cp-paper-deep p-5 sm:p-6">
+              <div>
+                <p className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.18em] text-cp-cobalt">
+                  Facture du séjour
+                </p>
+                <p className="mt-1 font-display text-xl italic text-cp-ink">
+                  Aperçu de la facture PDF envoyée au client.
+                </p>
+              </div>
+              <a
+                href={`/api/invoices/${booking.id}/pdf`}
+                target="_blank"
+                rel="noopener"
+                className="inline-flex items-center gap-2 rounded-md border border-cp-cobalt bg-cp-cobalt px-5 py-2.5 font-body text-sm font-semibold text-cp-paper transition-colors hover:bg-cp-cobalt-deep"
+              >
+                Ouvrir la facture PDF ↓
+              </a>
+            </aside>
+          )}
+
+          {/* Encaissement — montant réellement payé (distinct du total facturé). */}
+          {hasQuote && (
+            <section className="mt-6 rounded-md border border-cp-ink bg-cp-paper p-5 sm:p-6">
+              <p className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.22em] text-cp-paprika">
+                Encaissement
+              </p>
+              <p className="mb-3 mt-1 font-body text-sm text-cp-ink-soft">
+                Ce qui a réellement été payé pour ce séjour (distinct du total facturé).
+              </p>
+              {/* Verrouillé sur un séjour annulé seulement : sur un séjour terminé,
+                  le solde peut encore être encaissé après le départ des chats. */}
+              <ActionGate disabled={isCancelled}>
+                <BookingPaymentControl
+                  bookingId={booking.id}
+                  total={Number(booking.totalAmount)}
+                  initialPaid={booking.paidAmount === null ? null : Number(booking.paidAmount)}
+                />
+              </ActionGate>
+            </section>
+          )}
+
+          {!hasQuote && !awaitingQuote && (
+            <p className="mt-10 font-display text-xl italic text-cp-ink-soft">
+              Aucun devis n&apos;a été posé sur ce séjour, il n&apos;y a rien à
+              facturer.
+            </p>
+          )}
+
+          {/* Clôture — seulement depuis « accepté », en miroir de la garde
+              serveur. Les chats sont repartis, on solde le séjour. */}
+          {booking.status === "ACCEPTED" && (
+            <section className="mt-6 rounded-md border border-cp-ink/30 bg-cp-paper-deep p-5 sm:p-6">
+              <p className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.22em] text-cp-ink-soft">
+                Fin du séjour
+              </p>
+              <p className="mb-4 mt-1 font-body text-sm text-cp-ink-soft">
+                Une fois les chats repartis, marquez le séjour comme terminé pour
+                figer sa fiche et envoyer au client sa facture et son carnet.
+              </p>
+              <BookingClosureControl bookingId={booking.id} mode="complete" />
+            </section>
+          )}
+
+          {/* Devis + actions — uniquement tant que PENDING ou QUESTION_ASKED. */}
+          {awaitingQuote && suggested && (
+            <QuoteForm
+              bookingId={booking.id}
+              nights={nights}
+              catsCount={cats.length}
+              current={{
+                pricePerFirstCat:
+                  booking.pricePerFirstCat === null
+                    ? null
+                    : Number(booking.pricePerFirstCat),
+                pricePerExtraCat:
+                  booking.pricePerExtraCat === null
+                    ? null
+                    : Number(booking.pricePerExtraCat),
+                depositPercentage: booking.depositPercentage,
+                extras: booking.extras.map((e) => ({
+                  label: e.label,
+                  unit: e.unit,
+                  unitAmount: e.unitAmount === null ? null : Number(e.unitAmount),
+                  quantity: e.quantity,
+                  requestedByClient: e.requestedByClient,
+                })),
+              }}
+              suggested={{
+                pricePerFirstCat: Number(suggested.pricePerFirstCat),
+                pricePerExtraCat: Number(suggested.pricePerExtraCat),
+                depositPercentage: suggested.depositPercentage,
+              }}
+              presets={presets.map((p) => ({
+                id: p.id,
+                label: p.label,
+                unit: p.unit,
+                defaultAmount: Number(p.defaultAmount),
+              }))}
+            />
+          )}
         </>
       )}
 
-      {/* Carnet de séjour — masqué tant que le séjour n'est pas validé. */}
-      {showJournal && (
+      {onglet === "contact" && (
         <>
-          <RuleDivider className="my-16" label="Carnet de séjour" tone="cobalt" />
-          <section aria-labelledby="journal-title" className="space-y-8">
+          {/* Carnet de séjour — masqué tant que le séjour n'est pas validé ET
+              pas commencé : avant l'arrivée des chats, il n'y a rien à
+              raconter. */}
+          {showJournal && (
+            <section aria-labelledby="journal-title" className="mt-12 space-y-8">
+              <SectionHeading
+                title="Carnet de séjour"
+                kicker="Une note photo quotidienne, c'est ce que voit le client."
+                tone="cobalt"
+              />
+
+              <StayJournal bookingId={booking.id} cats={cats} canAdd={!isClosed} />
+            </section>
+          )}
+
+          {/* Télé-rendez-vous */}
+          <RuleDivider className="my-16" label="Télé-rendez-vous" tone="feuille" />
+          <ActionGate disabled={isClosed}>
+            <RdvScheduler
+              bookingId={booking.id}
+              appointments={appointments.map((a) => ({
+                id: a.id,
+                scheduledAt: a.scheduledAt.toISOString(),
+                durationMin: a.durationMin,
+                status: a.status,
+                title: a.title,
+              }))}
+            />
+          </ActionGate>
+
+          <RuleDivider className="my-16" tone="paprika" />
+
+          {/* Fil — POST réel */}
+          <section aria-labelledby="thread-title" className="space-y-8">
             <SectionHeading
-              number="02"
-              title="Carnet de séjour"
-              kicker="Une note photo quotidienne, c'est ce que voit le client."
-              tone="cobalt"
+              title="Échanges avec le client"
+              kicker={`${messages.length} message${messages.length > 1 ? "s" : ""} échangé${messages.length > 1 ? "s" : ""} jusqu'ici.`}
+              tone="paprika"
             />
 
-            <StayJournal bookingId={booking.id} cats={cats} canAdd={!isClosed} />
+            <ConversationView
+              bookingId={booking.id}
+              initialMessages={messages}
+              voice="admin"
+              canRespond={awaitingQuote}
+              readOnly={isClosed}
+            />
           </section>
         </>
       )}
-
-      {/* Télé-rendez-vous */}
-      <RuleDivider className="my-16" label="Télé-rendez-vous" tone="feuille" />
-      <ActionGate disabled={isClosed}>
-        <RdvScheduler
-          bookingId={booking.id}
-          appointments={appointments.map((a) => ({
-            id: a.id,
-            scheduledAt: a.scheduledAt.toISOString(),
-            durationMin: a.durationMin,
-            status: a.status,
-            title: a.title,
-          }))}
-        />
-      </ActionGate>
-
-      <RuleDivider className="my-16" tone="paprika" />
-
-      {/* Fil — POST réel */}
-      <section aria-labelledby="thread-title" className="space-y-8">
-        <SectionHeading
-          number={showJournal ? "03" : "02"}
-          title="Échanges avec le client"
-          kicker={`${messages.length} message${messages.length > 1 ? "s" : ""} échangé${messages.length > 1 ? "s" : ""} jusqu'ici.`}
-          tone="paprika"
-        />
-
-        <ConversationView
-          bookingId={booking.id}
-          initialMessages={messages}
-          voice="admin"
-          canRespond={awaitingQuote}
-          readOnly={isClosed}
-        />
-      </section>
 
       <RuleDivider className="my-16" />
 

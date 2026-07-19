@@ -218,6 +218,13 @@ model Booking {
   depositAmount     Decimal? @db.Decimal(10, 2) // depositPercentage % du total
   paidAmount        Decimal? @db.Decimal(10, 2) // montant réellement encaissé (saisi par l'admin)
 
+  // Date du passage en ANNULÉ ou TERMINÉ, remise à null à la réouverture.
+  // C'est elle, et pas updatedAt, qui décide de l'archivage au bout de 30
+  // jours : updatedAt bouge à chaque écriture, et l'encaissement d'un solde
+  // reste permis sur un séjour terminé, ce qui ferait ressortir de l'archive
+  // un séjour clos depuis des mois.
+  closedAt DateTime?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -438,6 +445,7 @@ enum NotificationType {
   ARRIVAL_REMINDER // (admin) arrivée prévue le lendemain
   APPOINTMENT_SCHEDULED // (client) un télé-rendez-vous a été planifié
   APPOINTMENT_CANCELLED // (client) un télé-rendez-vous a été annulé
+  BOOKING_COMPLETED // (client) séjour terminé : facture et carnet à retrouver
 }
 
 /// Notification in-app destinée à un utilisateur.

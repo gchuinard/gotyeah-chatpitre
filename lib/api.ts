@@ -39,6 +39,43 @@ export function isBookingClosed(status: string): boolean {
   return (CLOSED_BOOKING_STATUSES as readonly string[]).includes(status);
 }
 
+/// Statuts pour lesquels un séjour quitte la file de travail et part à
+/// l'archive au bout d'un délai. À NE PAS CONFONDRE avec les statuts clôturés
+/// ci-dessus : « Refusé » s'archive, parce qu'une demande refusée n'a plus rien
+/// à voir avec le travail courant, mais reste ÉCRIVABLE, parce que la
+/// confirmation de refus promet à l'utilisateur que l'échange continue. Ranger
+/// et verrouiller sont deux gestes différents.
+export const ARCHIVABLE_BOOKING_STATUSES = [
+  "CANCELLED",
+  "COMPLETED",
+  "REJECTED",
+] as const;
+
+export function isBookingArchivable(status: string): boolean {
+  return (ARCHIVABLE_BOOKING_STATUSES as readonly string[]).includes(status);
+}
+
+/// Délai au-delà duquel un séjour clôturé quitte la liste de travail.
+export const ARCHIVE_AFTER_DAYS = 30;
+
+/// Vrai si le séjour est rangé à l'archive. Le décompte part de la DATE DE
+/// CLÔTURE et non de la date de fin du séjour ni de `updatedAt` : ce dernier
+/// bouge à chaque écriture, et l'encaissement d'un solde reste permis sur un
+/// séjour terminé, ce qui aurait fait ressortir de l'archive un séjour clos
+/// depuis des mois.
+///
+/// Sans date de clôture, le séjour reste VISIBLE. La règle échoue ainsi du bon
+/// côté : mieux vaut un séjour de trop dans la liste de travail qu'un séjour
+/// disparu de la vue.
+export function isBookingArchived(
+  status: string,
+  closedAt: Date | null,
+): boolean {
+  if (!isBookingArchivable(status)) return false;
+  if (!closedAt) return false;
+  return Date.now() - closedAt.getTime() > ARCHIVE_AFTER_DAYS * 86_400_000;
+}
+
 /// Lève un 409 si le séjour est clôturé. À appeler dans TOUTE route qui écrit
 /// sur un séjour : le verrou d'interface est rendu au moment du rendu serveur,
 /// donc périmé dès qu'un onglet reste ouvert pendant que le statut change.

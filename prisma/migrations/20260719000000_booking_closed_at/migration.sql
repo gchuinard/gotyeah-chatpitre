@@ -1,0 +1,12 @@
+-- Date de clôture d'un séjour : posée au passage en CANCELLED ou COMPLETED,
+-- remise à NULL à la réouverture. Additive et rétro-compatible.
+--
+-- Elle existe parce que "updatedAt" ne peut pas servir de date de clôture : il
+-- bouge à chaque écriture, et l'encaissement d'un solde reste permis sur un
+-- séjour TERMINÉ. Un paiement tardif aurait donc fait ressortir de l'archive un
+-- séjour clos depuis des mois.
+--
+-- La reprise des séjours DÉJÀ clôturés est volontairement laissée à une
+-- migration ultérieure, celle de l'archive : ici on ne fait qu'ajouter la
+-- colonne, sans toucher aux données.
+ALTER TABLE "Booking" ADD COLUMN     "closedAt" TIMESTAMP(3);

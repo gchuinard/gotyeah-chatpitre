@@ -1,18 +1,30 @@
-// Helpers de formatage pur — sans dépendance Prisma, donc importable
+// Helpers de formatage pur, sans dépendance Prisma, donc importable
 // depuis les Server Components ET les Client Components.
+//
+// La zone est FIXÉE à Europe/Paris et jamais laissée à l'environnement. Sans
+// elle, un même instant s'affichait différemment selon l'endroit où le code
+// tourne : le conteneur de production est en UTC (vérifié), le navigateur est
+// dans le fuseau du visiteur. Un composant client, rendu une fois sur le
+// serveur puis hydraté, pouvait donc afficher deux jours différents pour la
+// même date. La pension est à Bordeaux : ses dates se lisent à son heure,
+// d'où qu'on les regarde.
+const TIME_ZONE = "Europe/Paris";
 
 const dateFormatter = new Intl.DateTimeFormat("fr-FR", {
+  timeZone: TIME_ZONE,
   day: "numeric",
   month: "long",
   year: "numeric",
 });
 
 const shortDateFormatter = new Intl.DateTimeFormat("fr-FR", {
+  timeZone: TIME_ZONE,
   day: "2-digit",
   month: "short",
 });
 
 const dateTimeFormatter = new Intl.DateTimeFormat("fr-FR", {
+  timeZone: TIME_ZONE,
   day: "2-digit",
   month: "short",
   hour: "2-digit",

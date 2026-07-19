@@ -240,24 +240,34 @@ export function CatDocuments({
         onConfirm={confirmDelete}
       />
 
+      {/* Deux boîtes aux textes figés plutôt qu'une seule aux textes calculés.
+          Le popup reste monté le temps de son animation de sortie, pendant
+          laquelle `toReview` vaut déjà null : toutes les ternaires retombaient
+          alors sur la branche « Accepter », et confirmer un refus affichait
+          fugitivement « Accepter ce document ? ». Une comparaison stricte, elle,
+          vaut simplement false quand `toReview` est null. */}
       <ConfirmDialog
-        open={toReview !== null}
+        open={toReview?.status === "ACCEPTED"}
         onOpenChange={(open) => {
           if (!open) setToReview(null);
         }}
-        title={
-          toReview?.status === "REJECTED"
-            ? "Refuser ce document ?"
-            : "Accepter ce document ?"
-        }
-        description={
-          toReview?.status === "REJECTED"
-            ? "Le client verra que ce document est refusé, et qu'il doit en fournir un autre."
-            : "Le document sera marqué comme vérifié, et le client le verra accepté."
-        }
-        confirmLabel={toReview?.status === "REJECTED" ? "Refuser" : "Accepter"}
+        title="Accepter ce document ?"
+        description="Le document sera marqué comme vérifié, et le client le verra accepté."
+        confirmLabel="Accepter"
         cancelLabel="Revenir en arrière"
-        confirmVariant={toReview?.status === "REJECTED" ? "destructive" : "default"}
+        onConfirm={confirmReview}
+      />
+
+      <ConfirmDialog
+        open={toReview?.status === "REJECTED"}
+        onOpenChange={(open) => {
+          if (!open) setToReview(null);
+        }}
+        title="Refuser ce document ?"
+        description="Le client verra que ce document est refusé, et qu'il doit en fournir un autre."
+        confirmLabel="Refuser"
+        cancelLabel="Revenir en arrière"
+        confirmVariant="destructive"
         onConfirm={confirmReview}
       />
     </section>

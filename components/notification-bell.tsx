@@ -27,6 +27,9 @@ export function NotificationBell({ items }: { items: NotificationItem[] }) {
   const unreadCount = items.filter((i) => i.unread).length;
 
   function openNotification(item: NotificationItem) {
+    // Comme markAllRead : sans ça, un échec précédent laissait son message
+    // affiché au-dessus d'actions qui, elles, avaient réussi.
+    setError(null);
     setIsOpen(false);
     startTransition(async () => {
       // Si le marquage échoue on navigue quand même : c'est l'intention du

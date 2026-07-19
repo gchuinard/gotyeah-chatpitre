@@ -11,6 +11,7 @@ import { prisma } from "@/lib/db";
 import {
   handle,
   HttpError,
+  isBookingArchivable,
   isBookingClosed,
   json,
   parseJson,
@@ -24,11 +25,15 @@ import { differenceInCalendarDays } from "date-fns";
 type RouteContext = { params: Promise<{ id: string }> };
 
 // Notification envoyée au client selon le nouveau statut. Les statuts absents
-// de cette table (PENDING, CANCELLED, COMPLETED) ne déclenchent pas de notif —
-// l'énumération NotificationType ne prévoit pas de type dédié.
+// de cette table (PENDING, CANCELLED) ne déclenchent pas de notif.
 const STATUS_NOTIFICATION: Partial<
-  Record<BookingStatus, { type: NotificationType; title: string }>
+  Record<BookingStatus, { type: NotificationType; title: string; body?: string }>
 > = {
+  COMPLETED: {
+    type: "BOOKING_COMPLETED",
+    title: "Votre séjour est terminé",
+    body: "Retrouvez sa facture et le carnet de séjour de votre chat.",
+  },
   ACCEPTED: {
     type: "BOOKING_ACCEPTED",
     title: "Votre demande de réservation a été acceptée",
@@ -66,6 +71,35 @@ export function PATCH(req: NextRequest, { params }: RouteContext) {
     if (!booking) throw new HttpError(404, "Réservation introuvable.");
 
     const data = await parseJson(req, adminBookingUpdateSchema);
+
+    // Réouverture : sortie anticipée AVANT la garde de lecture seule, pour que
+    // celle-ci conserve sa règle simple (aucune écriture ordinaire sur un
+    // séjour clôturé) et que l'exception reste unique et nommée. Surtout, ne
+    // pas fondre cette branche dans le flux principal : elle y traverserait le
+    // recalcul du devis, l'annulation en cascade des rendez-vous et la table
+    // des notifications, et annoncerait au client « demande acceptée » à
+    // chaque réouverture.
+    if (data.reopen) {
+      if (!isBookingClosed(booking.status)) {
+        throw new HttpError(
+          409,
+          "Ce séjour n'est pas clôturé, il n'y a rien à rouvrir.",
+        );
+      }
+      const reopened = await prisma.booking.update({
+        where: { id },
+        // Un séjour TERMINÉ a forcément été accepté, il y retourne. Un séjour
+        // ANNULÉ repart en attente : rien en base ne dit s'il avait été
+        // accepté, et le total ne le prouve pas puisque le devis se saisit
+        // avant l'acceptation. Repasser par une acceptation explicite est peu
+        // coûteux et renotifie correctement le client.
+        data: {
+          status: booking.status === "COMPLETED" ? "ACCEPTED" : "PENDING",
+          closedAt: null,
+        },
+      });
+      return json({ booking: reopened });
+    }
 
     // Séjour clôturé : lecture seule, en miroir de ce que la fiche admin
     // affiche. Un séjour ANNULÉ est totalement figé ; sur un séjour TERMINÉ on
@@ -164,6 +198,16 @@ export function PATCH(req: NextRequest, { params }: RouteContext) {
       );
     }
 
+    // Un séjour ne se termine que depuis « accepté ». Sans cette garde, un
+    // appel direct pourrait clore une demande jamais acceptée, qui deviendrait
+    // alors définitivement en lecture seule.
+    if (data.status === "COMPLETED" && booking.status !== "ACCEPTED") {
+      throw new HttpError(
+        409,
+        "Seul un séjour accepté peut être marqué comme terminé.",
+      );
+    }
+
     const updateData: PrismaTypes.BookingUpdateInput = {
       status: data.status,
       adminNotes: data.adminNotes,
@@ -174,6 +218,18 @@ export function PATCH(req: NextRequest, { params }: RouteContext) {
       depositAmount,
       paidAmount:
         data.paidAmount !== undefined ? new Prisma.Decimal(data.paidAmount) : undefined,
+      // `undefined` et NON `null` quand le statut n'est pas touché. Écrire
+      // `null` ici effacerait la date de clôture à chaque enregistrement
+      // d'encaissement sur un séjour terminé, seule écriture que la garde
+      // ci-dessus laisse passer : le séjour ressortirait alors définitivement
+      // de l'archive, des semaines plus tard, à cause d'une action sans
+      // rapport. Introuvable en recette.
+      closedAt:
+        data.status === undefined
+          ? undefined
+          : isBookingArchivable(data.status)
+            ? new Date()
+            : null,
     };
 
     // Update booking + remplace les extras + poste la question éventuelle,
@@ -235,6 +291,7 @@ export function PATCH(req: NextRequest, { params }: RouteContext) {
           userId: booking.userId,
           type: notif.type,
           title: notif.title,
+          body: notif.body,
           link: `/dashboard/bookings/${booking.id}`,
         });
       }

@@ -158,7 +158,7 @@ export default async function AdminDashboardPage() {
                       serveur. */}
                   <Link
                     href={`/admin/bookings/${b.id}`}
-                    className="grid gap-3 py-5 transition-colors hover:bg-cp-paper-deep/40 sm:grid-cols-[6rem_2fr_2fr_auto] sm:items-center sm:gap-5"
+                    className="grid gap-3 py-5 pr-4 transition-colors hover:bg-cp-paper-deep/40 sm:grid-cols-[6rem_2fr_2fr_auto] sm:items-center sm:gap-5"
                   >
                     <p className="font-mono text-sm font-bold uppercase tracking-[0.18em] text-cp-paprika">
                       N°{displayRef(b.id)}
