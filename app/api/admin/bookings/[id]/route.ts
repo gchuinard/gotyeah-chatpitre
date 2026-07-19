@@ -101,26 +101,13 @@ export function PATCH(req: NextRequest, { params }: RouteContext) {
       return json({ booking: reopened });
     }
 
-    // Séjour clôturé : lecture seule, en miroir de ce que la fiche admin
-    // affiche. Un séjour ANNULÉ est totalement figé ; sur un séjour TERMINÉ on
-    // laisse passer le seul encaissement, le solde pouvant être réglé après le
-    // départ des chats. Sans cette garde, « Poser une question » écrivait un
-    // message ET rouvrait le séjour en « Question posée », alors que le bouton
-    // « Envoyer » voisin était refusé.
+    // Séjour clôturé : lecture seule STRICTE. L'exception sensible aux champs
+    // qui vivait ici, pour laisser passer l'encaissement d'un séjour terminé,
+    // n'a plus d'objet : l'encaissement a sa propre route et sa propre garde
+    // depuis que les versements sont des lignes. La réouverture, elle, est
+    // sortie plus haut.
     if (isBookingClosed(booking.status)) {
-      const touched = Object.entries(data)
-        .filter(([, value]) => value !== undefined)
-        .map(([key]) => key);
-      const paymentOnly =
-        booking.status === "COMPLETED" &&
-        touched.length > 0 &&
-        touched.every((key) => key === "paidAmount");
-      if (!paymentOnly) {
-        throw new HttpError(
-          409,
-          "Ce séjour est clôturé, il est en lecture seule.",
-        );
-      }
+      throw new HttpError(409, "Ce séjour est clôturé, il est en lecture seule.");
     }
 
     // État final du devis = valeur fournie ∪ valeur existante.
@@ -216,8 +203,9 @@ export function PATCH(req: NextRequest, { params }: RouteContext) {
       depositPercentage,
       totalAmount,
       depositAmount,
-      paidAmount:
-        data.paidAmount !== undefined ? new Prisma.Decimal(data.paidAmount) : undefined,
+      // paidAmount n'est PAS écrit ici : c'est la somme des versements, tenue
+      // par syncBookingPaidAmount. Un second chemin d'écriture la ferait
+      // diverger sans que rien ne le signale.
       // `undefined` et NON `null` quand le statut n'est pas touché. Écrire
       // `null` ici effacerait la date de clôture à chaque enregistrement
       // d'encaissement sur un séjour terminé, seule écriture que la garde

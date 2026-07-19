@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { BookingClosureControl } from "@/components/booking-closure-control";
-import { BookingPaymentControl } from "@/components/booking-payment-control";
+import { BookingPayments } from "@/components/booking-payments";
 import { BookingStatusBadge } from "@/components/booking-status-badge";
 import { CatReviewControl } from "@/components/cat-review-control";
 import { ConversationView } from "@/components/conversation-view";
@@ -24,7 +24,10 @@ import {
   formatDate,
   getAppointmentsForBooking,
   getBookingFor,
+  getPaymentsForBooking,
   nightsBetween,
+  todayInputDate,
+  toInputDate,
 } from "@/lib/repository";
 
 /// Détail admin d'un séjour — Prisma + actions de changement de statut
@@ -68,6 +71,17 @@ export default async function AdminBookingDetailPage({
   if (!booking) notFound();
 
   const appointments = await getAppointmentsForBooking(booking.id);
+  // Dates formatées côté serveur : le composant est un composant client, et un
+  // formatage fait des deux côtés doit produire exactement la même chaîne.
+  const paymentRows = (await getPaymentsForBooking(booking.id)).map((p) => ({
+    id: p.id,
+    amount: Number(p.amount),
+    method: p.method,
+    paidAtLabel: formatDate(p.paidAt),
+    paidAtInput: toInputDate(p.paidAt),
+    reference: p.reference,
+    recordedByLabel: p.recordedBy?.firstName ?? null,
+  }));
   const cats = booking.cats.map((link) => link.cat);
   const client = booking.user;
   const nights = nightsBetween(booking.startDate, booking.endDate);
@@ -365,10 +379,11 @@ export default async function AdminBookingDetailPage({
               {/* Verrouillé sur un séjour annulé seulement : sur un séjour terminé,
                   le solde peut encore être encaissé après le départ des chats. */}
               <ActionGate disabled={isCancelled}>
-                <BookingPaymentControl
+                <BookingPayments
                   bookingId={booking.id}
                   total={Number(booking.totalAmount)}
-                  initialPaid={booking.paidAmount === null ? null : Number(booking.paidAmount)}
+                  payments={paymentRows}
+                  today={todayInputDate()}
                 />
               </ActionGate>
             </section>

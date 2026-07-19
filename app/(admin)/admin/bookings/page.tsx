@@ -63,6 +63,11 @@ export default async function AdminBookingsListPage({
   // lignes déjà formatées, plus une date ISO et un total brut pour trier.
   const rows = bookings.map((b) => {
     const total = b.totalAmount === null ? null : Number(b.totalAmount);
+    // paidAmount est la somme des versements, tenue à jour à chaque écriture :
+    // rien à agréger ici. Sans devis, l'encaissement n'a pas de sens à afficher,
+    // il n'y a rien à devoir.
+    const paid = total === null ? null : Number(b.paidAmount ?? 0);
+    const balance = total === null || paid === null ? null : total - paid;
     return {
       id: b.id,
       reference: displayRef(b.id),
@@ -76,6 +81,24 @@ export default async function AdminBookingsListPage({
       catNames: b.cats.map((link) => link.cat.name).join(" · "),
       total,
       totalLabel: total === null ? null : `${formatEuros(total)}€`,
+      paid,
+      paidLabel: paid === null ? null : `${formatEuros(paid)}€`,
+      balanceLabel:
+        balance === null
+          ? null
+          : balance > 0
+            ? `reste ${formatEuros(balance)}€`
+            : balance < 0
+              ? `trop-perçu ${formatEuros(-balance)}€`
+              : "soldé",
+      balanceTone:
+        balance === null
+          ? null
+          : balance > 0
+            ? ("due" as const)
+            : balance < 0
+              ? ("over" as const)
+              : ("settled" as const),
     };
   });
 

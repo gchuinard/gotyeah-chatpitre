@@ -55,6 +55,20 @@ export function isBookingArchivable(status: string): boolean {
   return (ARCHIVABLE_BOOKING_STATUSES as readonly string[]).includes(status);
 }
 
+/// L'encaissement est le seul geste encore permis sur un séjour TERMINÉ : le
+/// solde peut être réglé après le départ des chats, et rien dans l'interface ne
+/// permettrait de rouvrir le séjour pour le saisir. Il reste refusé sur un
+/// séjour ANNULÉ, qui est totalement figé. On ne peut donc pas se contenter
+/// d'`assertBookingWritable` ici, qui refuserait les deux.
+export function assertPaymentWritable(status: string): void {
+  if (status === "CANCELLED") {
+    throw new HttpError(
+      409,
+      "Ce séjour est annulé, il n'accepte plus d'encaissement.",
+    );
+  }
+}
+
 /// Délai au-delà duquel un séjour clôturé quitte la liste de travail.
 export const ARCHIVE_AFTER_DAYS = 30;
 

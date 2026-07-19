@@ -46,6 +46,27 @@ export function formatDateTime(date: Date): string {
   return dateTimeFormatter.format(date).replace(", ", " · ").replace(":", "h");
 }
 
+/// Date au format attendu par un champ `<input type="date">`, exprimée à Paris
+/// comme tout le reste. La locale en-CA produit nativement l'ordre
+/// année-mois-jour, ce qui évite de recomposer la chaîne à la main.
+const inputDateFormatter = new Intl.DateTimeFormat("en-CA", {
+  timeZone: TIME_ZONE,
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+});
+
+/// « 2026-07-19 » — pour pré-remplir un champ date.
+export function toInputDate(date: Date): string {
+  return inputDateFormatter.format(date);
+}
+
+/// Date du jour à Paris, au format d'un champ date. La lecture de l'heure vit
+/// ici et non dans un composant : un rendu doit rester pur.
+export function todayInputDate(): string {
+  return toInputDate(new Date());
+}
+
 /// « 2026-06-16 » — date ISO courte (UTC), pour les noms de fichiers.
 export function formatISODate(date: Date): string {
   return date.toISOString().slice(0, 10);

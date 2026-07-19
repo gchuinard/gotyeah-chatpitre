@@ -145,12 +145,12 @@ export const adminBookingUpdateSchema = z.object({
     .min(0)
     .max(100)
     .optional(),
-  // Montant réellement encaissé sur le séjour (saisi par l'admin), distinct du
-  // total facturé. 0 = rien d'encaissé.
-  paidAmount: z.coerce
-    .number()
-    .nonnegative("Montant encaissé négatif impossible.")
-    .optional(),
+  // PAS de paidAmount ici. Ce champ est devenu la somme des versements,
+  // recalculée à chaque écriture de ligne : le laisser écrivable par cette
+  // route permettrait de poser une valeur qui ne correspond à aucun versement,
+  // et deux écrans afficheraient alors des montants différents jusqu'à ce que
+  // le prochain versement écrase silencieusement le mensonge. L'encaissement
+  // passe par /api/admin/bookings/[id]/payments.
   // Lignes de suppléments — quand le champ est fourni, il remplace
   // intégralement les lignes existantes (un array vide vide les suppléments).
   extras: z.array(bookingExtraInputSchema).optional(),
@@ -167,6 +167,19 @@ export const adminBookingUpdateSchema = z.object({
       Object.values(d).filter((v) => v !== undefined).length === 1,
     { message: "La réouverture ne se combine avec aucune autre modification." },
   );
+
+/// Un versement encaissé sur un séjour. Le montant doit être strictement
+/// positif : un versement de zéro euro ne veut rien dire, « rien reçu » se
+/// traduit par l'absence de ligne.
+export const bookingPaymentSchema = z.object({
+  amount: z.coerce
+    .number()
+    .positive("Le montant du versement doit être supérieur à zéro."),
+  method: z.enum(["CASH", "CHEQUE", "TRANSFER", "OTHER"]),
+  paidAt: z.coerce.date(),
+  // Numéro de chèque, référence de virement. Facultatif.
+  reference: z.string().trim().max(120).optional(),
+});
 
 /// Avis de l'admin sur un chat d'un séjour (état + note libre).
 export const catReviewSchema = z.object({
