@@ -154,7 +154,14 @@ export default async function AdminBookingDetailPage({
             renvoyée à droite en CSS dès qu'il y a la place. `self-start` et non
             `items-start` sur la grille : seule la note a besoin de ne pas
             s'étirer, sans quoi `sticky` n'aurait aucune marge où coller. */}
-        <aside className="min-w-0 min-[1440px]:sticky min-[1440px]:top-8 min-[1440px]:col-start-2 min-[1440px]:row-start-1 min-[1440px]:self-start">
+        {/* top-24 et non top-8 : l'en-tête d'administration est lui-même
+            `sticky top-0 z-40` (client-header.tsx, partagé avec l'espace
+            client). Il fait 67px : py-3 (24) plus le bouton le plus haut, celui
+            du menu utilisateur (28 d'avatar + 12 de padding + 2 de bordure =
+            42), plus le filet du bas. Calée à 32px, la note passait dessous dès
+            le premier tour de molette. 96px la posent franchement en dessous,
+            avec de l'air. */}
+        <aside className="min-w-0 min-[1440px]:sticky min-[1440px]:top-24 min-[1440px]:col-start-2 min-[1440px]:row-start-1 min-[1440px]:self-start">
           <BookingNoteControl
             bookingId={booking.id}
             active={booking.pinnedForAdmin}

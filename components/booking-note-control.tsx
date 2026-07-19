@@ -90,9 +90,11 @@ export function BookingNoteControl({
 
       <Textarea
         id={`booking-note-${bookingId}`}
-        rows={2}
-        // Le Textarea part à min-h-28, trop haut pour deux lignes de pense-bête.
-        className="min-h-20"
+        rows={5}
+        // Dimensionné pour que les 200 caractères tiennent sans barre de
+        // défilement : dans une colonne de 18rem, moins le padding, une note au
+        // maximum de sa longueur occupe environ six lignes.
+        className="min-h-40"
         maxLength={NOTE_MAX}
         value={draft}
         onChange={(e) => setDraft(e.target.value)}
