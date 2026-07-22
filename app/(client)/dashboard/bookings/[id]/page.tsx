@@ -161,8 +161,12 @@ export default async function BookingDetailPage({
             </p>
           </aside>
 
+          {/* Encadré neutre et non cobalt : il suit immédiatement l'aside
+              cobalt du devis, et deux cadres bleus qui s'enchaînent alourdissent
+              la page sans rien hiérarchiser. Le cobalt reste comme accent, sur
+              le titre et les montants. */}
           {booking.extras.length > 0 && (
-            <RuledBox variant="cobalt" className="mt-6">
+            <RuledBox className="mt-6">
               <p className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.22em] text-cp-cobalt">
                 Suppléments souhaités
               </p>
@@ -227,8 +231,10 @@ export default async function BookingDetailPage({
               />
             </section>
 
+            {/* Même traitement que « Suppléments souhaités » plus haut : les
+                deux blocs étaient construits pareil, ils doivent le rester. */}
             {booking.extras.length > 0 && (
-              <RuledBox variant="cobalt" className="mt-6">
+              <RuledBox className="mt-6">
                 <p className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.22em] text-cp-cobalt">
                   Suppléments inclus
                 </p>

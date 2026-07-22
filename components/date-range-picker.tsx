@@ -13,7 +13,10 @@ import { cn } from "@/lib/utils";
 /// comme tels et non-cliquables. Les hidden inputs `startDate` /
 /// `endDate` portent les valeurs ISO pour le submit du form.
 
-const CAPACITY = 7; // 7 chambres
+// Réexporté depuis lib/occupancy, source unique partagée avec le calendrier
+// d'occupation de l'administration. Les deux disaient la même journée avec des
+// mots différents tant que chacun avait sa constante.
+import { CAPACITY } from "@/lib/occupancy";
 
 // Occupation pré-calculée pour la maquette — la prod calculera ça
 // depuis la base. Format clé : YYYY-MM-DD, valeur : nombre de chats

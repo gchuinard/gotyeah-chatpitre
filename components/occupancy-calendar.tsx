@@ -1,3 +1,4 @@
+import { OCCUPANCY_LABEL, occupancyState } from "@/lib/occupancy";
 import { cn } from "@/lib/utils";
 
 /// Grille calendaire d'occupation : une cellule par jour du mois, avec
@@ -84,11 +85,20 @@ export function OccupancyCalendar({
                 }
                 const isToday = todayDay === cell.day;
                 const isOccupied = !!cell.occ;
-                const intensity = cell.occ?.intensity ?? "low";
+                // L'état vient du NOMBRE d'occupants, plus du champ `intensity`
+                // calculé côté données : c'est ce qui garantit que les deux
+                // calendriers de l'application classent une journée pareil.
+                const state = occupancyState(cell.occ?.count ?? 0);
+                const intensity =
+                  state === "full" ? "high" : state === "last" ? "medium" : "low";
 
                 return (
                   <td
                     key={`d-${cell.day}`}
+                    // L'état est aussi porté par du TEXTE et pas seulement par
+                    // la couleur : sans ça, un daltonien ne peut pas lire la
+                    // différence entre « dernière place » et « complet ».
+                    title={`${String(cell.day).padStart(2, "0")} : ${OCCUPANCY_LABEL[state]}${cell.occ ? ` (${cell.occ.count} sur 7)` : ""}`}
                     className={cn(
                       "relative aspect-square border border-cp-ink/15 p-1.5 align-top",
                       isOccupied && intensity === "low" && "bg-cp-paper-deep/70",
@@ -142,11 +152,13 @@ export function OccupancyCalendar({
         </tbody>
       </table>
 
-      <footer className="flex items-center gap-6 border-t border-cp-ink px-5 py-3">
-        <LegendDot label="Libre" />
-        <LegendDot label="Léger" tint="low" />
-        <LegendDot label="Plein" tint="medium" />
-        <LegendDot label="Comble" tint="high" />
+      {/* Même vocabulaire que le calendrier de réservation, cf. lib/occupancy.
+          L'ancien dégradé à quatre paliers rangeait « il reste une chambre » et
+          « il n'en reste aucune » dans la même case. */}
+      <footer className="flex flex-wrap items-center gap-x-6 gap-y-2 border-t border-cp-ink px-5 py-3">
+        <LegendDot label={OCCUPANCY_LABEL.available} />
+        <LegendDot label={OCCUPANCY_LABEL.last} tint="medium" />
+        <LegendDot label={OCCUPANCY_LABEL.full} tint="high" />
       </footer>
     </div>
   );
