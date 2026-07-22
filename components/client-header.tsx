@@ -10,9 +10,12 @@ import { Wordmark } from "@/components/wordmark";
 /// utilisateur. Sticky avec filet noir. Composant server — les sous-blocs
 /// interactifs (notifs, menu) sont les seuls clients.
 
+/// Pas d'entrée « Pensionnaires » : la page de liste faisait doublon avec la
+/// section « Ma troupe » du tableau de bord, pour un client qui a un ou deux
+/// chats. « Séjours » reste, un client fidèle en accumulant assez pour justifier
+/// une page à part.
 export const CLIENT_NAV = [
   { href: "/dashboard", label: "Mon espace" },
-  { href: "/dashboard/cats", label: "Pensionnaires" },
   { href: "/dashboard/bookings", label: "Séjours" },
 ];
 
@@ -48,8 +51,10 @@ export function ClientHeader({
         { href: "/dashboard", label: "Espace client →" },
       ]
     : [
+        // Deuxième liste, distincte de CLIENT_NAV : le menu utilisateur a la
+        // sienne. Retirer une entrée de l'une sans toucher l'autre la laisse
+        // visible dans le menu déroulant.
         { href: "/dashboard", label: "Mon espace" },
-        { href: "/dashboard/cats", label: "Mes pensionnaires" },
         { href: "/dashboard/bookings", label: "Mes séjours" },
       ];
 

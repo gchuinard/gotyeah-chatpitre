@@ -169,9 +169,13 @@ export default async function DashboardPage() {
             kicker={`${cats.length} pensionnaire${cats.length > 1 ? "s" : ""} déclaré${cats.length > 1 ? "s" : ""}.`}
             className="flex-1"
           />
+          {/* Bouton plein et non cadre creux : depuis la suppression de la page
+              de liste, qui en portait deux autres, c'est le SEUL accès à la
+              déclaration d'un chat. Et sans chat déclaré, un client ne peut
+              rien réserver. */}
           <Link
             href="/dashboard/cats/new"
-            className={buttonVariants({ variant: "outline", size: "sm" })}
+            className={buttonVariants({ className: "shrink-0 px-6" })}
           >
             + Déclarer un pensionnaire
           </Link>

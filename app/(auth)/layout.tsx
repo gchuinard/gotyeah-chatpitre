@@ -13,8 +13,11 @@ import { Wordmark } from "@/components/wordmark";
 export default function AuthLayout({ children }: { children: ReactNode }) {
   return (
     <div className="grid min-h-screen grid-rows-[auto_1fr] lg:grid-cols-[5fr_7fr] lg:grid-rows-1">
-      {/* Panneau gauche — page de titre, cobalt */}
-      <aside className="relative flex flex-col gap-10 overflow-hidden bg-cp-cobalt p-6 text-cp-paper sm:p-10 lg:gap-12 lg:p-14">
+      {/* Panneau gauche — page de titre, cobalt.
+          Sous lg il devient une simple bande : la grille passe en une colonne et
+          ce panneau s'empile AU-DESSUS du formulaire, si bien que tout ce qu'il
+          contient repousse les champs sous la ligne de flottaison. */}
+      <aside className="relative flex flex-col gap-4 overflow-hidden bg-cp-cobalt p-6 text-cp-paper sm:p-10 lg:gap-12 lg:p-14">
         <div className="relative flex items-center justify-between gap-3">
           <Link
             href="/"
@@ -28,7 +31,12 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
           </LibraryStamp>
         </div>
 
-        <div className="relative flex flex-1 flex-col justify-center gap-8">
+        {/* Masqué sous lg, comme le sont déjà l'illustration et l'adresse en
+            pied. C'est un retrait ASSUMÉ et non un oubli : la citation est de
+            l'habillage éditorial, et sur un téléphone elle coûtait à elle seule
+            la visibilité du premier champ. Sur grand écran, où la colonne est
+            à côté du formulaire et non au-dessus, elle ne gêne personne. */}
+        <div className="relative hidden flex-1 flex-col justify-center gap-8 lg:flex">
           <p className="font-display text-3xl italic leading-[1.06] text-cp-paper sm:text-4xl lg:text-4xl xl:text-5xl">
             « Vous nous confiez un chat.{" "}
             <span className="text-cp-canari">Nous vous en rendons compte.</span>{" "}
@@ -67,7 +75,9 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
           </Link>
         </header>
 
-        <div className="flex flex-1 items-start justify-center px-6 py-12 sm:px-10 sm:py-20 lg:items-center">
+        {/* py-8 sous sm : la marge généreuse est un luxe de grand écran, sur un
+            téléphone elle consommait la place du bouton d'envoi. */}
+        <div className="flex flex-1 items-start justify-center px-6 py-8 sm:px-10 sm:py-20 lg:items-center">
           <div className="w-full max-w-md">{children}</div>
         </div>
       </section>

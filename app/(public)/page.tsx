@@ -209,7 +209,6 @@ export default function HomePage() {
               notes={[
                 "Repas, litière, ménage quotidien inclus.",
                 "Compléments médicaux apportés par le propriétaire.",
-                "Réduction de 10 % au-delà de quatorze nuits.",
               ]}
             />
             <PriceCard

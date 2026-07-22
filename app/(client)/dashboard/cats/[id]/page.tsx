@@ -69,8 +69,8 @@ export default async function CatDetailPage({
           Mon espace
         </Link>
         <span aria-hidden>/</span>
-        <Link href="/dashboard/cats" className="hover:text-cp-paprika">
-          Pensionnaires
+        <Link href="/dashboard" className="hover:text-cp-paprika">
+          Ma troupe
         </Link>
         <span aria-hidden>/</span>
         <span className="min-w-0 break-words text-cp-ink">{cat.name}</span>

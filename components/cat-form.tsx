@@ -112,7 +112,9 @@ export function CatForm({
         if (data.fields) setFieldErrors(data.fields);
         return;
       }
-      router.push("/dashboard/cats");
+      // Retour au tableau de bord : la page de liste des pensionnaires a été
+      // supprimée, c'est « Ma troupe » qui la remplace.
+      router.push("/dashboard");
       router.refresh();
     });
   }
@@ -128,8 +130,8 @@ export function CatForm({
           Mon espace
         </Link>
         <span aria-hidden>/</span>
-        <Link href="/dashboard/cats" className="hover:text-cp-paprika">
-          Pensionnaires
+        <Link href="/dashboard" className="hover:text-cp-paprika">
+          Ma troupe
         </Link>
         <span aria-hidden>/</span>
         <span className="text-cp-ink">
@@ -166,7 +168,7 @@ export function CatForm({
         >
           <div className="grid gap-6 sm:grid-cols-[2fr_1fr]">
             <Field
-              label="Nom de scène"
+              label="Nom"
               htmlFor="cat-name"
               required
               error={fieldErrors.name}
@@ -307,7 +309,7 @@ export function CatForm({
             <p className="font-body text-sm text-cp-paprika">{error}</p>
           )}
           <Link
-            href="/dashboard/cats"
+            href="/dashboard"
             className={buttonVariants({ variant: "ghost", size: "default" })}
           >
             Annuler
