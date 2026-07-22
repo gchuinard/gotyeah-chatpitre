@@ -131,7 +131,7 @@ export function CatForm({
         </Link>
         <span aria-hidden>/</span>
         <Link href="/dashboard" className="hover:text-cp-paprika">
-          Ma troupe
+          Pensionnaires
         </Link>
         <span aria-hidden>/</span>
         <span className="text-cp-ink">

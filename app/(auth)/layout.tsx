@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 
+import { AuthSwitchLink } from "@/components/auth-switch-link";
 import { CatIllustration } from "@/components/cat-illustration";
 import { LibraryStamp } from "@/components/library-stamp";
 import { Wordmark } from "@/components/wordmark";
@@ -73,6 +74,8 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
           >
             ← Retour à l&apos;accueil
           </Link>
+          <span aria-hidden className="h-4 w-px bg-cp-ink/25" />
+          <AuthSwitchLink />
         </header>
 
         {/* py-8 sous sm : la marge généreuse est un luxe de grand écran, sur un
