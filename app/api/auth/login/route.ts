@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { prisma } from "@/lib/db";
-import { createSession, verifyPassword } from "@/lib/auth";
+import { createSession, isAdmin, verifyPassword } from "@/lib/auth";
 import { loginSchema } from "@/lib/validations";
 
 /// POST /api/auth/login — vérifie les identifiants et ouvre la session.
@@ -31,7 +31,15 @@ export async function POST(req: NextRequest) {
   if (!passwordOk) return invalid;
 
   await createSession(user);
+  // La destination est calculée ICI, et pas dans le formulaire.
+  //
+  // Le formulaire est un composant client, alors qu'isAdmin() lit la variable
+  // d'environnement ADMIN_EMAILS, qui est serveur. Faire le test côté navigateur
+  // supposerait de lui livrer la liste des emails d'administration, autrement
+  // dit de publier la porte d'entrée de l'administration. Le serveur tranche et
+  // le formulaire se contente de suivre.
   return NextResponse.json({
     user: { id: user.id, email: user.email, firstName: user.firstName },
+    redirectTo: isAdmin(user) ? "/admin" : "/dashboard",
   });
 }

@@ -13,7 +13,11 @@ import { Input } from "@/components/ui/input";
 /// puis redirige. L'authentification réelle reste intacte (juste un
 /// restylage). Erreur API affichée en sanguine avec marqueur §.
 
-export function LoginForm({ next }: { next: string }) {
+/// `next` n'est renseigné QUE s'il vient explicitement de l'URL. Sans lui, la
+/// destination est celle que renvoie le serveur, seul à savoir si ce compte est
+/// une administration : le test s'appuie sur ADMIN_EMAILS, qui ne doit jamais
+/// descendre jusqu'au navigateur.
+export function LoginForm({ next }: { next?: string }) {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -34,7 +38,10 @@ export function LoginForm({ next }: { next: string }) {
     });
 
     if (res.ok) {
-      router.push(next);
+      // Un lien profond l'emporte : venir de /admin/bookings/xxx doit y ramener,
+      // pas atterrir sur un tableau de bord.
+      const data: { redirectTo?: string } = await res.json().catch(() => ({}));
+      router.push(next ?? data.redirectTo ?? "/dashboard");
       router.refresh();
     } else {
       const data: { error?: string } = await res.json().catch(() => ({}));

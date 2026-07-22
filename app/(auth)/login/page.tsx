@@ -9,10 +9,14 @@ export default async function LoginPage({
 }) {
   const params = await searchParams;
   // On n'accepte qu'un chemin interne comme cible (anti open-redirect).
+  //
+  // undefined et non "/dashboard" par défaut : sans cette distinction, on ne
+  // saurait plus si la cible a été DEMANDÉE ou simplement supposée, et le
+  // serveur ne pourrait jamais envoyer une administration vers /admin.
   const next =
     typeof params.next === "string" && params.next.startsWith("/")
       ? params.next
-      : "/dashboard";
+      : undefined;
 
   return <LoginForm next={next} />;
 }
