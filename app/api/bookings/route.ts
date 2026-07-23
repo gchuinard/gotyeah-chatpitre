@@ -3,7 +3,7 @@ import { differenceInCalendarDays } from "date-fns";
 import { prisma } from "@/lib/db";
 import { handle, HttpError, json, parseJson, requireUser } from "@/lib/api";
 import { bookingCreateSchema } from "@/lib/validations";
-import { extraLineTotal } from "@/lib/pricing";
+import { computeBookingPricing, extraLineTotal } from "@/lib/pricing";
 import { notifyAdmins } from "@/lib/notifications";
 
 /// GET /api/bookings — liste les réservations de l'utilisateur courant.
@@ -72,14 +72,48 @@ export function POST(req: NextRequest) {
       })),
     ];
 
-    // Pas de tarif à la création : la demande nait en PENDING sans devis.
-    // L'admin pose les montants au passage à ACCEPTED via PATCH. Les options
-    // du client pré-remplissent le devis admin (snapshot dans BookingExtra).
+    // Tarif calculé DÈS la création, à partir de la grille en vigueur.
+    //
+    // Le calcul existait déjà mais n'alimentait qu'une suggestion que la
+    // pension devait valider : le client patientait pour un chiffre que la
+    // machine connaissait, et la pension retapait un calcul qu'elle avait
+    // elle-même paramétré.
+    //
+    // Les montants sont FIGÉS sur le séjour, ils ne sont pas recalculés à
+    // l'affichage. Modifier la grille plus tard ne rechiffre donc aucun
+    // séjour existant, ce qui est la seule façon honnête de tenir un devis.
+    const pricing = await computeBookingPricing(
+      data.startDate,
+      data.endDate,
+      cats.length,
+    );
+
+    // Les suppléments demandés s'ajoutent au total. Ceux que le client a
+    // saisis librement ne sont pas chiffrables ici : leur ligne reste à null
+    // et la pension les posera. Le total reste donc une base, pas une
+    // promesse définitive quand une demande libre existe.
+    const extrasCents = extraRows.reduce(
+      (sum, e) => sum + Math.round(Number(e.amount ?? 0) * 100),
+      0,
+    );
+    const totalAmount = pricing.totalAmount.plus(extrasCents / 100);
+    const depositAmount = totalAmount
+      .times(pricing.depositPercentage)
+      .dividedBy(100)
+      .toDecimalPlaces(2);
+
     const booking = await prisma.booking.create({
       data: {
         userId: user.id,
         startDate: data.startDate,
         endDate: data.endDate,
+        // Snapshot de la grille appliquée : le prix affiché doit rester
+        // explicable même si les réglages changent demain.
+        pricePerFirstCat: pricing.pricePerFirstCat,
+        pricePerExtraCat: pricing.pricePerExtraCat,
+        depositPercentage: pricing.depositPercentage,
+        totalAmount,
+        depositAmount,
         clientNotes: data.clientNotes ?? null,
         interviewRequested: data.interviewRequested ?? false,
         interviewChannel: data.interviewRequested

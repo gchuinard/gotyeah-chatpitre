@@ -73,8 +73,17 @@ export default async function BookingDetailPage({
 
   // Le devis est posé par la maison lors du passage à ACCEPTED. Tant que
   // PENDING ou QUESTION_ASKED, on cache les chiffres et la facture PDF.
+  // Le tarif est désormais calculé DÈS la demande : il n'y a plus de raison de
+  // le cacher au client, qui l'a d'ailleurs déjà vu sur la grille publique.
+  //
+  // `awaitingQuote` ne veut donc plus dire « pas de chiffre » mais « pas encore
+  // validé par la pension ». La distinction compte : un séjour dont le client a
+  // demandé un supplément libre porte une ligne non chiffrée, et son total
+  // reste une base tant que la pension ne l'a pas confirmé.
   const awaitingQuote = ["PENDING", "QUESTION_ASKED"].includes(booking.status);
-  const hasQuote = !awaitingQuote && booking.totalAmount !== null;
+  const hasQuote = booking.totalAmount !== null;
+  // Une demande libre du client empêche de présenter le total comme définitif.
+  const hasUnpricedExtra = booking.extras.some((e) => e.amount === null);
   // Le carnet de séjour n'a de sens qu'une fois le séjour validé : on le
   // cache tant que la demande n'est pas acceptée (ou terminée).
   const showJournal = ["ACCEPTED", "COMPLETED"].includes(booking.status);
@@ -169,18 +178,28 @@ export default async function BookingDetailPage({
         <>
       {awaitingQuote ? (
         <>
+          {/* Le tarif est calculé et affiché dès la demande. Ce bandeau ne dit
+              donc plus « nous vous communiquerons un prix », ce qui serait faux,
+              mais ce qui reste à faire : notre validation. */}
           <aside className="rounded-md border border-cp-cobalt bg-cp-paper-deep p-6 sm:p-8">
             <p className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.18em] text-cp-cobalt">
-              Devis en cours d&apos;évaluation
+              Demande en attente de validation
             </p>
             <p className="mt-3 font-display text-2xl italic leading-snug text-cp-ink sm:text-3xl">
-              Nous étudions votre demande et vous reviendrons avec un tarif
-              personnalisé sous 48 h.
+              {hasQuote ? (
+                <>
+                  Votre séjour revient à{" "}
+                  {formatEuros(Number(booking.totalAmount))}€
+                  {hasUnpricedExtra ? ", hors demandes particulières." : "."}
+                </>
+              ) : (
+                <>Nous étudions votre demande et revenons vers vous sous 48 h.</>
+              )}
             </p>
             <p className="mt-3 font-body text-sm text-cp-ink-soft">
-              Les nuitées, l&apos;éventuel coût de soins ou nourriture
-              particulière et l&apos;acompte vous seront communiqués ici dès
-              que le devis sera prêt.
+              {hasQuote
+                ? "Ce montant applique notre grille du jour. Nous confirmons votre séjour sous 48 h, et vous prévenons si quelque chose doit changer."
+                : "Les nuitées, l'éventuel coût de soins ou nourriture particulière et l'acompte vous seront communiqués ici."}
             </p>
           </aside>
 
