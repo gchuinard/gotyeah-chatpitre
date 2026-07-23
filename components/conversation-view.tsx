@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition, type FormEvent } from "react";
+import { useOptimistic, useState, useTransition, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 
 import { MessageThread } from "@/components/message-thread";
@@ -89,7 +89,22 @@ export function ConversationView({
 }) {
   const router = useRouter();
   const config = VOICE_CONFIG[voice];
-  const [messages, setMessages] = useState<ConversationMessage[]>(initialMessages);
+  // useOptimistic et non useState : l'état optimiste est ABANDONNÉ dès que la
+  // transition se termine, et la liste retombe sur celle du serveur.
+  //
+  // L'ancienne version conservait le message dans un useState. Or useState ne
+  // réapplique jamais sa valeur initiale, et router.refresh() est justement
+  // conçu pour préserver l'état client : les deux se neutralisaient, si bien
+  // que le message restait affiché avec son identifiant fabriqué et son
+  // horodatage calculé par le navigateur. Le commentaire du fichier affirmait
+  // pourtant le contraire.
+  //
+  // Bénéfice second : plus besoin de retirer le message à la main en cas
+  // d'échec, l'abandon de l'état optimiste s'en charge.
+  const [messages, addOptimisticMessage] = useOptimistic(
+    initialMessages,
+    (current, added: ConversationMessage) => [...current, added],
+  );
   const [body, setBody] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [rejectOpen, setRejectOpen] = useState(false);
@@ -109,18 +124,19 @@ export function ConversationView({
       return;
     }
 
-    const optimisticId = `m-optimistic-${Date.now()}`;
-    const optimistic: ConversationMessage = {
-      id: optimisticId,
-      body: content,
-      fromAdmin: config.fromAdmin,
-      authorLabel: config.authorLabel,
-      sentAt: new Date().toISOString(),
-    };
-    setMessages((prev) => [...prev, optimistic]);
     setBody("");
 
     startTransition(async () => {
+      // DANS la transition : c'est elle qui borne la durée de vie de l'état
+      // optimiste. Appelé en dehors, React refuserait la mise à jour.
+      addOptimisticMessage({
+        id: `m-optimistic-${nowStamp()}`,
+        body: content,
+        fromAdmin: config.fromAdmin,
+        authorLabel: config.authorLabel,
+        sentAt: new Date().toISOString(),
+      });
+
       const res =
         mode === "question"
           ? await fetch(`/api/admin/bookings/${bookingId}`, {
@@ -138,15 +154,18 @@ export function ConversationView({
             });
 
       if (!res.ok) {
-        // Retire l'optimistic + affiche l'erreur
-        setMessages((prev) => prev.filter((m) => m.id !== optimisticId));
+        // Rien à retirer : la fin de la transition abandonne l'état optimiste
+        // et la liste retombe sur celle du serveur. On remet le texte dans le
+        // champ, sinon l'envoi raté l'aurait fait disparaître.
+        setBody(content);
         const data: { error?: string } = await res.json().catch(() => ({}));
         setError(data.error ?? "Échec de l'envoi.");
         return;
       }
 
-      // Au succès, on rafraîchit la page pour récupérer les messages
-      // re-fetchés depuis Prisma (avec les vrais ids + horodatages).
+      // Au succès, on rafraîchit la page pour récupérer les messages depuis
+      // Prisma, avec leurs vrais identifiants et horodatages. L'état optimiste
+      // s'efface au même moment, remplacé par ces données-là.
       router.refresh();
     });
   }
@@ -287,6 +306,12 @@ export function ConversationView({
       )}
     </div>
   );
+}
+
+/// Horodatage courant, isolé dans une fonction : le lint React interdit de
+/// lire l'heure dans le corps d'un composant, qui doit rester pur.
+function nowStamp(): number {
+  return Date.now();
 }
 
 const sentAtFormatter = new Intl.DateTimeFormat("fr-FR", {
