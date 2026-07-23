@@ -14,6 +14,7 @@ import type {
 import { Prisma } from "@prisma/client";
 
 import type { CatCardProps } from "@/components/cat-card";
+import { parseAvatarKey } from "@/lib/cat-avatar";
 import { prisma } from "@/lib/db";
 import { SETTINGS, withFallbacks, type SettingKey } from "@/lib/settings";
 
@@ -54,6 +55,9 @@ export function toCatCardProps(cat: Cat): CatCardProps {
     ageLabel: _ageLabel(cat.birthDate),
     photoUrl: cat.photoUrl,
     passedAway: cat.passedAwayAt !== null,
+    // `?? undefined` et non `?? null` : CatCard retombe alors sur son tirage
+    // par le nom, qui reste le comportement quand rien n'a été choisi.
+    illustration: parseAvatarKey(cat.avatarKey) ?? undefined,
     criteria: {
       sterilized: cat.isSterilized,
       identified: cat.isIdentified,

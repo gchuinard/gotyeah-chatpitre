@@ -1,6 +1,8 @@
 import { z } from "zod";
 import { differenceInCalendarDays } from "date-fns";
 
+import { parseAvatarKey } from "@/lib/cat-avatar";
+
 // Schémas de validation Zod des entrées des routes API.
 
 // --- Authentification -------------------------------------------------------
@@ -31,6 +33,19 @@ export const catCreateSchema = z.object({
   color: z.string().trim().optional(),
   weight: z.number().positive("Le poids doit être positif.").optional(),
   photoUrl: z.string().trim().optional(),
+  // Contrôlée contre le jeu fermé d'illustrations, pas seulement en longueur :
+  // la valeur vient du navigateur et finit dans un rendu.
+  avatarKey: z
+    .string()
+    .trim()
+    .refine((v) => v === "" || parseAvatarKey(v) !== null, "Avatar inconnu.")
+    // La chaîne vide devient null : c'est « aucun avatar choisi », et les
+    // routes écrivent ces données telles quelles en base. Sans cette
+    // conversion, parseAvatarKey rejetterait plus tard une valeur qu'il ne
+    // reconnaît pas, et l'illustration retomberait sur le tirage par le nom
+    // en laissant une chaîne vide traîner en base.
+    .transform((v) => (v === "" ? null : v))
+    .optional(),
   personality: z.string().trim().optional(),
   isSterilized: z.boolean().optional(),
   isIdentified: z.boolean().optional(),

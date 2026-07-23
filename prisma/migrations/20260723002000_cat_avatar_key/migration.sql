@@ -1,0 +1,13 @@
+-- Avatar choisi par le propriétaire pour son chat.
+--
+-- Colonne nullable : l'absence de clé signifie « aucun choix », auquel cas
+-- l'illustration reste dérivée du nom, comme aujourd'hui. Aucune reprise de
+-- données n'est donc nécessaire, et rien ne change pour les chats existants.
+--
+-- Le contenu est une CLÉ « couleur/pose », par exemple « cobalt/sitting », et
+-- non un chemin de fichier : réorganiser les illustrations ne doit pas
+-- invalider ce qui est déjà enregistré.
+--
+-- Distincte de photoUrl volontairement : quand le téléversement de vraies
+-- photos existera, l'avatar servira de repli plutôt que d'être écrasé.
+ALTER TABLE "Cat" ADD COLUMN "avatarKey" TEXT;

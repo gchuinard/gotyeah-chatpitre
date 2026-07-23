@@ -4,6 +4,7 @@ import { useState, useTransition, type FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
+import { CatAvatarPicker } from "@/components/cat-avatar-picker";
 import { Field } from "@/components/field";
 import { LibraryStamp } from "@/components/library-stamp";
 import { RuleDivider } from "@/components/rule-divider";
@@ -24,6 +25,7 @@ export type CatFormValues = {
   breed?: string;
   birthYear?: string;
   notes?: string;
+  avatarKey?: string | null;
   criteria?: {
     sterilized?: boolean;
     identified?: boolean;
@@ -95,6 +97,9 @@ export function CatForm({
       isIdentified: fd.get("identified") === "on",
       vaccinesUpToDate: fd.get("vaccines") === "on",
       isSociable: fd.get("sociable") === "on",
+      // Toujours envoyé, y compris vide : c'est ainsi qu'on RETIRE un avatar.
+      // Avec `|| undefined`, désélectionner n'aurait rien fait.
+      avatarKey: String(fd.get("avatarKey") ?? ""),
     };
 
     startTransition(async () => {
@@ -204,6 +209,12 @@ export function CatForm({
                 />
               </div>
             </Field>
+          </div>
+
+          {/* Avec l'identité et non dans une section à part : choisir la
+              tête de son chat fait partie du fait de le présenter. */}
+          <div className="mt-8">
+            <CatAvatarPicker defaultValue={v.avatarKey} catName={v.name} />
           </div>
         </FormSection>
 

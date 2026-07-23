@@ -94,6 +94,16 @@ model Cat {
   // de la valeur pour le propriétaire, c'est même ce qui lui reste.
   passedAwayAt DateTime?
 
+  // Avatar choisi par le propriétaire, sous la forme « couleur/pose ».
+  //
+  // Une CLÉ et non un chemin de fichier : renommer ou réorganiser les
+  // illustrations ne doit pas invalider ce qui est déjà en base.
+  //
+  // Champ distinct de photoUrl, et c'est voulu : le jour où le téléversement
+  // de vraies photos arrivera, l'avatar servira de repli quand aucune photo
+  // n'aura été envoyée, au lieu d'être écrasé.
+  avatarKey String?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

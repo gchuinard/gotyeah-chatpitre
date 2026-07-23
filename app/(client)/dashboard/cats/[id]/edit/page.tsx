@@ -32,6 +32,7 @@ export default async function EditCatPage({
         breed: cat.breed ?? undefined,
         birthYear: cat.birthDate ? String(cat.birthDate.getFullYear()) : undefined,
         notes: cat.personality ?? undefined,
+        avatarKey: cat.avatarKey,
         criteria: {
           sterilized: cat.isSterilized,
           identified: cat.isIdentified,
