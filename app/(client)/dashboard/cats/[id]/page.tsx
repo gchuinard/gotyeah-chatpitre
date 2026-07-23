@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { CatDeleteControl } from "@/components/cat-delete-control";
+import { CatMemorialControl } from "@/components/cat-memorial-control";
 import { CatDocuments } from "@/components/cat-documents";
 import { LibraryStamp } from "@/components/library-stamp";
 import { RuleDivider } from "@/components/rule-divider";
@@ -80,6 +81,15 @@ export default async function CatDetailPage({
         <span aria-hidden>/</span>
         <span className="min-w-0 break-words text-cp-ink">{cat.name}</span>
       </nav>
+
+      {/* Bandeau en encre pleine, sans couleur d'accent ni emoji : ce n'est ni
+          une alerte ni une décoration. Placé avant le nom, il donne le ton de
+          la page avant qu'on ne le lise. */}
+      {cat.passedAwayAt && (
+        <p className="mb-6 rounded-md border border-cp-ink bg-cp-ink px-5 py-3 text-center font-mono text-[0.65rem] font-bold uppercase tracking-[0.18em] text-cp-paper">
+          En souvenir de {cat.name}
+        </p>
+      )}
 
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div className="min-w-0 space-y-4">
@@ -176,9 +186,16 @@ export default async function CatDetailPage({
         <CatDocuments catId={cat.id} documents={docItems} />
       </section>
 
-      {/* En pied de page, discrètement : c'est un geste rare et sans retour.
-          Le contrôle disparaît de lui-même dès que le chat a séjourné. */}
-      <footer className="mt-16 border-t border-cp-ink/30 pt-6">
+      {/* En pied de page, discrètement : deux gestes rares, dont un sans
+          retour. Ils ne se ressemblent pas et ne doivent pas se confondre.
+          La suppression disparaît d'elle-même dès que le chat a séjourné, le
+          marquage reste toujours disponible. */}
+      <footer className="mt-16 space-y-4 border-t border-cp-ink/30 pt-6">
+        <CatMemorialControl
+          catId={cat.id}
+          catName={cat.name}
+          passedAway={cat.passedAwayAt !== null}
+        />
         <CatDeleteControl
           catId={cat.id}
           catName={cat.name}

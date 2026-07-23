@@ -1,0 +1,12 @@
+-- Marquage d'un chat disparu.
+--
+-- Colonne nullable, sans valeur par défaut : l'absence de date signifie « bien
+-- vivant », qui est l'état de tous les chats existants. Aucune reprise de
+-- données n'est donc nécessaire.
+--
+-- Une date plutôt qu'un booléen : même coût, et elle permettra d'écrire
+-- « disparu en mars 2026 » sans une seconde migration.
+--
+-- La fiche n'est JAMAIS supprimée. Son carnet et son historique de séjours
+-- restent lisibles par le propriétaire : c'est précisément ce qui lui reste.
+ALTER TABLE "Cat" ADD COLUMN "passedAwayAt" TIMESTAMP(3);

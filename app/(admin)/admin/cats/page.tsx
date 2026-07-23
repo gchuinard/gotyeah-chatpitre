@@ -57,6 +57,7 @@ export default async function AdminCatsPage() {
           b.startDate < dayEnd &&
           b.endDate >= dayStart,
       ),
+      passedAway: cat.passedAwayAt !== null,
     };
   });
 

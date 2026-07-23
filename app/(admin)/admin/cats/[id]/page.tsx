@@ -68,6 +68,14 @@ export default async function AdminCatDetailPage({
         <span className="min-w-0 break-words text-cp-ink">{cat.name}</span>
       </nav>
 
+      {/* Visible côté pension aussi : sans ça, on demanderait des nouvelles
+          d'un chat qui n'est plus là. */}
+      {cat.passedAwayAt && (
+        <p className="mb-6 rounded-md border border-cp-ink bg-cp-ink px-5 py-3 text-center font-mono text-[0.65rem] font-bold uppercase tracking-[0.18em] text-cp-paper">
+          En souvenir de {cat.name}
+        </p>
+      )}
+
       <header className="space-y-4">
         <LibraryStamp boxed>Fiche N°{displayRef(cat.id)}</LibraryStamp>
         <h1 className="font-display text-5xl font-medium leading-[0.95] tracking-[-0.01em] text-cp-ink break-words sm:text-6xl">

@@ -53,6 +53,7 @@ export function toCatCardProps(cat: Cat): CatCardProps {
     breed: cat.breed,
     ageLabel: _ageLabel(cat.birthDate),
     photoUrl: cat.photoUrl,
+    passedAway: cat.passedAwayAt !== null,
     criteria: {
       sterilized: cat.isSterilized,
       identified: cat.isIdentified,
@@ -87,9 +88,18 @@ const BOOKING_INCLUDE = {
 } as const;
 
 /// Tous les chats d'un propriétaire, triés par création.
-export function getCatsByOwner(ownerId: string): Promise<Cat[]> {
+///
+/// `includePassedAway` distingue les deux usages. La troupe du tableau de bord
+/// montre TOUS les chats, y compris ceux qui sont partis : les faire
+/// disparaître de son espace reviendrait à effacer le souvenir sans le
+/// demander. Le formulaire de réservation, lui, ne doit proposer que ceux qu'on
+/// peut encore confier.
+export function getCatsByOwner(
+  ownerId: string,
+  { includePassedAway = true }: { includePassedAway?: boolean } = {},
+): Promise<Cat[]> {
   return prisma.cat.findMany({
-    where: { ownerId },
+    where: { ownerId, ...(includePassedAway ? {} : { passedAwayAt: null }) },
     orderBy: { createdAt: "asc" },
   });
 }

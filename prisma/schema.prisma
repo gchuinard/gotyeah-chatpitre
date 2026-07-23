@@ -84,6 +84,16 @@ model Cat {
   medicalNotes      String?
   specialDiet       String?
 
+  // Date à laquelle le propriétaire a signalé la disparition de son chat.
+  //
+  // Une DATE et non un booléen : elle coûte le même prix en base et permettra
+  // d'écrire « disparu en mars 2026 » si on le souhaite un jour, ce qu'un
+  // booléen aurait interdit sans une seconde migration.
+  //
+  // La fiche n'est jamais effacée : le carnet et l'historique des séjours ont
+  // de la valeur pour le propriétaire, c'est même ce qui lui reste.
+  passedAwayAt DateTime?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

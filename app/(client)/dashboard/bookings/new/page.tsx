@@ -15,7 +15,9 @@ export default async function NewBookingPage() {
   if (!user) return null;
 
   const [cats, presets] = await Promise.all([
-    getCatsByOwner(user.id),
+    // Les chats disparus ne sont pas proposés : lire le nom de son chat mort
+    // dans une liste de réservation serait d'une brutalité inutile.
+    getCatsByOwner(user.id, { includePassedAway: false }),
     getExtraPresets(),
   ]);
 

@@ -28,6 +28,8 @@ export type CatCardProps = {
   breed?: string | null;
   ageLabel?: string;
   criteria: CatCardCriteria;
+  /** Chat disparu : la carte porte un bandeau sobre et se met en retrait. */
+  passedAway?: boolean;
   /** Surcharge optionnelle — sinon l'illustration est dérivée du nom. */
   illustration?: { variant: CatIllustrationVariant; pose: CatIllustrationPose };
   className?: string;
@@ -48,6 +50,7 @@ export function CatCard({
   breed,
   ageLabel,
   criteria,
+  passedAway = false,
   illustration,
   className,
 }: CatCardProps) {
@@ -62,6 +65,13 @@ export function CatCard({
         className,
       )}
     >
+      {/* Bandeau sobre, en encre et non en couleur d'accent : ni festif, ni
+          alarmant. Il dit ce qu'il a à dire et se tait. */}
+      {passedAway && (
+        <p className="border-b border-cp-ink bg-cp-ink px-4 py-1.5 text-center font-mono text-[0.6rem] font-bold uppercase tracking-[0.18em] text-cp-paper">
+          En souvenir
+        </p>
+      )}
       {/* En-tête type fiche — numéro et sexe */}
       <header className="flex items-center justify-between border-b border-cp-ink px-4 py-2.5">
         <LibraryStamp tone="cobalt">

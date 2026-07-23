@@ -24,6 +24,7 @@ export type AdminCatRow = {
   bookingCount: number;
   /// Vrai si un séjour accepté couvre la journée d'aujourd'hui.
   inHouse: boolean;
+  passedAway: boolean;
 };
 
 type SortKey = "name" | "owner" | "bookings";
@@ -173,10 +174,16 @@ export function AdminCatsTable({ cats }: { cats: AdminCatRow[] }) {
                     </p>
                   </Td>
                   <Td>
-                    {c.inHouse && (
-                      <span className="inline-flex items-center rounded-full border border-cp-paprika bg-cp-paprika px-2.5 py-0.5 font-mono text-[0.6rem] font-bold uppercase tracking-[0.16em] text-cp-paper">
-                        En séjour
+                    {c.passedAway ? (
+                      <span className="inline-flex items-center rounded-full border border-cp-ink bg-cp-ink px-2.5 py-0.5 font-mono text-[0.6rem] font-bold uppercase tracking-[0.16em] text-cp-paper">
+                        En souvenir
                       </span>
+                    ) : (
+                      c.inHouse && (
+                        <span className="inline-flex items-center rounded-full border border-cp-paprika bg-cp-paprika px-2.5 py-0.5 font-mono text-[0.6rem] font-bold uppercase tracking-[0.16em] text-cp-paper">
+                          En séjour
+                        </span>
+                      )
                     )}
                   </Td>
                 </tr>
