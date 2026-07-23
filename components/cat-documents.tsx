@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Check, FileText, Star, Trash2, X } from "lucide-react";
+import { Check, Download, Eye, FileText, Star, Trash2, X } from "lucide-react";
 import type { DocumentReviewStatus, DocumentType } from "@prisma/client";
 
 import { DocumentUploadForm } from "@/components/document-upload-form";
@@ -124,7 +124,7 @@ export function CatDocuments({
                   target="_blank"
                   rel="noopener"
                   className="shrink-0"
-                  aria-label={`Ouvrir ${label}`}
+                  aria-label={`Voir ${label}`}
                 >
                   {isImage ? (
                     // eslint-disable-next-line @next/next/no-img-element
@@ -162,10 +162,25 @@ export function CatDocuments({
                 </div>
 
                 <div className="flex w-full shrink-0 items-center justify-end gap-2 sm:w-auto">
+                  {/* « Voir » en toutes lettres, alors que la vignette ouvre
+                      déjà le document : rien ne le disait, il fallait deviner
+                      qu'elle était cliquable. La consultation passe donc devant
+                      le téléchargement, qui n'est utile que pour garder une
+                      copie. */}
+                  <a
+                    href={`/api/documents/${doc.id}`}
+                    target="_blank"
+                    rel="noopener"
+                    className={cn(buttonVariants({ variant: "outline", size: "sm" }), "h-11 gap-2")}
+                  >
+                    <Eye aria-hidden />
+                    Voir
+                  </a>
                   <a
                     href={`/api/documents/${doc.id}?download=1`}
-                    className={cn(buttonVariants({ variant: "outline", size: "sm" }), "h-11")}
+                    className={cn(buttonVariants({ variant: "outline", size: "sm" }), "h-11 gap-2")}
                   >
+                    <Download aria-hidden />
                     Télécharger
                   </a>
                   {isImage && (
