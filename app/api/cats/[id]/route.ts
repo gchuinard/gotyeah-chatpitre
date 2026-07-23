@@ -2,6 +2,7 @@ import type { NextRequest } from "next/server";
 import type { Cat } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { handle, HttpError, json, parseJson, requireUser } from "@/lib/api";
+import { deleteDocument } from "@/lib/storage";
 import { catUpdateSchema } from "@/lib/validations";
 
 type RouteContext = { params: Promise<{ id: string }> };
@@ -48,15 +49,40 @@ export function DELETE(_req: NextRequest, { params }: RouteContext) {
 
     // Un chat rattaché à une réservation ne peut pas être supprimé : la clé
     // étrangère BookingCat.catId est en Restrict côté base de données.
+    //
+    // Ce n'est pas une limite à contourner, c'est la bonne règle : effacer un
+    // chat qui figure sur des séjours facturés casserait l'historique et les
+    // factures. Le message oriente donc vers ce qu'il faut faire à la place.
     const linkedBookings = await prisma.bookingCat.count({ where: { catId: id } });
     if (linkedBookings > 0) {
       throw new HttpError(
         409,
-        "Ce chat est rattaché à des réservations et ne peut pas être supprimé.",
+        "Ce chat a déjà séjourné chez nous, sa fiche ne peut pas être supprimée sans effacer son historique.",
       );
     }
 
+    // Les clés de stockage sont relevées AVANT la suppression : la cascade
+    // efface les lignes CatDocument, après quoi plus rien ne dirait quels
+    // fichiers effacer, et ils resteraient orphelins sur le disque du Pi.
+    const documents = await prisma.catDocument.findMany({
+      where: { catId: id },
+      select: { storageKey: true },
+    });
+
     await prisma.cat.delete({ where: { id } });
+
+    // Après la base, et sans faire échouer la requête : la fiche est déjà
+    // supprimée, refuser maintenant laisserait l'utilisateur croire que rien
+    // n'a eu lieu. deleteDocument ignore déjà les fichiers absents.
+    for (const doc of documents) {
+      try {
+        await deleteDocument(doc.storageKey);
+      } catch {
+        // Fichier resté sur le disque : sans conséquence fonctionnelle, la
+        // ligne qui le désignait n'existe plus.
+      }
+    }
+
     return json({ ok: true });
   });
 }

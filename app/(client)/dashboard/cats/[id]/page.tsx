@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { CatDeleteControl } from "@/components/cat-delete-control";
 import { CatDocuments } from "@/components/cat-documents";
 import { LibraryStamp } from "@/components/library-stamp";
 import { RuleDivider } from "@/components/rule-divider";
@@ -31,7 +32,11 @@ export default async function CatDetailPage({
   const cat = await prisma.cat.findUnique({ where: { id } });
   if (!cat || cat.ownerId !== user.id) notFound();
 
-  const [links, documents] = await Promise.all([
+  // Compté SANS filtrer sur le propriétaire, contrairement à `links` : c'est
+  // exactement le critère qu'applique la route de suppression, et les deux
+  // doivent dire la même chose sous peine de proposer un bouton qui échoue.
+  const [stayCount, links, documents] = await Promise.all([
+    prisma.bookingCat.count({ where: { catId: id } }),
     prisma.bookingCat.findMany({
       where: { catId: id, booking: { userId: user.id } },
       include: { booking: { select: { id: true, startDate: true, endDate: true } } },
@@ -170,6 +175,16 @@ export default async function CatDetailPage({
         />
         <CatDocuments catId={cat.id} documents={docItems} />
       </section>
+
+      {/* En pied de page, discrètement : c'est un geste rare et sans retour.
+          Le contrôle disparaît de lui-même dès que le chat a séjourné. */}
+      <footer className="mt-16 border-t border-cp-ink/30 pt-6">
+        <CatDeleteControl
+          catId={cat.id}
+          catName={cat.name}
+          hasStayed={stayCount > 0}
+        />
+      </footer>
     </article>
   );
 }
