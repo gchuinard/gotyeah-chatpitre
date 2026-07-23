@@ -1,5 +1,18 @@
+import Link from "next/link";
+
 import { OCCUPANCY_LABEL, occupancyState } from "@/lib/occupancy";
 import { cn } from "@/lib/utils";
+
+/// « 2026-08-14 » pour l'URL d'une journée.
+///
+/// Construit à la main plutôt que par toISOString() : cette dernière convertit
+/// en UTC, et un 1er août à minuit heure de Paris y devient un 31 juillet. Le
+/// jour affiché et le jour ouvert doivent être le même.
+function dayHref(year: number, monthIndex: number, day: number): string {
+  const mm = String(monthIndex + 1).padStart(2, "0");
+  const dd = String(day).padStart(2, "0");
+  return `${year}-${mm}-${dd}`;
+}
 
 /// Grille calendaire d'occupation : une cellule par jour du mois, avec
 /// nombre de pensionnaires hébergés ce jour-là. CSS pur, accessibilité
@@ -100,13 +113,26 @@ export function OccupancyCalendar({
                     // différence entre « dernière place » et « complet ».
                     title={`${String(cell.day).padStart(2, "0")} : ${OCCUPANCY_LABEL[state]}${cell.occ ? ` (${cell.occ.count} sur 7)` : ""}`}
                     className={cn(
-                      "relative aspect-square border border-cp-ink/15 p-1.5 align-top",
+                      "relative aspect-square border border-cp-ink/15 align-top",
                       isOccupied && intensity === "low" && "bg-cp-paper-deep/70",
                       isOccupied && intensity === "medium" && "bg-cp-paper-deep",
                       isOccupied && intensity === "high" && "bg-cp-ink text-cp-paper",
                       isToday && "outline outline-2 -outline-offset-2 outline-cp-paprika",
                     )}
                   >
+                    {/* Un vrai lien et non un gestionnaire de clic : le clavier,
+                        le ctrl-clic et le clic milieu fonctionnent nativement.
+                        Il occupe toute la case, y compris les jours sans
+                        occupation, qui doivent répondre eux aussi plutôt que de
+                        rester inertes sous le doigt.
+
+                        Le padding est porté ICI et plus par la cellule, sans
+                        quoi la zone cliquable s'arrêterait avant les bords. */}
+                    <Link
+                      href={`/admin/jour/${dayHref(year, monthIndex, cell.day)}`}
+                      aria-label={`Voir la journée du ${String(cell.day).padStart(2, "0")}, ${OCCUPANCY_LABEL[state].toLowerCase()}`}
+                      className="block h-full p-1.5 outline-none transition-colors hover:bg-cp-paprika/10 focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-cp-paprika"
+                    >
                     <div className="flex h-full flex-col">
                       <span
                         className={cn(
@@ -144,6 +170,7 @@ export function OccupancyCalendar({
                         </div>
                       )}
                     </div>
+                    </Link>
                   </td>
                 );
               })}
