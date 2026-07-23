@@ -30,6 +30,30 @@ export function Th({
   );
 }
 
+/// Cellule de corps de tableau. Était recopiée à l'identique dans chaque
+/// tableau d'administration.
+export function Td({
+  children,
+  className,
+}: {
+  children?: React.ReactNode;
+  className?: string;
+}) {
+  return <td className={`px-4 py-4 align-top ${className ?? ""}`}>{children}</td>;
+}
+
+/// Vrai pour un clic « simple » sur une ligne, celui qui doit naviguer.
+///
+/// Écarte les clics porteurs d'une touche de modification, qui servent à ouvrir
+/// dans un nouvel onglet ou à étendre une sélection, et le cas où l'utilisateur
+/// vient de sélectionner du texte : naviguer lui ferait perdre ce qu'il était en
+/// train de copier.
+export function isPlainRowClick(e: React.MouseEvent): boolean {
+  if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return false;
+  if (window.getSelection()?.toString()) return false;
+  return true;
+}
+
 export function SortableTh<K extends string>({
   label,
   sortKey,

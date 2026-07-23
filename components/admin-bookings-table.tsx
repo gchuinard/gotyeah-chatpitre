@@ -11,7 +11,7 @@ import {
   type BookingStatus,
 } from "@/components/booking-status-badge";
 import { Input } from "@/components/ui/input";
-import { SortableTh, Th } from "@/components/ui/sortable-th";
+import { isPlainRowClick, SortableTh, Td, Th } from "@/components/ui/sortable-th";
 import { cn } from "@/lib/utils";
 
 /// Tableau des séjours côté admin : recherche, filtre par statut, tri par
@@ -254,21 +254,3 @@ export function AdminBookingsTable({ bookings }: { bookings: AdminBookingRow[] }
   );
 }
 
-/// Vrai seulement pour un clic gauche simple hors sélection de texte : on
-/// laisse passer ctrl/cmd-clic (ouvrir dans un onglet via le lien du n°) et on
-/// n'ouvre pas la fiche à la fin d'un glisser de sélection.
-function isPlainRowClick(e: React.MouseEvent): boolean {
-  if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return false;
-  if (window.getSelection()?.toString()) return false;
-  return true;
-}
-
-function Td({
-  children,
-  className,
-}: {
-  children: React.ReactNode;
-  className?: string;
-}) {
-  return <td className={`px-4 py-4 align-top ${className ?? ""}`}>{children}</td>;
-}

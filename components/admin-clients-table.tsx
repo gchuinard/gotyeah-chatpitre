@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { Check, Copy } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
-import { SortableTh, Th } from "@/components/ui/sortable-th";
+import { isPlainRowClick, SortableTh, Td, Th } from "@/components/ui/sortable-th";
 import { cn } from "@/lib/utils";
 
 /// Tableau des comptes clients : recherche, tri par colonne, ligne entièrement
@@ -188,15 +188,6 @@ export function AdminClientsTable({ clients }: { clients: AdminClientRow[] }) {
   );
 }
 
-/// Vrai seulement pour un clic gauche simple hors sélection de texte : on
-/// laisse passer ctrl/cmd-clic (ouvrir dans un onglet via le lien du nom) et on
-/// n'ouvre pas la fiche à la fin d'un glisser de sélection.
-function isPlainRowClick(e: React.MouseEvent): boolean {
-  if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return false;
-  if (window.getSelection()?.toString()) return false;
-  return true;
-}
-
 /// Copie l'adresse dans le presse-papier, avec un retour visuel bref.
 function CopyMailButton({ email }: { email: string }) {
   const [copied, setCopied] = useState(false);
@@ -238,12 +229,3 @@ function CopyMailButton({ email }: { email: string }) {
   );
 }
 
-function Td({
-  children,
-  className,
-}: {
-  children: React.ReactNode;
-  className?: string;
-}) {
-  return <td className={`px-4 py-4 align-top ${className ?? ""}`}>{children}</td>;
-}

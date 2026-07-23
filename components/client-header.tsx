@@ -38,6 +38,7 @@ export function ClientHeader({
         { href: "/admin", label: "Tableau de bord" },
         { href: "/admin/bookings", label: "Séjours" },
         { href: "/admin/clients", label: "Clients" },
+        { href: "/admin/cats", label: "Pensionnaires" },
         { href: "/admin/extras", label: "Suppléments" },
         { href: "/admin/reglages", label: "Réglages" },
       ]
@@ -48,6 +49,7 @@ export function ClientHeader({
         { href: "/admin", label: "Tableau de bord" },
         { href: "/admin/bookings", label: "Séjours" },
         { href: "/admin/clients", label: "Clients" },
+        { href: "/admin/cats", label: "Pensionnaires" },
         { href: "/admin/extras", label: "Suppléments" },
         { href: "/admin/reglages", label: "Réglages" },
         { href: "/dashboard", label: "Espace client →" },
