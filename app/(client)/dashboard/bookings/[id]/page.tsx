@@ -10,10 +10,12 @@ import { RuleDivider } from "@/components/rule-divider";
 import { RuledBox } from "@/components/ruled-box";
 import { SectionHeading } from "@/components/section-heading";
 import { StayJournal } from "@/components/stay-journal";
+import { StaySchedule } from "@/components/stay-schedule";
 import { resolveTab, UrlTabs, type UrlTabItem } from "@/components/url-tabs";
 import { buttonVariants } from "@/components/ui/button";
 import { getCurrentUser, isAdmin } from "@/lib/auth";
 import { CAT_REVIEW_BADGE, CAT_REVIEW_LABEL } from "@/lib/cat-review";
+import { readSettings } from "@/lib/repository";
 import { extraUnitGloss } from "@/lib/extras";
 import {
   ageLabel,
@@ -52,6 +54,15 @@ export default async function BookingDetailPage({
   if (!booking) notFound();
 
   const appointments = await getAppointmentsForBooking(booking.id);
+  const settings = await readSettings();
+  const arrivalWindow = {
+    start: settings.arrival_window_start,
+    end: settings.arrival_window_end,
+  };
+  const departureWindow = {
+    start: settings.departure_window_start,
+    end: settings.departure_window_end,
+  };
   const cats = booking.cats.map((link) => link.cat);
   const nights = nightsBetween(booking.startDate, booking.endDate);
   const ref = displayRef(booking.id);
@@ -121,6 +132,18 @@ export default async function BookingDetailPage({
           <br />
           <span className="italic font-normal">au {formatDate(booking.endDate)}.</span>
         </h1>
+
+        {/* Le client voit la même chose que la pension : soit l'heure convenue
+            avec lui, soit le créneau d'accueil habituel. Il n'a rien à choisir
+            ni à demander. */}
+        <StaySchedule
+          schedule={{
+            arrivalTime: booking.arrivalTime,
+            departureTime: booking.departureTime,
+            arrivalWindow,
+            departureWindow,
+          }}
+        />
 
         <p className="max-w-2xl font-display text-xl italic leading-snug text-cp-ink-soft">
           {cats.map((c) => c.name).join(" · ")}, {nights} nuit

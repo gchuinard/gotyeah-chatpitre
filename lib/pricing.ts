@@ -1,19 +1,14 @@
 import { differenceInCalendarDays } from "date-fns";
 import { Prisma, type ExtraUnit } from "@prisma/client";
-import { prisma } from "@/lib/db";
 import { extraUnitMultiplier } from "@/lib/extras";
+import { readSettings } from "@/lib/repository";
 
 // Calcul de la tarification d'un séjour. Les tarifs « vivants » sont stockés
-// dans la table Setting (modifiables côté admin) ; un repli codé en dur évite
-// tout plantage si une clé venait à manquer.
-
-const DEFAULTS = {
-  price_first_cat: "16",
-  price_extra_cat: "13",
-  deposit_percentage: "20",
-} as const;
-
-type SettingKey = keyof typeof DEFAULTS;
+// dans la table Setting ; leurs valeurs de repli et leur validation vivent
+// désormais dans lib/settings.ts, seul endroit qui décrive ce que la table
+// contient. Ce fichier avait sa propre copie des replis, restée à 16 et 13
+// alors que la production applique 22 et 18 : une base neuve aurait chiffré
+// les séjours sous le tarif annoncé publiquement.
 
 export interface BookingPricing {
   nights: number;
@@ -38,12 +33,6 @@ export function extraLineTotal(
     .toDecimalPlaces(2);
 }
 
-/// Lit un réglage dans la table Setting, avec repli sur la valeur par défaut.
-async function readSetting(key: SettingKey): Promise<string> {
-  const setting = await prisma.setting.findUnique({ where: { key } });
-  return setting?.value ?? DEFAULTS[key];
-}
-
 /// Calcule la tarification d'un séjour : nuitées × (1er chat + chats
 /// supplémentaires), puis l'acompte. `catCount` doit être >= 1.
 export async function computeBookingPricing(
@@ -53,9 +42,11 @@ export async function computeBookingPricing(
 ): Promise<BookingPricing> {
   const nights = differenceInCalendarDays(endDate, startDate);
 
-  const pricePerFirstCat = new Prisma.Decimal(await readSetting("price_first_cat"));
-  const pricePerExtraCat = new Prisma.Decimal(await readSetting("price_extra_cat"));
-  const depositPercentage = Number(await readSetting("deposit_percentage"));
+  // Une seule requête pour les trois réglages, au lieu de trois.
+  const settings = await readSettings();
+  const pricePerFirstCat = new Prisma.Decimal(settings.price_first_cat);
+  const pricePerExtraCat = new Prisma.Decimal(settings.price_extra_cat);
+  const depositPercentage = Number(settings.deposit_percentage);
 
   const extraCats = Math.max(0, catCount - 1);
   // Tarif d'une nuit = 1er chat + chats supplémentaires.

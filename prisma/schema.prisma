@@ -237,6 +237,16 @@ model Booking {
   // que le drapeau : une note orpheline réapparaîtrait au prochain épinglage.
   pinnedNote String?
 
+  // Heure d'arrivée et de départ CONVENUE pour ce séjour, quand elle sort des
+  // plages d'accueil habituelles. Vides dans l'immense majorité des cas : le
+  // séjour suit alors les créneaux de la pension, réglables dans Setting.
+  //
+  // Chaînes « HH:MM » et non DateTime : « le chat arrive à 9h » ne désigne pas
+  // un instant mais une heure de pendule. Un DateTime obligerait à inventer un
+  // jour et à se débattre avec les fuseaux et l'heure d'été à chaque lecture.
+  arrivalTime   String?
+  departureTime String?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

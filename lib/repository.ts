@@ -15,6 +15,7 @@ import { Prisma } from "@prisma/client";
 
 import type { CatCardProps } from "@/components/cat-card";
 import { prisma } from "@/lib/db";
+import { SETTINGS, withFallbacks, type SettingKey } from "@/lib/settings";
 
 // Helpers de formatage : réexportés depuis lib/format pour le confort
 // des consommateurs, mais le code de formatage lui-même vit dans un
@@ -527,4 +528,21 @@ function startOfDayUTC(date: Date): Date {
   return new Date(
     Date.UTC(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0, 0),
   );
+}
+
+/// Lit tous les réglages de la pension en UNE requête, complétés par leurs
+/// valeurs de repli.
+///
+/// Vit ICI et non dans lib/settings.ts : ce dernier est importé par des
+/// composants client, qui ont besoin des libellés et du formatage. Y mettre
+/// cette requête embarquerait Prisma et le pilote PostgreSQL dans le paquet du
+/// navigateur, ce qui ne compile pas.
+///
+/// Une seule requête et non une par clé : la fiche d'un séjour en lit quatre
+/// et l'écran de réglages les sept.
+export async function readSettings(): Promise<Record<SettingKey, string>> {
+  const rows = await prisma.setting.findMany({
+    where: { key: { in: SETTINGS.map((s) => s.key) } },
+  });
+  return withFallbacks(new Map(rows.map((r) => [r.key, r.value])));
 }

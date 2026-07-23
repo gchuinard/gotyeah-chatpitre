@@ -11,7 +11,9 @@ import { ConversationView } from "@/components/conversation-view";
 import { LibraryStamp } from "@/components/library-stamp";
 import { QuoteForm } from "@/components/quote-form";
 import { RdvScheduler } from "@/components/rdv-scheduler";
+import { BookingScheduleControl } from "@/components/booking-schedule-control";
 import { RuleDivider } from "@/components/rule-divider";
+import { StaySchedule } from "@/components/stay-schedule";
 import { RuledBox } from "@/components/ruled-box";
 import { SectionHeading } from "@/components/section-heading";
 import { StayJournal } from "@/components/stay-journal";
@@ -20,6 +22,7 @@ import { resolveTab, UrlTabs, type UrlTabItem } from "@/components/url-tabs";
 import { getCurrentUser, isAdmin } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { computeBookingPricing } from "@/lib/pricing";
+import { readSettings } from "@/lib/repository";
 import {
   ageLabel,
   displayRef,
@@ -75,6 +78,15 @@ export default async function AdminBookingDetailPage({
   if (!booking) notFound();
 
   const appointments = await getAppointmentsForBooking(booking.id);
+  const settings = await readSettings();
+  const arrivalWindow = {
+    start: settings.arrival_window_start,
+    end: settings.arrival_window_end,
+  };
+  const departureWindow = {
+    start: settings.departure_window_start,
+    end: settings.departure_window_end,
+  };
   // Dates formatées côté serveur : le composant est un composant client, et un
   // formatage fait des deux côtés doit produire exactement la même chaîne.
   const paymentRows = (await getPaymentsForBooking(booking.id)).map((p) => ({
@@ -220,6 +232,17 @@ export default async function AdminBookingDetailPage({
           {cats.map((c) => c.name).join(" · ")}, confiés par{" "}
           {client.firstName} {client.lastName}.
         </p>
+
+        {/* Dans l'en-tête, avec les dates : « quand » est une seule question,
+            le jour et l'heure ne se lisent pas à deux endroits différents. */}
+        <StaySchedule
+          schedule={{
+            arrivalTime: booking.arrivalTime,
+            departureTime: booking.departureTime,
+            arrivalWindow,
+            departureWindow,
+          }}
+        />
       </header>
 
       {isEditingRecent(booking.editingStartedAt) && (
@@ -393,6 +416,21 @@ export default async function AdminBookingDetailPage({
 
       {onglet === "administratif" && (
         <>
+          {/* Horaires convenus, sous ActionGate : sur un séjour clôturé la
+              fiche est en lecture seule, et convenir d'une arrivée sur un
+              séjour terminé n'aurait aucun sens. */}
+          <div className="mt-10">
+            <ActionGate disabled={isClosed}>
+              <BookingScheduleControl
+                bookingId={booking.id}
+                arrivalTime={booking.arrivalTime}
+                departureTime={booking.departureTime}
+                arrivalWindow={arrivalWindow}
+                departureWindow={departureWindow}
+              />
+            </ActionGate>
+          </div>
+
           {/* Facture PDF — uniquement quand le devis est posé. */}
           {hasQuote && (
             <aside className="mt-10 flex flex-wrap items-center justify-between gap-4 rounded-md border border-cp-cobalt bg-cp-paper-deep p-5 sm:p-6">
