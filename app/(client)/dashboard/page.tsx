@@ -189,7 +189,10 @@ export default async function DashboardPage() {
             ctaLabel="Déclarer un pensionnaire"
           />
         ) : (
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          // Quatre par ligne sur grand écran : le tableau de bord est déjà en
+          // max-w-7xl, la place existe, et la carte compacte tient dedans sans
+          // devenir une vignette illisible.
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {cats.map((cat) => (
               <Link
                 key={cat.id}
@@ -198,6 +201,7 @@ export default async function DashboardPage() {
               >
                 <CatCard
                   {...toCatCardProps(cat)}
+                  compact
                   className="transition-shadow group-hover:shadow-[6px_6px_0_0_var(--color-cp-ink)]"
                 />
               </Link>

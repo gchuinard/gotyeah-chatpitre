@@ -30,6 +30,14 @@ export type CatCardProps = {
   criteria: CatCardCriteria;
   /** Chat disparu : la carte porte un bandeau sobre et se met en retrait. */
   passedAway?: boolean;
+  /**
+   * Version resserrée, pour une grille de quatre par ligne.
+   *
+   * Garde ce qui sert à RECONNAÎTRE le chat, avatar, nom, sexe et âge, et
+   * laisse à la fiche ce qui relève du dossier : les critères d'admission ne
+   * se lisent pas d'un coup d'œil, ils se vérifient.
+   */
+  compact?: boolean;
   /** Surcharge optionnelle — sinon l'illustration est dérivée du nom. */
   illustration?: { variant: CatIllustrationVariant; pose: CatIllustrationPose };
   className?: string;
@@ -51,6 +59,7 @@ export function CatCard({
   ageLabel,
   criteria,
   passedAway = false,
+  compact = false,
   illustration,
   className,
 }: CatCardProps) {
@@ -72,20 +81,23 @@ export function CatCard({
           En souvenir
         </p>
       )}
-      {/* En-tête type fiche — numéro et sexe */}
-      <header className="flex items-center justify-between border-b border-cp-ink px-4 py-2.5">
-        <LibraryStamp tone="cobalt">
-          {reference ? `Pensionnaire n° ${reference}` : "Pensionnaire"}
-        </LibraryStamp>
-        {sexLabel && (
-          <span
-            aria-hidden
-            className="font-display text-xl leading-none text-cp-ink"
-          >
-            {sexLabel}
-          </span>
-        )}
-      </header>
+      {/* L'en-tête à numéro disparaît en compact : c'est de l'information de
+          dossier, pas de reconnaissance. Le sexe rejoint le nom plus bas. */}
+      {!compact && (
+        <header className="flex items-center justify-between border-b border-cp-ink px-4 py-2.5">
+          <LibraryStamp tone="cobalt">
+            {reference ? `Pensionnaire n° ${reference}` : "Pensionnaire"}
+          </LibraryStamp>
+          {sexLabel && (
+            <span
+              aria-hidden
+              className="font-display text-xl leading-none text-cp-ink"
+            >
+              {sexLabel}
+            </span>
+          )}
+        </header>
+      )}
 
       {/* Portrait — illustration Charley Harper sauf si photoUrl */}
       {photoUrl ? (
@@ -107,15 +119,47 @@ export function CatCard({
       )}
 
       {/* Contenu */}
-      <div className="flex flex-col gap-3 px-5 py-5">
-        <h3 className="font-display text-3xl italic leading-tight text-cp-ink">
-          {name}
-        </h3>
+      <div
+        className={cn(
+          "flex flex-col",
+          compact ? "gap-1 px-4 py-3" : "gap-3 px-5 py-5",
+        )}
+      >
+        {/* Le sexe est accolé au NOM en compact : les deux se lisent ensemble,
+            et il était relégué dans l'en-tête, loin de ce qu'il qualifie. */}
+        <div className="flex items-baseline gap-2">
+          <h3
+            className={cn(
+              "min-w-0 flex-1 font-display italic leading-tight text-cp-ink",
+              // break-words : un nom long ne doit pas élargir la carte et
+              // casser la grille de quatre par ligne.
+              compact ? "text-xl break-words" : "text-3xl",
+            )}
+          >
+            {name}
+          </h3>
+          {compact && sexLabel && (
+            <span
+              aria-hidden
+              className="shrink-0 font-display text-lg leading-none text-cp-ink-soft"
+            >
+              {sexLabel}
+            </span>
+          )}
+        </div>
 
         {subtitle && (
-          <p className="font-body text-sm text-cp-ink-soft">{subtitle}</p>
+          <p
+            className={cn(
+              "text-cp-ink-soft",
+              compact ? "font-mono text-[0.6rem] uppercase tracking-[0.14em]" : "font-body text-sm",
+            )}
+          >
+            {subtitle}
+          </p>
         )}
 
+        {!compact && (
         <ul className="mt-1 grid grid-cols-2 gap-x-3 gap-y-1.5 border-t border-cp-ink/30 pt-3">
           {CRITERIA.map(({ key, label }) => {
             const ok = criteria[key];
@@ -137,6 +181,7 @@ export function CatCard({
             );
           })}
         </ul>
+        )}
       </div>
     </article>
   );
