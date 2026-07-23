@@ -40,6 +40,7 @@ model User {
   appointmentsCreated Appointment[] @relation("AppointmentCreatedBy") // rdv planifiés (admin)
 
   uploadedDocuments CatDocument[] // documents téléversés par cet utilisateur
+  uploadedPhotos    CatPhoto[] // photos de séjour déposées (admin)
 }
 
 // ---------------------------------------------------------------------------
@@ -110,6 +111,7 @@ model Cat {
   bookingCats BookingCat[]
   stayUpdates StayUpdate[]
   documents   CatDocument[]
+  photos      CatPhoto[]
 
   @@index([ownerId])
 }
@@ -139,6 +141,44 @@ enum DocumentReviewStatus {
   PENDING
   ACCEPTED
   REJECTED
+}
+
+/// Photo d'un chat pendant son séjour, déposée par la pension.
+///
+/// Modèle SÉPARÉ de CatDocument, et c'est le point important : leurs cycles de
+/// vie sont opposés. Un carnet de vaccination se conserve, une photo de séjour
+/// s'efface au bout de trente jours. Les mélanger aurait obligé chaque lecture
+/// à distinguer les deux, et un jour on aurait supprimé un certificat.
+///
+/// Comme les documents, le fichier vit sur disque sous un nom OPAQUE et n'est
+/// servi que par une route authentifiée, jamais par une URL publique.
+model CatPhoto {
+  id String @id @default(cuid())
+
+  catId String
+  cat   Cat    @relation(fields: [catId], references: [id], onDelete: Cascade)
+
+  // Séjour pendant lequel la photo a été prise. Cascade aussi : une photo de
+  // séjour n'a pas de sens sans son séjour.
+  bookingId String
+  booking   Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  // Auteur du dépôt (la pension). SET NULL si le compte disparaît, la photo
+  // reste visible du propriétaire.
+  uploadedById String?
+  uploadedBy   User?   @relation(fields: [uploadedById], references: [id], onDelete: SetNull)
+
+  storageKey String @unique
+  mimeType   String
+  sizeBytes  Int
+
+  createdAt DateTime @default(now())
+
+  // Index sur la date : la purge des photos anciennes balaie cette colonne à
+  // chaque passage, et le carnet les lit par ordre d'arrivée.
+  @@index([catId])
+  @@index([bookingId])
+  @@index([createdAt])
 }
 
 /// Document associé à un chat (carnet de vaccination, certificat de santé…).
@@ -277,6 +317,7 @@ model Booking {
   stayUpdates  StayUpdate[]
   appointments Appointment[]
   payments     BookingPayment[]
+  photos       CatPhoto[]
 
   @@index([userId])
   @@index([status])

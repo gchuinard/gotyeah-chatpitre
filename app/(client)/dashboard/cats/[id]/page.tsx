@@ -3,12 +3,14 @@ import { notFound } from "next/navigation";
 
 import { CatDeleteControl } from "@/components/cat-delete-control";
 import { CatMemorialControl } from "@/components/cat-memorial-control";
+import { PhotoGallery } from "@/components/photo-gallery";
 import { CatDocuments } from "@/components/cat-documents";
 import { LibraryStamp } from "@/components/library-stamp";
 import { RuleDivider } from "@/components/rule-divider";
 import { SectionHeading } from "@/components/section-heading";
 import { buttonVariants } from "@/components/ui/button";
 import { getCurrentUser } from "@/lib/auth";
+import { photoDaysLeft } from "@/lib/cat-photos";
 import { CAT_REVIEW_BADGE, CAT_REVIEW_LABEL } from "@/lib/cat-review";
 import { prisma } from "@/lib/db";
 import {
@@ -36,7 +38,7 @@ export default async function CatDetailPage({
   // Compté SANS filtrer sur le propriétaire, contrairement à `links` : c'est
   // exactement le critère qu'applique la route de suppression, et les deux
   // doivent dire la même chose sous peine de proposer un bouton qui échoue.
-  const [stayCount, links, documents] = await Promise.all([
+  const [stayCount, links, documents, photos] = await Promise.all([
     prisma.bookingCat.count({ where: { catId: id } }),
     prisma.bookingCat.findMany({
       where: { catId: id, booking: { userId: user.id } },
@@ -44,7 +46,23 @@ export default async function CatDetailPage({
       orderBy: { booking: { startDate: "desc" } },
     }),
     getDocumentsForCat(id),
+    // Les plus récentes en tête. La purge ayant déjà effacé les anciennes,
+    // aucun filtre de date n'est nécessaire ici : ce qui reste est visible.
+    prisma.catPhoto.findMany({
+      where: { catId: id },
+      select: { id: true, createdAt: true },
+      orderBy: { createdAt: "desc" },
+    }),
   ]);
+
+  // Le décompte des jours restants est fait CÔTÉ SERVEUR : le composant est
+  // rendu à l'avance, et lire l'horloge dans son corps casserait sa pureté.
+  const now = new Date();
+  const galleryPhotos = photos.map((p) => ({
+    id: p.id,
+    daysLeft: photoDaysLeft(p.createdAt, now),
+    catName: cat.name,
+  }));
 
   const docItems = documents.map((d) => ({
     id: d.id,
@@ -184,6 +202,16 @@ export default async function CatDetailPage({
           tone="feuille"
         />
         <CatDocuments catId={cat.id} documents={docItems} />
+      </section>
+
+      <RuleDivider className="my-12" label="Photos" tone="paprika" />
+      <section className="space-y-6">
+        <SectionHeading
+          title="Photos"
+          kicker="Ce que nous avons pris pendant ses séjours."
+          tone="paprika"
+        />
+        <PhotoGallery photos={galleryPhotos} />
       </section>
 
       {/* En pied de page, discrètement : deux gestes rares, dont un sans

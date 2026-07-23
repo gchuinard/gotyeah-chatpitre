@@ -39,6 +39,8 @@ chmod 600 /opt/chatpitre/.cron_secret
 ```
 # Chat-Pitre — purge des notifications lues depuis plus de 30 jours
 15 4 * * * /usr/bin/curl -fsS -X POST https://chatpitre.gautierchuinard.com/api/cron/notifications-cleanup -H "Authorization: Bearer $(cat /opt/chatpitre/.cron_secret)" >> /var/log/chatpitre-cron.log 2>&1
+# Chat-Pitre — effacement des photos de séjour au-delà de 30 jours
+20 4 * * * /usr/bin/curl -fsS -X POST https://chatpitre.gautierchuinard.com/api/cron/photos-cleanup -H "Authorization: Bearer $(cat /opt/chatpitre/.cron_secret)" >> /var/log/chatpitre-cron.log 2>&1
 ```
 
 L'horaire de 4h15 est choisi juste après la sauvegarde de 4h et décalé des
@@ -78,3 +80,16 @@ en premier et renvoie un compte de ce qu'elle a traité. Trois règles :
 | Route | Cadence | Ce qu'elle fait |
 |---|---|---|
 | `notifications-cleanup` | quotidienne, 4h15 | Supprime les notifications **lues** il y a plus de 30 jours. Une notification non lue reste, quel que soit son âge : elle porte une information que personne n'a vue. |
+| `photos-cleanup` | quotidienne, 4h20 | Efface les photos de séjour de plus de 30 jours, **fichier compris**. C'est la tâche qui a rendu cet ordonnanceur nécessaire : l'espace Photos annonce au propriétaire que ses photos sont effacées, un simple masquage aurait fait de cette promesse un mensonge. |
+
+### Deux détails de `photos-cleanup`
+
+Le traitement est borné à **200 photos par passage** : vider des milliers de
+fichiers d'un coup tiendrait la base et le disque du Pi. Le champ `hasMore` de
+la réponse signale qu'il reste du travail pour le passage suivant, et la
+cadence quotidienne laisse largement le temps de rattraper.
+
+Quand un fichier résiste à l'effacement, **sa ligne est conservée**. La
+supprimer laisserait un fichier orphelin que plus rien ne désigne, donc
+introuvable par la tâche comme par un humain. La photo repassera au tour
+suivant.

@@ -12,6 +12,7 @@ import { LibraryStamp } from "@/components/library-stamp";
 import { QuoteForm } from "@/components/quote-form";
 import { RdvScheduler } from "@/components/rdv-scheduler";
 import { BookingScheduleControl } from "@/components/booking-schedule-control";
+import { PhotoUpload } from "@/components/photo-upload";
 import { RuleDivider } from "@/components/rule-divider";
 import { StaySchedule } from "@/components/stay-schedule";
 import { RuledBox } from "@/components/ruled-box";
@@ -552,6 +553,15 @@ export default async function AdminBookingDetailPage({
                 />
 
                 <StayJournal bookingId={booking.id} cats={cats} canAdd={!isClosed} />
+
+              {/* Sous le carnet : les deux donnent des nouvelles, l'un par le
+                  texte, l'autre par l'image. Même condition d'affichage. */}
+              <ActionGate disabled={isClosed}>
+                <PhotoUpload
+                  bookingId={booking.id}
+                  cats={cats.map((c) => ({ id: c.id, name: c.name }))}
+                />
+              </ActionGate>
               </section>
 
               <RuleDivider className="my-16" tone="feuille" />
