@@ -46,12 +46,22 @@ const styles = StyleSheet.create({
     fontSize: 28,
     color: COLORS.ink,
     letterSpacing: -0.6,
+    // lineHeight EXPLICITE, sans quoi le slogan remonte SUR le titre.
+    //
+    // La page pose lineHeight 1.45, mais @react-pdf/renderer ne s'en sert pas
+    // pour réserver la hauteur de ce bloc : la boîte du titre restait plus
+    // courte que ses propres lettres, et le texte suivant venait s'y loger.
+    // Le défaut ne se voyait qu'à l'impression, jamais dans le code.
+    lineHeight: 1.2,
   },
   brandSubtitle: {
     fontFamily: "Times-Italic",
     fontSize: 10,
     color: COLORS.inkSoft,
-    marginTop: 2,
+    lineHeight: 1.3,
+    // Marge portée par le HAUT du slogan plutôt que par le bas du titre : elle
+    // reste juste même si le titre change un jour de corps.
+    marginTop: 4,
   },
   invoiceMeta: {
     alignItems: "flex-end",
