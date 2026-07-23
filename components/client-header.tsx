@@ -40,6 +40,7 @@ export function ClientHeader({
         { href: "/admin/clients", label: "Clients" },
         { href: "/admin/cats", label: "Pensionnaires" },
         { href: "/admin/extras", label: "Suppléments" },
+        { href: "/admin/compta", label: "Compta" },
         { href: "/admin/reglages", label: "Réglages" },
       ]
     : CLIENT_NAV;
@@ -51,6 +52,7 @@ export function ClientHeader({
         { href: "/admin/clients", label: "Clients" },
         { href: "/admin/cats", label: "Pensionnaires" },
         { href: "/admin/extras", label: "Suppléments" },
+        { href: "/admin/compta", label: "Compta" },
         { href: "/admin/reglages", label: "Réglages" },
         { href: "/dashboard", label: "Espace client →" },
       ]

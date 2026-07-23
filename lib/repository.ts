@@ -556,3 +556,44 @@ export async function readSettings(): Promise<Record<SettingKey, string>> {
   });
   return withFallbacks(new Map(rows.map((r) => [r.key, r.value])));
 }
+
+/// Tous les versements d'une période, avec leur séjour et leur client.
+///
+/// Bornes NULLES pour « depuis le début ». Les séjours archivés et clôturés
+/// sont inclus : la comptabilité ne s'efface pas au bout de trente jours.
+export async function getPaymentsForPeriod(from: Date | null, to: Date | null) {
+  return prisma.bookingPayment.findMany({
+    where:
+      from && to ? { paidAt: { gte: from, lt: to } } : {},
+    orderBy: { paidAt: "desc" },
+    include: {
+      booking: {
+        select: {
+          id: true,
+          user: { select: { firstName: true, lastName: true } },
+        },
+      },
+      recordedBy: { select: { firstName: true } },
+    },
+  });
+}
+
+/// Reste dû global : ce qui a été facturé et pas encore encaissé.
+///
+/// Les séjours ANNULÉS sont exclus : leur solde n'est réclamé à personne, le
+/// compter gonflerait artificiellement ce qu'on croit avoir à recouvrer.
+export async function getOutstandingCents(): Promise<number> {
+  const bookings = await prisma.booking.findMany({
+    where: { status: { notIn: ["CANCELLED", "REJECTED"] }, totalAmount: { not: null } },
+    select: { totalAmount: true, paidAmount: true },
+  });
+  let cents = 0;
+  for (const b of bookings) {
+    const total = Math.round(Number(b.totalAmount ?? 0) * 100);
+    const paid = Math.round(Number(b.paidAmount ?? 0) * 100);
+    // Un trop-perçu ne compense PAS le reste dû d'un autre séjour : ce sont
+    // deux dossiers distincts, et les mélanger cacherait une créance réelle.
+    if (total > paid) cents += total - paid;
+  }
+  return cents;
+}
