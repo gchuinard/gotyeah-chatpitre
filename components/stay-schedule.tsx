@@ -58,18 +58,21 @@ function Slot({
   time: string | null;
   window: { start: string; end: string };
 }) {
-  // Boolean() et non `time !== null` : une chaîne vide ou une valeur absente
-  // veulent dire la même chose ici, « rien de convenu ». Le test strict laissait
-  // passer undefined, ce qui faisait tomber la fiche entière sur un séjour dont
-  // le champ n'avait pas été chargé.
-  const agreed = Boolean(time);
+  // Un test sur la valeur, et non `time !== null` : une chaîne vide ou une
+  // valeur absente veulent dire la même chose ici, « rien de convenu ». Le test
+  // strict laissait passer undefined et faisait tomber la fiche entière sur un
+  // séjour dont le champ n'avait pas été chargé.
+  //
+  // Écrit sous cette forme pour que TypeScript en déduise le type : `Boolean(x)`
+  // ne restreint pas la variable, `agreed ? time : …` aurait donc gardé le null.
+  const agreed = time ? time : null;
   return (
     <div className="space-y-1">
       <dt className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.18em] text-cp-ink-soft">
         {label}
       </dt>
       <dd className="font-display text-xl italic leading-snug text-cp-ink">
-        {agreed ? `à ${formatTime(time)}` : formatWindow(window.start, window.end)}
+        {agreed ? `à ${formatTime(agreed)}` : formatWindow(window.start, window.end)}
       </dd>
       {/* Dire d'où vient l'heure, sinon on ne sait pas si elle a été convenue
           avec ce client ou si c'est l'horaire habituel de la maison. */}

@@ -39,6 +39,7 @@ export function ClientHeader({
         { href: "/admin/bookings", label: "Séjours" },
         { href: "/admin/clients", label: "Clients" },
         { href: "/admin/extras", label: "Suppléments" },
+        { href: "/admin/reglages", label: "Réglages" },
       ]
     : CLIENT_NAV;
 
@@ -48,6 +49,7 @@ export function ClientHeader({
         { href: "/admin/bookings", label: "Séjours" },
         { href: "/admin/clients", label: "Clients" },
         { href: "/admin/extras", label: "Suppléments" },
+        { href: "/admin/reglages", label: "Réglages" },
         { href: "/dashboard", label: "Espace client →" },
       ]
     : [
