@@ -28,11 +28,25 @@ export function UserMenu({
 
   async function logout() {
     setPending(true);
-    await fetch("/api/auth/logout", { method: "POST" });
-    // Navigation complète : router.push() laissait parfois le client sur
-    // la page courante (cache RSC stale). window.location refait la
-    // requête avec les cookies effacés, le proxy renvoie /login.
-    window.location.assign("/login");
+    try {
+      // redirect: "manual" — on ne SUIT PAS la redirection de la route.
+      //
+      // Elle n'existe que pour le cas sans JavaScript. La suivre chargeait la
+      // page de connexion pour rien, et surtout rendait la déconnexion
+      // dépendante d'une URL que le serveur ne peut pas deviner derrière un
+      // proxy : quand elle était fausse, la requête échouait et la navigation
+      // ci-dessous n'était jamais atteinte.
+      await fetch("/api/auth/logout", { method: "POST", redirect: "manual" });
+    } catch {
+      // Même si l'appel échoue, on emmène l'utilisateur vers /login. Le laisser
+      // sur une page d'administration en croyant s'être déconnecté est le pire
+      // des deux états.
+    } finally {
+      // Navigation complète, dans un `finally` : router.push() laissait le
+      // client sur la page courante avec un cache RSC périmé, et rien ne doit
+      // pouvoir empêcher ce départ.
+      window.location.assign("/login");
+    }
   }
 
   return (
