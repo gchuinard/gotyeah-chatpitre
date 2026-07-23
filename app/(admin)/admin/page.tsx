@@ -8,6 +8,7 @@ import { OccupancyCalendar } from "@/components/occupancy-calendar";
 import { RuleDivider } from "@/components/rule-divider";
 import { RuledBox } from "@/components/ruled-box";
 import { SectionHeading } from "@/components/section-heading";
+import { TodayPanel, type TodayItem } from "@/components/today-panel";
 import { buttonVariants } from "@/components/ui/button";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/db";
@@ -17,6 +18,7 @@ import {
   formatDate,
   getMonthOccupancy,
   nightsBetween,
+  readSettings,
 } from "@/lib/repository";
 
 /// Tableau de bord administration — entièrement Prisma : décisions en
@@ -41,12 +43,18 @@ export default async function AdminDashboardPage() {
   const firstWeekday = (firstOfMonth.getDay() + 6) % 7;
   const daysInMonth = new Date(year, monthIndex + 1, 0).getDate();
 
+  // Bornes de la journée courante, pour « Aujourd'hui ».
+  const dayStart = new Date(year, monthIndex, today.getDate());
+  const dayEnd = new Date(dayStart.getTime() + 24 * 60 * 60 * 1000);
+
   const [
     pendingDecisions,
     acceptedActiveCount,
     clientCount,
     catCount,
     occupancies,
+    settings,
+    todayBookings,
   ] = await Promise.all([
     prisma.booking.findMany({
       // La file rassemble tout ce qui demande une action : les demandes à
@@ -83,7 +91,73 @@ export default async function AdminDashboardPage() {
     countClients(),
     prisma.cat.count(),
     getMonthOccupancy(year, monthIndex),
+    readSettings(),
+    // Séjours qui touchent la journée : arrivée, départ, ou déjà en cours avec
+    // une note ou un message non lu. Une seule requête pour les quatre sources.
+    prisma.booking.findMany({
+      where: {
+        status: "ACCEPTED",
+        startDate: { lt: dayEnd },
+        endDate: { gte: dayStart },
+      },
+      include: {
+        user: { select: { firstName: true, lastName: true } },
+        cats: { include: { cat: { select: { name: true } } } },
+        messages: {
+          where: { isFromAdmin: false, readAt: null },
+          select: { id: true },
+          take: 1,
+        },
+      },
+    }),
   ]);
+
+  const sameDay = (a: Date, b: Date) =>
+    a.getFullYear() === b.getFullYear() &&
+    a.getMonth() === b.getMonth() &&
+    a.getDate() === b.getDate();
+
+  // Un séjour peut produire PLUSIEURS lignes : il arrive aujourd'hui ET porte
+  // un message non lu. Ce sont deux choses à faire, pas une.
+  const todayItems: TodayItem[] = [];
+  for (const b of todayBookings) {
+    const base = {
+      bookingId: b.id,
+      cats: b.cats.map((c) => c.cat.name).join(" · "),
+      clientName: `${b.user.firstName} ${b.user.lastName}`,
+    };
+    if (sameDay(b.startDate, dayStart)) {
+      todayItems.push({ ...base, kind: "arrival", time: b.arrivalTime, note: null });
+    }
+    if (sameDay(b.endDate, dayStart)) {
+      todayItems.push({ ...base, kind: "departure", time: b.departureTime, note: null });
+    }
+    if (b.pinnedForAdmin) {
+      todayItems.push({ ...base, kind: "note", time: null, note: b.pinnedNote });
+    }
+    if (b.messages.length > 0) {
+      todayItems.push({ ...base, kind: "unread", time: null, note: null });
+    }
+  }
+
+  // Les mouvements d'abord, ordonnés par heure : c'est ce qui a lieu à une
+  // heure donnée et qui ne se rattrape pas. Les notes et messages suivent,
+  // ils se traitent quand on a un moment.
+  const KIND_RANK = { arrival: 0, departure: 1, note: 2, unread: 3 } as const;
+  todayItems.sort(
+    (a, b) =>
+      KIND_RANK[a.kind] - KIND_RANK[b.kind] ||
+      (a.time ?? "99:99").localeCompare(b.time ?? "99:99"),
+  );
+
+  const arrivalWindow = {
+    start: settings.arrival_window_start,
+    end: settings.arrival_window_end,
+  };
+  const departureWindow = {
+    start: settings.departure_window_start,
+    end: settings.departure_window_end,
+  };
 
   return (
     <div className="mx-auto w-full max-w-7xl px-6 py-12 sm:px-10 sm:py-16">
@@ -139,11 +213,28 @@ export default async function AdminDashboardPage() {
 
       <RuleDivider className="my-14" />
 
+      {/* Aujourd'hui — ce qui a lieu dans la journée. Placé AVANT « À traiter » :
+          une arrivée à 9h ne se rattrape pas, une demande à trancher si. */}
+      <section className="space-y-8">
+        <SectionHeading
+          number="01"
+          title="Aujourd'hui"
+          kicker="Arrivées, départs, et ce qui attend une réponse sur les séjours en cours."
+        />
+        <TodayPanel
+          items={todayItems}
+          arrivalWindow={arrivalWindow}
+          departureWindow={departureWindow}
+        />
+      </section>
+
+      <RuleDivider className="my-14" />
+
       {/* Décisions en attente */}
       <section className="space-y-8">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <SectionHeading
-            number="01"
+            number="02"
             title="À traiter"
             kicker="Demandes à trancher, messages non lus, et ce que vous avez épinglé."
             className="flex-1"
@@ -234,9 +325,9 @@ export default async function AdminDashboardPage() {
       {/* Calendrier */}
       <section className="space-y-8">
         <SectionHeading
-          number="02"
+          number="03"
           title="Calendrier d'occupation"
-          kicker="Vue du mois courant, capacité maximale : 7 chambres."
+          kicker="Vue du mois courant, capacité maximale : 7 chambres. Cliquez un jour pour voir qui arrive et qui repart."
         />
         <OccupancyCalendar
           monthLabel={monthLabel}
