@@ -15,7 +15,9 @@ import { createNotification } from "@/lib/notifications";
 type RouteContext = { params: Promise<{ id: string }> };
 
 const stayUpdateSchema = z.object({
-  catId: z.string().min(1, "Sélectionnez un chat."),
+  /// Un ou plusieurs chats du séjour : la pension écrit une fois pour tous
+  /// ceux qui ont partagé la journée.
+  catIds: z.array(z.string().min(1)).min(1, "Sélectionnez au moins un chat."),
   content: z.string().trim().min(1, "Le contenu ne peut pas être vide."),
   imageVariant: z
     .enum(["COBALT", "PAPRIKA", "CANARI", "FEUILLE"])
@@ -57,23 +59,44 @@ export function POST(req: NextRequest, { params }: RouteContext) {
 
     const data = await parseJson(req, stayUpdateSchema);
 
-    // Vérifier que le chat appartient bien à la réservation
-    if (!booking.cats.some((c) => c.catId === data.catId)) {
+    // Les doublons sont écartés avant tout contrôle : un même chat envoyé deux
+    // fois créerait deux entrées identiques dans son carnet.
+    const catIds = [...new Set(data.catIds)];
+
+    // Chaque chat doit appartenir à CE séjour. Sans ce contrôle, une requête
+    // forgée écrirait dans le carnet du chat d'un autre client.
+    const booked = new Set(booking.cats.map((c) => c.catId));
+    if (catIds.some((catId) => !booked.has(catId))) {
       throw new HttpError(400, "Ce chat n'est pas concerné par ce séjour.");
     }
 
-    const update = await prisma.stayUpdate.create({
-      data: {
-        bookingId: booking.id,
-        catId: data.catId,
-        authorId: admin.id,
-        content: data.content,
-        imageVariant: data.imageVariant ?? pickRandom(VARIANTS),
-        imagePose: data.imagePose ?? pickRandom(POSES),
-      },
-    });
+    // Une illustration tirée UNE fois pour toute la fournée : les chats qui
+    // partagent une note doivent partager son image, sinon la même phrase
+    // apparaîtrait sous trois dessins différents.
+    const imageVariant = data.imageVariant ?? pickRandom(VARIANTS);
+    const imagePose = data.imagePose ?? pickRandom(POSES);
 
-    // Notifie le client qu'une nouvelle entrée du carnet est dispo.
+    // Une entrée par chat, dans UNE transaction : soit tous les carnets
+    // reçoivent la note, soit aucun. Une écriture partielle laisserait un chat
+    // sans nouvelle sans que personne ne s'en aperçoive.
+    const updates = await prisma.$transaction(
+      catIds.map((catId) =>
+        prisma.stayUpdate.create({
+          data: {
+            bookingId: booking.id,
+            catId,
+            authorId: admin.id,
+            content: data.content,
+            imageVariant,
+            imagePose,
+          },
+        }),
+      ),
+    );
+
+    // UNE notification, même si la note concerne trois chats : le client a reçu
+    // une nouvelle, pas trois. En envoyer une par chat transformerait sa cloche
+    // en avalanche pour un seul geste de la pension.
     await createNotification({
       userId: booking.userId,
       type: "MESSAGE_RECEIVED",
@@ -82,6 +105,6 @@ export function POST(req: NextRequest, { params }: RouteContext) {
       link: `/dashboard/bookings/${booking.id}?onglet=nouvelles`,
     });
 
-    return json({ update }, 201);
+    return json({ updates }, 201);
   });
 }

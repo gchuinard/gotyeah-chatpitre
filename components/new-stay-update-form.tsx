@@ -9,10 +9,15 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 
-/// Formulaire admin pour poster une nouvelle entrée du carnet — sélection
-/// du chat concerné, note libre, soumission POST sur l'API. Le variant
-/// et la pose de l'illustration sont choisis côté serveur (aléatoires)
-/// puisqu'il s'agit d'un placeholder en attendant les vraies photos.
+/// Formulaire admin pour poster une nouvelle entrée du carnet — sélection des
+/// chats concernés, note libre, soumission POST sur l'API. Le variant et la
+/// pose de l'illustration sont choisis côté serveur (aléatoires) puisqu'il
+/// s'agit d'un placeholder en attendant les vraies photos.
+///
+/// Plusieurs chats peuvent être cochés : quand deux frères et sœurs du même
+/// foyer passent la journée ensemble, la pension écrivait deux fois la même
+/// chose. Le serveur crée alors une entrée par chat, si bien que chacun garde
+/// un carnet complet et lisible de bout en bout.
 
 export function NewStayUpdateForm({
   bookingId,
@@ -23,9 +28,23 @@ export function NewStayUpdateForm({
 }) {
   const router = useRouter();
   const formRef = useRef<HTMLFormElement>(null);
-  const [selectedCatId, setSelectedCatId] = useState<string>(cats[0]?.id ?? "");
+  // Tous cochés par défaut : sur un séjour à plusieurs chats, une note du jour
+  // les concerne le plus souvent tous. C'est l'exception qu'on décoche.
+  const [selectedCatIds, setSelectedCatIds] = useState<string[]>(
+    cats.map((c) => c.id),
+  );
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
+
+  function toggleCat(catId: string) {
+    setSelectedCatIds((prev) =>
+      prev.includes(catId)
+        ? prev.filter((id) => id !== catId)
+        : // On réordonne selon `cats` plutôt que d'ajouter en fin de liste :
+          // l'ordre reste celui affiché, quel que soit l'ordre des clics.
+          cats.filter((c) => c.id === catId || prev.includes(c.id)).map((c) => c.id),
+    );
+  }
 
   function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -33,6 +52,10 @@ export function NewStayUpdateForm({
     const formData = new FormData(e.currentTarget);
     const content = String(formData.get("content") ?? "").trim();
     if (!content) return;
+    if (selectedCatIds.length === 0) {
+      setError("Sélectionnez au moins un chat.");
+      return;
+    }
 
     startTransition(async () => {
       const res = await fetch(
@@ -41,7 +64,7 @@ export function NewStayUpdateForm({
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            catId: selectedCatId,
+            catIds: selectedCatIds,
             content,
           }),
         },
@@ -67,19 +90,32 @@ export function NewStayUpdateForm({
         Nouvelle entrée du carnet
       </p>
 
+      {/* Aucun sélecteur sur un séjour à un seul chat : rien ne change pour le
+          cas le plus courant. */}
       {cats.length > 1 && (
         <div className="space-y-2">
-          <p className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.18em] text-cp-paper/70">
+          <p
+            id="journal-cats-label"
+            className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.18em] text-cp-paper/70"
+          >
             Au sujet de
           </p>
-          <div className="flex flex-wrap gap-2">
+          <div
+            role="group"
+            aria-labelledby="journal-cats-label"
+            className="flex flex-wrap items-center gap-2"
+          >
             {cats.map((cat) => {
-              const selected = cat.id === selectedCatId;
+              const selected = selectedCatIds.includes(cat.id);
               return (
                 <button
                   key={cat.id}
                   type="button"
-                  onClick={() => setSelectedCatId(cat.id)}
+                  // aria-pressed et non un simple bouton : plusieurs choix
+                  // coexistent désormais, un lecteur d'écran doit pouvoir dire
+                  // lesquels sont cochés.
+                  aria-pressed={selected}
+                  onClick={() => toggleCat(cat.id)}
                   className={cn(
                     "rounded-md border px-3 py-1.5 font-body text-sm font-semibold transition-colors",
                     selected
@@ -91,6 +127,18 @@ export function NewStayUpdateForm({
                 </button>
               );
             })}
+            {/* Raccourci « tous », utile après avoir décoché : sans lui il faut
+                recocher chaque chat un par un. Masqué quand tous le sont
+                déjà, où il ne ferait rien. */}
+            {selectedCatIds.length < cats.length && (
+              <button
+                type="button"
+                onClick={() => setSelectedCatIds(cats.map((c) => c.id))}
+                className="rounded-md px-3 py-1.5 font-body text-sm font-semibold text-cp-canari underline underline-offset-4 transition-colors hover:text-cp-paper"
+              >
+                Tous
+              </button>
+            )}
           </div>
         </div>
       )}
