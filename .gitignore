@@ -37,6 +37,9 @@ yarn-error.log*
 .env*
 !.env.example
 
+# sauvegardes de la base faites sur le serveur : données des clients, jamais dans git
+/backups/
+
 # vercel
 .vercel
 
