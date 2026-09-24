@@ -7,7 +7,11 @@
 # Cloudflare est devant NPM. La base n'est exposée ni à l'hôte ni au LAN.
 #
 # Déploiement :  docker compose -f docker-compose.prod.yml up -d --build
-# Prérequis   :  un .env de production (AUTH_SECRET dédié, BASE_URL https…).
+# Prérequis   :  un .env de production (AUTH_SECRET dédié, BASE_URL https…),
+#                avec POSTGRES_USER, POSTGRES_PASSWORD et POSTGRES_DB. Compose les lit
+#                dans le .env à côté de ce fichier ; s'il en manque un, il refuse de
+#                démarrer au lieu de lancer la base avec une valeur vide.
+#                Mot de passe alphanumérique : il est repris tel quel dans DATABASE_URL.
 
 services:
   db:
@@ -15,15 +19,16 @@ services:
     container_name: chatpitre_db
     restart: unless-stopped
     environment:
-      POSTGRES_USER: chatpitre
-      POSTGRES_PASSWORD: chatpitre
-      POSTGRES_DB: chatpitre
+      POSTGRES_USER: ${POSTGRES_USER:?POSTGRES_USER manquant dans .env}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD manquant dans .env}
+      POSTGRES_DB: ${POSTGRES_DB:?POSTGRES_DB manquant dans .env}
     volumes:
       - chatpitre_pgdata:/var/lib/postgresql/data
     # Pas de `ports:` — la base reste interne au réseau `default`,
     # seule l'app y accède.
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U chatpitre -d chatpitre"]
+      # $$ : la variable est lue dans le conteneur, pas remplacée par Compose.
+      test: ["CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\""]
       interval: 10s
       timeout: 3s
       retries: 10
@@ -44,7 +49,7 @@ services:
     environment:
       # Dans le réseau Docker, la base est joignable via le nom de service `db`
       # — on surcharge le DATABASE_URL du .env (qui pointe sur localhost).
-      DATABASE_URL: postgresql://chatpitre:chatpitre@db:5432/chatpitre
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
       NODE_ENV: production
       # Répertoire des documents téléversés (monté sur le volume ci-dessous).
       UPLOAD_DIR: /data/uploads
