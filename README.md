@@ -307,7 +307,10 @@ PostgreSQL du homelab.
 Déploiement actuel (manuel) : `git pull` sur le Pi puis
 `docker compose -f docker-compose.prod.yml up -d --build` (les migrations
 s'appliquent au démarrage du conteneur). Un workflow GitHub Actions
-(`.github/workflows/ci.yml`) vérifie build + lint sur `main` et les PR.
+(`.github/workflows/ci.yml`) vérifie lint, typage et build sur `main` et les PR.
+Jusqu'au 25/09/2026, ce paragraphe disait « build + lint » : le lint n'était
+en réalité pas lancé, `next build` ne s'en chargeant plus depuis Next 16. La
+CI a désormais sa propre étape `npm run lint`.
 
 ### Télé-rendez-vous (visioconférence)
 
@@ -343,10 +346,26 @@ rebuilds) sous un nom opaque, servis **uniquement** par une route authentifiée
 - **Sauvegarde** : inclure le volume `chatpitre_uploads` dans la routine de
   sauvegarde du Pi (le `pg_dump` ne couvre que la base).
 
+## Dépendances forcées
+
+`package.json` force deux dépendances transitives de Prisma (`overrides`), que
+Prisma 7.10 épingle encore sur des versions touchées par des failles hautes
+(`npm audit --omit=dev`) :
+
+- `mysql2` ^3.24.4 au lieu de 3.15.3 (GHSA-3f6p-5ww8-9rcr,
+  GHSA-rgwj-5xj2-c3m3). Il ne sert qu'au Studio et à `prisma dev` sur MySQL,
+  jamais ici ;
+- `deepmerge-ts` ^8.0.2 au lieu de 7.1.5 (GHSA-ggr8-5vv4-36mx). Il sert à
+  fusionner `prisma.config.ts` ; les ruptures de la version 8 (fusion des
+  `Map`, `deepmergeInto`, noms de types) ne touchent pas cet usage.
+
+À retirer quand une montée de Prisma embarquera des versions corrigées :
+`npm audit --omit=dev` le dira.
+
 ## Hors périmètre (étapes suivantes)
 
 Conversion HEIC → JPEG côté serveur (l'aperçu inline des HEIC est limité par les
 navigateurs), rappels automatiques d'arrivée (cron `ARRIVAL_REMINDER`), déploiement continu
-(CD) automatique vers le Pi (le CI build/lint est en place, le déploiement
-reste manuel). Côté visio : appels **1:1 uniquement** (ni groupe, ni
+(CD) automatique vers le Pi (la CI lint, typage et build est en place, le
+déploiement reste manuel). Côté visio : appels **1:1 uniquement** (ni groupe, ni
 enregistrement, ni salle d'attente).

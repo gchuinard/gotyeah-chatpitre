@@ -39,8 +39,14 @@ jobs:
         run: npm ci
       - name: Prisma generate
         run: npx prisma generate
+      # Lint lancé à part : next build ne lance plus ESLint depuis Next 16.
+      # L'étape de build s'appelait « Build (lint + typecheck inclus via
+      # next build) » jusqu'au 25/09/2026 : c'était faux pour le lint, qui
+      # n'a donc jamais tourné en CI sous Next 16.
+      - name: Lint
+        run: npm run lint
       # Build Next paresseux (client Prisma instancié à la demande) : pas de
       # requête DB au build, donc pas besoin de pousser le schéma. Le service
       # Postgres rend juste DATABASE_URL joignable au cas où.
-      - name: Build (lint + typecheck inclus via next build)
+      - name: Build (typage inclus via next build)
         run: npm run build
